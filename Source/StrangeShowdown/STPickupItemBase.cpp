@@ -41,7 +41,7 @@ void ASTPickupItemBase::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	// 에디터에서 값 변경 시에도 Mesh 위치 갱신
-	if (Mesh)
+	if (Mesh && ItemData)
 	{
 		// Mesh 설정
 		Mesh->SetStaticMesh(ItemData->PickupMesh);
