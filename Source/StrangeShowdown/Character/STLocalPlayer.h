@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "STPlayerBase.h"
+#include "Character/STPlayerBase.h"
 #include "STLocalPlayer.generated.h"
 
 /**

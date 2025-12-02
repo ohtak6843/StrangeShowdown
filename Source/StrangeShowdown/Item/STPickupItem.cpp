@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "STPickupItem.h"
+#include "Item/STPickupItem.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"

@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "STLocalPlayer.h"
-#include "STPickupItem.h"
+#include "Character/STLocalPlayer.h"
+#include "Item/STPickupItem.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {

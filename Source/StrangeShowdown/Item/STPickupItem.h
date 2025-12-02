@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Item/STItemDataAssetBase.h"
 #include "Components/SphereComponent.h"
-#include "STItemDataAssetBase.h"
 #include "Components/WidgetComponent.h"
 #include "STPickupItem.generated.h"
 
