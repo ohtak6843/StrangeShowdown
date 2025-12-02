@@ -6,16 +6,16 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "STItemDataAssetBase.h"
-#include "STPickupItemBase.generated.h"
+#include "STPickupItem.generated.h"
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTPickupItemBase : public AActor
+class STRANGESHOWDOWN_API ASTPickupItem : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ASTPickupItemBase();
+	ASTPickupItem();
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,7 +33,7 @@ public:
 	UStaticMeshComponent* Mesh;
 
 	// 메쉬 위치
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FVector MeshPos = FVector(0.f, 0.f, 0.f);
 
 	// 콜리전
