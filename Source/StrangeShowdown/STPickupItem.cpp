@@ -62,19 +62,39 @@ void ASTPickupItem::BeginPlay()
 void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<ACharacter>(OtherActor))
+	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
 	{
+		OverlappedPlayer = Player;
 		OnPlayerEnter.Broadcast();
+
+		// 위젯 표시
+		if (PickupWidgetComponent)
+			PickupWidgetComponent->SetVisibility(true);
 	}
 }
 
 void ASTPickupItem::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex)
 {
-	if (Cast<ACharacter>(OtherActor))
+	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
 	{
+		OverlappedPlayer = nullptr;
 		OnPlayerExit.Broadcast();
+
+		// UI 숨기기
+		if (PickupWidgetComponent)
+			PickupWidgetComponent->SetVisibility(false);
 	}
+}
+
+void ASTPickupItem::Pickup()
+{
+	if (OverlappedPlayer == nullptr)
+		return;
+
+	// 아이템 획득 로직 구현 (예: 인벤토리에 추가 등)
+
+	Destroy();
 }
 
 // Called every frame
