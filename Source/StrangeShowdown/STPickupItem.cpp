@@ -2,6 +2,9 @@
 
 
 #include "STPickupItem.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 
 // Sets default values
 ASTPickupItem::ASTPickupItem()
@@ -20,27 +23,17 @@ ASTPickupItem::ASTPickupItem()
 	PickupCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
 	PickupCollision->SetupAttachment(RootComponent);
 	PickupCollision->InitSphereRadius(50.f); // default
+
+	// Widget Component
+	PickupWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	PickupWidgetComponent->SetupAttachment(RootComponent);
+	PickupWidgetComponent->SetVisibility(false);
+
+	// 카메라는 플레이어를 바라보도록
+	PickupWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 }
 
-// Called when the game starts or when spawned
-void ASTPickupItem::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
-// Called every frame
-void ASTPickupItem::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// 틱마다 회전
-	FRotator NewRotation = GetActorRotation();
-	NewRotation.Yaw += DeltaTime * 45.f; // 초당 45도 회전
-	SetActorRotation(NewRotation);
-
-}
-
+// 에디터 배치 시 호출
 void ASTPickupItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -54,5 +47,62 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 		Mesh->SetWorldScale3D(ItemData->MeshScale);
 		// 위치 조정
 		Mesh->SetRelativeLocation(MeshPos);
+	}
+}
+
+// Called when the game starts or when spawned
+void ASTPickupItem::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PickupCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTPickupItem::HandleBeginOverlap);
+	PickupCollision->OnComponentEndOverlap.AddDynamic(this, &ASTPickupItem::HandleEndOverlap);
+}
+
+void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cast<ACharacter>(OtherActor))
+	{
+		OnPlayerEnter.Broadcast();
+	}
+}
+
+void ASTPickupItem::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 BodyIndex)
+{
+	if (Cast<ACharacter>(OtherActor))
+	{
+		OnPlayerExit.Broadcast();
+	}
+}
+
+// Called every frame
+void ASTPickupItem::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 틱마다 회전
+	FRotator NewRotation = GetActorRotation();
+	NewRotation.Yaw += DeltaTime * 45.f; // 초당 45도 회전
+	SetActorRotation(NewRotation);
+
+	// 위젯이 카메라를 바라보도록 처리
+	if (PickupWidgetComponent)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+
+		// 플레이어 카메라 얻기
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC && PC->PlayerCameraManager)
+		{
+			PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+
+			// UI가 카메라를 바라보게
+			FVector Direction = CameraLocation - PickupWidgetComponent->GetComponentLocation();
+			FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+			PickupWidgetComponent->SetWorldRotation(LookAtRotation);
+		}
 	}
 }

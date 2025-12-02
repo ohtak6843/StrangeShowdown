@@ -6,7 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "STItemDataAssetBase.h"
+#include "Components/WidgetComponent.h"
 #include "STPickupItem.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExit);
 
 UCLASS()
 class STRANGESHOWDOWN_API ASTPickupItem : public AActor
@@ -27,6 +31,15 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+private:
+	UFUNCTION()
+	void HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 public:
 	// 월드에서 보여지는 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
@@ -40,7 +53,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	USphereComponent* PickupCollision;
 
+	// Overlap 이벤트
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerEnter OnPlayerEnter;
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerExit OnPlayerExit;
+
 	// 아이템
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	USTItemDataAssetBase* ItemData;
+
+	// Picup UI 위젯
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* PickupWidgetComponent;
+
 };
