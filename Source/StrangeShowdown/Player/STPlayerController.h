@@ -13,5 +13,8 @@ UCLASS()
 class STRANGESHOWDOWN_API ASTPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
 	
 };

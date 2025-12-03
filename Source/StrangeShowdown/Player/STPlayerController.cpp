@@ -3,3 +3,10 @@
 
 #include "Player/STPlayerController.h"
 
+void ASTPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	FInputModeGameOnly GameOnlyInputMode;
+	SetInputMode(GameOnlyInputMode);
+}

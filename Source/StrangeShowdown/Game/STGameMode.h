@@ -13,5 +13,8 @@ UCLASS()
 class STRANGESHOWDOWN_API ASTGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	ASTGameMode();
 	
 };
