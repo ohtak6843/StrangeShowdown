@@ -18,6 +18,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
+
+	// Inventory Component
+	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 }
 
 void ASTLocalPlayer::BeginPlay()
@@ -42,7 +45,14 @@ void ASTLocalPlayer::Interact()
 		ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
 		if (PickupItem)
 		{
-			PickupItem->Pickup();
+			if (InventoryComp && PickupItem->ItemData)
+			{
+				bool bAdded = InventoryComp->AddItem(PickupItem->ItemData, 1);
+				if (bAdded)
+				{
+					PickupItem->Destroy();
+				}
+			}
 		}
 	}
 }

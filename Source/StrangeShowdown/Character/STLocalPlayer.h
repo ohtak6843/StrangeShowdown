@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/STPlayerBase.h"
+#include "Component/STInventoryComponent.h"
 #include "STLocalPlayer.generated.h"
 
 /**
@@ -33,4 +34,8 @@ public:
 	// Camera Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
+
+	// Inventory Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	USTInventoryComponent* InventoryComp;
 };

@@ -41,10 +41,6 @@ private:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
-	UFUNCTION()
-	void Pickup();
-
-public:
 	// 월드에서 보여지는 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	UStaticMeshComponent* Mesh;

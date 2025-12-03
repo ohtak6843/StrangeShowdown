@@ -13,7 +13,7 @@ ASTGameMode::ASTGameMode()
 	}
 
 	// PlayerControllerClass
-	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Game/StrangeShowdown/Blueprint/PC_PlayerController.PC_PlayerController"));
+	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Game/StrangeShowdown/Blueprint/PC_PlayerController.PC_PlayerController_C"));
 	if (PlayerControllerClassRef.Class)
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;

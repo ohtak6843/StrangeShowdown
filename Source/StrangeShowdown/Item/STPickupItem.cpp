@@ -87,16 +87,6 @@ void ASTPickupItem::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	}
 }
 
-void ASTPickupItem::Pickup()
-{
-	if (OverlappedPlayer == nullptr)
-		return;
-
-	// 아이템 획득 로직 구현 (예: 인벤토리에 추가 등)
-
-	Destroy();
-}
-
 // Called every frame
 void ASTPickupItem::Tick(float DeltaTime)
 {

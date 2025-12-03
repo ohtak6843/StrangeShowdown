@@ -54,4 +54,8 @@ public:
 	// 메쉬 크기
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
 	FVector MeshScale = FVector(1.f, 1.f, 1.f);
+
+	// Max Stack Count
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	int32 MaxStack = 1;
 };
