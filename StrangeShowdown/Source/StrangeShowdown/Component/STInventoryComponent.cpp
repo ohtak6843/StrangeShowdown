@@ -1,44 +1,34 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Component/STInventoryComponent.h"
 #include "Item/STItemDataAssetBase.h"
 
-// Sets default values for this component's properties
 USTInventoryComponent::USTInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-
-// Called when the game starts
 void USTInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	Slots.SetNum(MaxSlots);
+
+	// MouseDrop이 발생하면 ChangeSlot 실행되도록 바인딩
+	MouseDrop.AddDynamic(this, &USTInventoryComponent::ChangeSlot_FromEvent);
 }
 
-
-// Called every frame
-void USTInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void USTInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 {
-	if (NewItem == nullptr || Count <= 0)
+	if (!NewItem || Count <= 0)
 		return false;
 
-	// 스택 가능한 슬롯 찾기
 	int32 StackSlot = FindStackableSlot(NewItem);
+
 	if (StackSlot != -1)
 	{
 		int32 SpaceLeft = NewItem->MaxStack - Slots[StackSlot].Count;
@@ -47,38 +37,20 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 		Slots[StackSlot].Count += AddCount;
 		Count -= AddCount;
 
-		UE_LOG(LogTemp, Warning, TEXT("[Inventory] Stacked %d of %s in Slot %d (Now: %d)"),
-			AddCount,
-			*NewItem->ItemName.ToString(),
-			StackSlot,
-			Slots[StackSlot].Count
-		);
-
 		if (Count <= 0)
 			return true;
 	}
 
-	// 빈 슬롯에 새로 추가
 	while (Count > 0)
 	{
 		int32 EmptyIndex = FindEmptySlot();
 		if (EmptyIndex == -1)
-		{
-			UE_LOG(LogTemp, Error, TEXT("[Inventory] Failed to add %s - Inventory full"),
-				*NewItem->ItemName.ToString());
 			return false;
-		}
 
 		int32 AddCount = FMath::Min(Count, NewItem->MaxStack);
 
 		Slots[EmptyIndex].ItemData = NewItem;
 		Slots[EmptyIndex].Count = AddCount;
-
-		UE_LOG(LogTemp, Warning, TEXT("[Inventory] Added New Item %s (Slot: %d, Count: %d)"),
-			*NewItem->ItemName.ToString(),
-			EmptyIndex,
-			AddCount
-		);
 
 		Count -= AddCount;
 	}
@@ -88,21 +60,16 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 
 bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 {
-	if (!Slots.IsValidIndex(SlotIndex))
-		return false;
-
-	if (Count <= 0)
+	if (!Slots.IsValidIndex(SlotIndex) || Count <= 0)
 		return false;
 
 	FInventorySlot& Slot = Slots[SlotIndex];
 
-	if (Slot.ItemData == nullptr)
+	if (!Slot.ItemData)
 		return false;
 
-	// 개수 차감
 	Slot.Count -= Count;
 
-	// 0개 이하가 되면 비우기
 	if (Slot.Count <= 0)
 	{
 		Slot.ItemData = nullptr;
@@ -110,6 +77,51 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	}
 
 	return true;
+}
+
+bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTInventoryComponent* BeforeInventorySystem)
+{
+	if (!Slots.IsValidIndex(SlotAIndex) || !Slots.IsValidIndex(SlotBIndex))
+		return false;
+
+	FInventorySlot& SlotA = Slots[SlotAIndex];
+	FInventorySlot& SlotB = Slots[SlotBIndex];
+
+	if (BeforeInventorySystem)
+	{
+		FInventorySlot Temp = SlotA;
+		SlotA = BeforeInventorySystem->Slots[SlotBIndex];
+		BeforeInventorySystem->Slots[SlotBIndex] = Temp;
+	}
+	else
+	{
+		FInventorySlot Temp = SlotA;
+		SlotA = SlotB;
+		SlotB = Temp;
+	}
+
+	// UI 갱신
+	OnSlotChanged(SlotAIndex, SlotBIndex);
+
+	// 인벤토리 업데이트
+	OnInventoryUpdated.Broadcast();
+
+	if (BeforeInventorySystem)
+	{
+		BeforeInventorySystem->OnInventoryUpdated.Broadcast();
+	}
+
+	return true;
+}
+
+void USTInventoryComponent::CallMouseDrop(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex)
+{
+	MouseDrop.Broadcast(TargetIndex, BeforeInventorySystem, BeforeIndex);
+}
+
+void USTInventoryComponent::ChangeSlot_FromEvent(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex)
+{
+	ChangeSlot(TargetIndex, BeforeIndex, BeforeInventorySystem);
 }
 
 int32 USTInventoryComponent::FindEmptySlot() const
@@ -124,7 +136,7 @@ int32 USTInventoryComponent::FindEmptySlot() const
 
 int32 USTInventoryComponent::FindStackableSlot(USTItemDataAssetBase* NewItem) const
 {
-	if (NewItem == nullptr)
+	if (!NewItem)
 		return -1;
 
 	for (int32 i = 0; i < Slots.Num(); i++)
@@ -137,4 +149,3 @@ int32 USTInventoryComponent::FindStackableSlot(USTItemDataAssetBase* NewItem) co
 	}
 	return -1;
 }
-
