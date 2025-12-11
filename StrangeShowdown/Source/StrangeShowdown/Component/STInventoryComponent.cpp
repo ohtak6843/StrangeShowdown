@@ -1,5 +1,6 @@
 #include "Component/STInventoryComponent.h"
 #include "Item/STItemDataAssetBase.h"
+#include "STQuickSlotComponent.h"
 
 USTInventoryComponent::USTInventoryComponent()
 {
