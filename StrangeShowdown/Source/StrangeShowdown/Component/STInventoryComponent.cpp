@@ -125,6 +125,20 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 		SlotB = Temp;
 	}
 
+	// Äü½½·ÔÀÇ InventorySlotIndex °»½Å
+	USTQuickSlotComponent* QuickSlotComp = GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
+	if (QuickSlotComp)
+	{
+		if (QuickSlotComp->InventorySlotIndex == SlotAIndex)
+		{
+			QuickSlotComp->InventorySlotIndex = SlotBIndex;
+		}
+		else if (QuickSlotComp->InventorySlotIndex == SlotBIndex)
+		{
+			QuickSlotComp->InventorySlotIndex = SlotAIndex;
+		}
+	}
+
 	// UI °»½Å
 	OnSlotChanged(SlotAIndex, SlotBIndex);
 
