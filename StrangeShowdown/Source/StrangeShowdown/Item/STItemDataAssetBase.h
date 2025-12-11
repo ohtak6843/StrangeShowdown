@@ -12,7 +12,8 @@ enum class EItemType : uint8
 	HealPack,
 	WeaponEnforce,
 	WirelessSet,
-	BodyArmor
+	BodyArmor,
+	Temp
 };
 
 /**
@@ -25,6 +26,8 @@ class STRANGESHOWDOWN_API USTItemDataAssetBase : public UPrimaryDataAsset
 
 public:
 	USTItemDataAssetBase();
+
+	void UseItem(class ASTLocalPlayer* Player);
 	
 public:
 	// 아이템 고유 ID (인벤토리/저장용)

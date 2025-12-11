@@ -64,6 +64,15 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	return true;
 }
 
+FInventorySlot USTQuickSlotComponent::GetItemFromQuickSlot(int32 QuickSlotIndex) const
+{
+	if (QuickSlots.IsValidIndex(QuickSlotIndex))
+	{
+		return QuickSlots[QuickSlotIndex];
+	}
+	return FInventorySlot();
+}
+
 void USTQuickSlotComponent::CallMouseDropToQuickSlot(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex)
 {
 	MouseDropToQuickSlot.Broadcast(InventoryItemIndex, BeforeInventorySystem, QuickSlotIndex);

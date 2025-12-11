@@ -50,6 +50,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool RemoveItem(int32 SlotIndex, int32 Count = 1);
 
+	// 아이템 사용
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool UseItem(int32 SlotIndex, class ASTLocalPlayer* Player);
+
 	// 슬롯 교환
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTInventoryComponent* BeforeInventorySystem = nullptr);

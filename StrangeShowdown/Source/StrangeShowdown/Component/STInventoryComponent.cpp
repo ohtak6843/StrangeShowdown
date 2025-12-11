@@ -80,6 +80,30 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	return true;
 }
 
+bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player)
+{
+	if (!Slots.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	FInventorySlot& Slot = Slots[SlotIndex];
+
+	if (!Slot.ItemData)
+	{
+		return false;
+	}
+
+	Slot.ItemData->UseItem(Player);
+
+	RemoveItem(SlotIndex, 1);
+
+	// 인벤토리 업데이트
+	OnInventoryUpdated.Broadcast();
+
+	return true;
+}
+
 bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTInventoryComponent* BeforeInventorySystem)
 {
 	if (!Slots.IsValidIndex(SlotAIndex) || !Slots.IsValidIndex(SlotBIndex))
