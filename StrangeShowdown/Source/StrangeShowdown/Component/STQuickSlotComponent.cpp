@@ -22,6 +22,13 @@ void USTQuickSlotComponent::BeginPlay()
 	// ...
 	// Resize QuickSlots array
 	QuickSlots.SetNum(QuickSlotSize);
+	InventorySlotIndex.SetNum(QuickSlotSize);
+	
+	// InventorySlotIndex 초기화
+	for(int32 i = 0; i < InventorySlotIndex.Num(); i++)
+	{
+		InventorySlotIndex[i] = -1;
+	}
 
 	MouseDropToQuickSlot.AddDynamic(this, &USTQuickSlotComponent::AddToQuickSlot_FromEvent);
 }
@@ -54,10 +61,10 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	}
 
 	// 인벤토리에서 아이템 가져오기
-	const FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
+	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 해당 아이템이 몇번인지 저장
-	InventorySlotIndex = InventoryItemIndex;
+	InventorySlotIndex[TargetQuickSlotIndex] = InventoryItemIndex;
 
 	// 퀵슬롯에 설정 (Set Array Elem)
 	QuickSlots[TargetQuickSlotIndex] = ItemSlot;

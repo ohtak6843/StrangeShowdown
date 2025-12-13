@@ -39,14 +39,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	bool AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex);
 
-	// MouseDropToQuickSlot 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
-	FMouseDropToQuickSlotEvent MouseDropToQuickSlot;
-
-	// OnQuickSlotUpdated 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
-	FOnQuickSlotUpdated OnQuickSlotUpdated;
-
 	// BP에서 함수처럼 호출할 수 있는 MouseDrop wrapper
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	void CallMouseDropToQuickSlot(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex);
@@ -56,12 +48,21 @@ public:
 	void AddToQuickSlot_FromEvent(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex);
 
 public:
+	// MouseDropToQuickSlot 이벤트 디스패처
+	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
+	FMouseDropToQuickSlotEvent MouseDropToQuickSlot;
+
+	// OnQuickSlotUpdated 이벤트 디스패처
+	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
+	FOnQuickSlotUpdated OnQuickSlotUpdated;
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
 	TArray<FInventorySlot> QuickSlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
-	int32 QuickSlotSize = 5;
+	TArray<int32> InventorySlotIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
-	int32 InventorySlotIndex;
+	int32 QuickSlotSize = 5;
 };

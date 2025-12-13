@@ -77,6 +77,21 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 		Slot.Count = 0;
 	}
 
+	// 퀵슬롯 업데이트
+	USTQuickSlotComponent* QuickSlotComp = GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
+	if (QuickSlotComp)
+	{
+		for (int32 i = 0; i < QuickSlotComp->InventorySlotIndex.Num(); i++)
+		{
+			if (QuickSlotComp->InventorySlotIndex[i] == SlotIndex && Slot.ItemData == nullptr)
+			{
+				QuickSlotComp->QuickSlots[i].ItemData = nullptr;
+				QuickSlotComp->QuickSlots[i].Count = 0;
+				QuickSlotComp->InventorySlotIndex[i] = -1;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -129,20 +144,23 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 	USTQuickSlotComponent* QuickSlotComp = GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
 	if (QuickSlotComp)
 	{
-		if (QuickSlotComp->InventorySlotIndex == SlotAIndex)
+		for (int32 i = 0; i < QuickSlotComp->InventorySlotIndex.Num(); i++)
 		{
-			QuickSlotComp->InventorySlotIndex = SlotBIndex;
-		}
-		else if (QuickSlotComp->InventorySlotIndex == SlotBIndex)
-		{
-			QuickSlotComp->InventorySlotIndex = SlotAIndex;
+			if (QuickSlotComp->InventorySlotIndex[i] == SlotAIndex)
+			{
+				QuickSlotComp->InventorySlotIndex[i] = SlotBIndex;
+			}
+			else if (QuickSlotComp->InventorySlotIndex[i] == SlotBIndex)
+			{
+				QuickSlotComp->InventorySlotIndex[i] = SlotAIndex;
+			}
 		}
 	}
 
 	// UI 갱신
 	OnSlotChanged(SlotAIndex, SlotBIndex);
 
-	// 인벤토리 업데이트
+	// WB_Inventory에서 바인드 해둔 UpdateInventoryDrop 이벤트를 호출
 	OnInventoryUpdated.Broadcast();
 
 	if (BeforeInventorySystem)

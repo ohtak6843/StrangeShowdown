@@ -62,14 +62,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory")
 	void OnSlotChanged(int32 SlotA, int32 SlotB);
 
-	// MouseDrop 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-	FMouseDropEvent MouseDrop;
-
-	// OnInventoryUpdated 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-	FOnInventoryUpdated OnInventoryUpdated;
-
 	// BP에서 함수처럼 호출할 수 있는 MouseDrop wrapper
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void CallMouseDrop(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex);
@@ -81,6 +73,15 @@ public:
 private:
 	int32 FindEmptySlot() const;
 	int32 FindStackableSlot(USTItemDataAssetBase* NewItem) const;
+
+public:
+	// MouseDrop 이벤트 디스패처
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FMouseDropEvent MouseDrop;
+
+	// OnInventoryUpdated 이벤트 디스패처
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnInventoryUpdated OnInventoryUpdated;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
