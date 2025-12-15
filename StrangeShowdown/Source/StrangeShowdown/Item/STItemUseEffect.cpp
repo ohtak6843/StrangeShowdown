@@ -4,7 +4,7 @@
 #include "Item/STItemUseEffect.h"
 #include "STItemUseEffect.h"
 
-void USTItemUseEffect::Use_Implementation(AActor* User)
+void USTItemUseEffect::Use_Implementation(ASTLocalPlayer* User)
 {
 
 }

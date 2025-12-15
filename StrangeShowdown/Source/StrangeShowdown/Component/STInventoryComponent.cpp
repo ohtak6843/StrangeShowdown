@@ -109,7 +109,14 @@ bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player)
 		return false;
 	}
 
-	Slot.ItemData->UseItem(Player);
+	// 아이템 사용
+	if (!Slot.ItemData->UseEffectClass)
+		return false;
+
+	USTItemUseEffect* Effect =
+		NewObject<USTItemUseEffect>(this, Slot.ItemData->UseEffectClass);
+
+	if (Effect) Effect->Use(Player);
 
 	RemoveItem(SlotIndex, 1);
 

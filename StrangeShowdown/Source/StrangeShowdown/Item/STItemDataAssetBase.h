@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "STItemUseEffect.h"
 #include "STItemDataAssetBase.generated.h"
 
 UENUM(BlueprintType)
@@ -26,8 +27,6 @@ class STRANGESHOWDOWN_API USTItemDataAssetBase : public UPrimaryDataAsset
 
 public:
 	USTItemDataAssetBase();
-
-	void UseItem(class ASTLocalPlayer* Player);
 	
 public:
 	// 아이템 고유 ID (인벤토리/저장용)
@@ -61,4 +60,8 @@ public:
 	// Max Stack Count
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 MaxStack = 1;
+
+	// 아이템 사용 효과
+	UPROPERTY(EditAnywhere, Category = "Item")
+	TSubclassOf<USTItemUseEffect> UseEffectClass;
 };
