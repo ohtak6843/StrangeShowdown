@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Component/STStatComponent.h"
 #include "STPlayerBase.generated.h"
 
 UCLASS()
@@ -17,6 +18,8 @@ public:
 	// Sets default values for this character's properties
 	ASTPlayerBase();
 
-protected:
-
+public:
+	// Stat Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	TObjectPtr<USTStatComponent> StatComp;
 };
