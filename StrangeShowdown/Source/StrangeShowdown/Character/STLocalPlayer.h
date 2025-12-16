@@ -29,13 +29,13 @@ protected:
 public:
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	USpringArmComponent* SpringArmComp;
+	TObjectPtr<USpringArmComponent> SpringArmComp;
 
 	// Camera Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	UCameraComponent* CameraComp;
+	TObjectPtr<UCameraComponent> CameraComp;
 
 	// Inventory Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	USTInventoryComponent* InventoryComp;
+	TObjectPtr<USTInventoryComponent> InventoryComp;
 };
