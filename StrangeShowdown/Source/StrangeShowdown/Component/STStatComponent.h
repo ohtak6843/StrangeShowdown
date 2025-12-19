@@ -25,25 +25,25 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetHp(int32 HealAmount);
+	void AddHp(int32 HealAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetGold(int32 GoldAmount);
+	void AddGold(int32 GoldAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetKill(int32 KillAmount);
+	void AddKill(int32 KillAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetMoveSpeed(int32 MoveSpeedAmount);
+	void AddMoveSpeed(int32 MoveSpeedAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetStamina(int32 StaminaAmount);
+	void AddStamina(int32 StaminaAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetAction(int32 ActionAmount);
+	void AddAction(int32 ActionAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetPrize(int32 PrizeAmount);
+	void AddPrize(int32 PrizeAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void SetIsActive(bool isActive);
@@ -69,7 +69,7 @@ public:
 	float Stamina;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	float MaxStamina = 4;
+	float MaxStamina = 5;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Action;

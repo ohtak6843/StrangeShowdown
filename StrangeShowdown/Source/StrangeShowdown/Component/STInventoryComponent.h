@@ -52,7 +52,7 @@ public:
 
 	// 아이템 사용
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool UseItem(int32 SlotIndex, class ASTLocalPlayer* Player);
+	bool UseItem(int32 SlotIndex, class ASTLocalPlayer* Player, int32 StaminaCost);
 
 	// 슬롯 교환
 	UFUNCTION(BlueprintCallable, Category = "Inventory")

@@ -32,7 +32,7 @@ void USTStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void USTStatComponent::SetHp(int32 HealAmount)
+void USTStatComponent::AddHp(int32 HealAmount)
 {
 	Hp += HealAmount;
 
@@ -48,32 +48,37 @@ void USTStatComponent::SetHp(int32 HealAmount)
 	}
 }
 
-void USTStatComponent::SetGold(int32 GoldAmount)
+void USTStatComponent::AddGold(int32 GoldAmount)
 {
 	Gold += GoldAmount;
 }
 
-void USTStatComponent::SetKill(int32 KillAmount)
+void USTStatComponent::AddKill(int32 KillAmount)
 {
 	Kill += KillAmount;
 }
 
-void USTStatComponent::SetMoveSpeed(int32 MoveSpeedAmount)
+void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
 {
 	MoveSpeed += MoveSpeedAmount;
 }
 
-void USTStatComponent::SetStamina(int32 StaminaAmount)
+void USTStatComponent::AddStamina(int32 StaminaAmount)
 {
 	Stamina += StaminaAmount;
+
+	if (Stamina > MaxStamina)
+	{
+		Stamina = MaxStamina;
+	}
 }
 
-void USTStatComponent::SetAction(int32 ActionAmount)
+void USTStatComponent::AddAction(int32 ActionAmount)
 {
 	Action += ActionAmount;
 }
 
-void USTStatComponent::SetPrize(int32 PrizeAmount)
+void USTStatComponent::AddPrize(int32 PrizeAmount)
 {
 	Prize += PrizeAmount;
 }

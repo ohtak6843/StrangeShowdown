@@ -61,6 +61,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 MaxStack = 1;
 
+	// 스태미너 코스트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	int32 StaminaCost;
+
 	// 아이템 사용 효과
 	UPROPERTY(EditAnywhere, Category = "Item")
 	TSubclassOf<USTItemUseEffect> UseEffectClass;
