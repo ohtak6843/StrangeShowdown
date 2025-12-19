@@ -75,6 +75,9 @@ public:
 	int32 Action;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 MaxAction = 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Prize;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")

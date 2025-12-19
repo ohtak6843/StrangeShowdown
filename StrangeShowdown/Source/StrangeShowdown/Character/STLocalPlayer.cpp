@@ -29,7 +29,7 @@ ASTLocalPlayer::ASTLocalPlayer()
 	StatComp->Kill = 0;
 	StatComp->MoveSpeed = 500;
 	StatComp->Stamina = StatComp->MaxStamina - 2;
-	StatComp->Action = 1;
+	StatComp->Action = StatComp->MaxAction;
 	StatComp->Prize = 0;
 	StatComp->bAlive = true;
 }

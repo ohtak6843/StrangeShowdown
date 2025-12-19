@@ -27,6 +27,7 @@ ASTPickupItem::ASTPickupItem()
 	// Widget Component
 	PickupWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidgetComponent->SetupAttachment(RootComponent);
+	PickupWidgetComponent->InitWidget();
 	PickupWidgetComponent->SetVisibility(false);
 
 	// 카메라는 플레이어를 바라보도록
