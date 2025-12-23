@@ -58,11 +58,6 @@ void USTStatComponent::AddKill(int32 KillAmount)
 	Kill += KillAmount;
 }
 
-void USTStatComponent::AddPower(int32 PowerAmount)
-{
-	Power += PowerAmount;
-}
-
 void USTStatComponent::AddArmor(int32 ArmorAmount)
 {
 	Armor += ArmorAmount;
@@ -86,6 +81,11 @@ void USTStatComponent::AddStamina(int32 StaminaAmount)
 void USTStatComponent::AddAction(int32 ActionAmount)
 {
 	Action += ActionAmount;
+}
+
+void USTStatComponent::AddMaxAction(int32 ActionAmount)
+{
+	MaxAction += ActionAmount;
 }
 
 void USTStatComponent::AddPrize(int32 PrizeAmount)
