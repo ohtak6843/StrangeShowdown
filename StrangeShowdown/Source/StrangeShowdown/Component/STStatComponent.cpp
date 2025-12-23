@@ -58,6 +58,16 @@ void USTStatComponent::AddKill(int32 KillAmount)
 	Kill += KillAmount;
 }
 
+void USTStatComponent::AddPower(int32 PowerAmount)
+{
+	Power += PowerAmount;
+}
+
+void USTStatComponent::AddArmor(int32 ArmorAmount)
+{
+	Armor += ArmorAmount;
+}
+
 void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
 {
 	MoveSpeed += MoveSpeedAmount;

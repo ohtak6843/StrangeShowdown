@@ -34,6 +34,12 @@ public:
 	void AddKill(int32 KillAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
+	void AddPower(int32 PowerAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	void AddArmor(int32 ArmorAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void AddMoveSpeed(int32 MoveSpeedAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
@@ -58,6 +64,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Gold;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 Power = 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 Armor = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Kill;

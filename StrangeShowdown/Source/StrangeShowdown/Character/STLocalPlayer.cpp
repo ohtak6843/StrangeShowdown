@@ -27,6 +27,8 @@ ASTLocalPlayer::ASTLocalPlayer()
 	StatComp->Hp = StatComp->MaxHp;
 	StatComp->Gold = 0;
 	StatComp->Kill = 0;
+	StatComp->Power = 1;
+	StatComp->Armor = 0;
 	StatComp->MoveSpeed = 500;
 	StatComp->Stamina = StatComp->MaxStamina - 2;
 	StatComp->Action = StatComp->MaxAction;
