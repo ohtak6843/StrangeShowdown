@@ -11,8 +11,8 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	HealPack,
-	WeaponEnforce,
 	WirelessSet,
+	EnhancePower,
 	BodyArmor,
 	Temp
 };
