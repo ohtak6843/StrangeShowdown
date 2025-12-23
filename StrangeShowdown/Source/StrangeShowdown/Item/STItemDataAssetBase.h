@@ -53,6 +53,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
 	UStaticMesh* PickupMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
+	UStaticMesh* PickupSubMesh;
+
 	// 메쉬 크기
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
 	FVector MeshScale = FVector(1.f, 1.f, 1.f);

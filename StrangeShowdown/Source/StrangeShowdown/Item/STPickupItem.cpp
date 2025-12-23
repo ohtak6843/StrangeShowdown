@@ -19,6 +19,9 @@ ASTPickupItem::ASTPickupItem()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 
+	SubMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMesh"));
+	SubMesh->SetupAttachment(Mesh);
+
 	// Initialize Collision Component
 	PickupCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
 	PickupCollision->SetupAttachment(RootComponent);
@@ -48,6 +51,26 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 		Mesh->SetWorldScale3D(ItemData->MeshScale);
 		// 위치 조정
 		Mesh->SetRelativeLocation(MeshPos);
+		// sub Mesh가 있으면 설정
+		if (ItemData->PickupSubMesh)
+		{
+			if (!SubMesh)
+			{
+				SubMesh = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("SubMesh"));
+				SubMesh->RegisterComponent();
+				SubMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			}
+			SubMesh->SetStaticMesh(ItemData->PickupSubMesh);
+			SubMesh->SetWorldScale3D(ItemData->MeshScale);
+		}
+		else
+		{
+			if (SubMesh)
+			{
+				SubMesh->DestroyComponent();
+				SubMesh = nullptr;
+			}
+		}
 	}
 }
 
