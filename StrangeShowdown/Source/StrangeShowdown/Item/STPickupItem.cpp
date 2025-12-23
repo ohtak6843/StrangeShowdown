@@ -47,21 +47,26 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 	{
 		// Mesh 설정
 		Mesh->SetStaticMesh(ItemData->PickupMesh);
-		// DataAsset에 저장된 스케일 적용
-		Mesh->SetWorldScale3D(ItemData->MeshScale);
-		// 위치 조정
-		Mesh->SetRelativeLocation(MeshPos);
+		// DataAsset에 저장된 스케일 적용 (Mesh의 상대 스케일)
+		Mesh->SetRelativeScale3D(ItemData->MeshScale);
+		// 위치 조정 (루트에 대한 상대 위치)
+		Mesh->SetRelativeLocation(ItemData->MeshPos);
+
 		// sub Mesh가 있으면 설정
 		if (ItemData->PickupSubMesh)
 		{
+			// SubMesh가 없으면 생성 후 Mesh에 붙임
 			if (!SubMesh)
 			{
 				SubMesh = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("SubMesh"));
 				SubMesh->RegisterComponent();
-				SubMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+				// 부모를 Mesh로 하여 상대 transform이 Mesh 기준이 되게 함
+				SubMesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
 			}
+
 			SubMesh->SetStaticMesh(ItemData->PickupSubMesh);
-			SubMesh->SetWorldScale3D(ItemData->MeshScale);
+			SubMesh->SetRelativeScale3D(FVector::OneVector);
+			SubMesh->SetRelativeLocation(FVector::ZeroVector);
 		}
 		else
 		{

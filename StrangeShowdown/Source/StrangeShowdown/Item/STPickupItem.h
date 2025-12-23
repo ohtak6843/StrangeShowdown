@@ -48,10 +48,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	UStaticMeshComponent* SubMesh;
 
-	// 메쉬 위치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FVector MeshPos = FVector(0.f, 0.f, 0.f);
-
 	// 콜리전
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	USphereComponent* PickupCollision;
