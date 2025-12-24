@@ -7,6 +7,7 @@
 #include "Component/STInventoryComponent.h"
 #include "STLocalPlayer.generated.h"
 
+class USTStoreComponent;
 /**
  * 
  */
@@ -38,4 +39,8 @@ public:
 	// Inventory Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<USTInventoryComponent> InventoryComp;
+
+	// Store Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Store")
+	TObjectPtr<USTStoreComponent> StoreComp;
 };

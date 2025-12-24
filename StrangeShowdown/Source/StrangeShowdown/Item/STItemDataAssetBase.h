@@ -72,6 +72,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 StaminaCost;
 
+	// 골드 코스트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	int32 GoldCost;
+
 	// 아이템 사용 효과
 	UPROPERTY(EditAnywhere, Category = "Item")
 	TSubclassOf<USTItemUseEffect> UseEffectClass;

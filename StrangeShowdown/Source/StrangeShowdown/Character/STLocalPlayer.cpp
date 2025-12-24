@@ -3,6 +3,7 @@
 
 #include "Character/STLocalPlayer.h"
 #include "Item/STPickupItem.h"
+#include "Component/STStoreComponent.h" 
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -22,17 +23,8 @@ ASTLocalPlayer::ASTLocalPlayer()
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 
-	// Stat Component
-	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
-	StatComp->Hp = StatComp->MaxHp;
-	StatComp->Gold = 0;
-	StatComp->Kill = 0;
-	StatComp->Armor = 0;
-	StatComp->MoveSpeed = 500;
-	StatComp->Stamina = StatComp->MaxStamina - 2;
-	StatComp->Action = StatComp->MaxAction;
-	StatComp->Prize = 0;
-	StatComp->bAlive = true;
+	// Store Component
+	StoreComp = CreateDefaultSubobject<USTStoreComponent>(TEXT("StoreComp"));
 }
 
 void ASTLocalPlayer::BeginPlay()
