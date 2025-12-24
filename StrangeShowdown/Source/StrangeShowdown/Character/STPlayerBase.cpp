@@ -20,5 +20,17 @@ ASTPlayerBase::ASTPlayerBase()
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+
+	// Stat Component
+	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
+	StatComp->Hp = StatComp->MaxHp;
+	StatComp->Gold = 0;
+	StatComp->Kill = 0;
+	StatComp->Armor = 0;
+	StatComp->MoveSpeed = 500;
+	StatComp->Stamina = StatComp->MaxStamina - 2;
+	StatComp->Action = StatComp->MaxAction;
+	StatComp->Prize = 0;
+	StatComp->bAlive = true;
 }
 
