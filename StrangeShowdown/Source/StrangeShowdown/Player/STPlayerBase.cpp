@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/STPlayerBase.h"
+#include "Player/STPlayerBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values

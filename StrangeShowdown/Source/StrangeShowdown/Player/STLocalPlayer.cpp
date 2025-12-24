@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/STLocalPlayer.h"
+#include "Player/STLocalPlayer.h"
 #include "Item/STPickupItem.h"
 #include "Component/STStoreComponent.h" 
 
