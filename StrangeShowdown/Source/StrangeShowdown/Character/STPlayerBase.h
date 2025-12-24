@@ -9,6 +9,15 @@
 #include "Component/STStatComponent.h"
 #include "STPlayerBase.generated.h"
 
+UENUM(BlueprintType)
+enum class EPlayerMeshType : uint8
+{
+	Badguy	UMETA(DisplayName = "Badguy"),
+	Cowboy	UMETA(DisplayName = "Cowboy"),
+	Cowgirl	UMETA(DisplayName = "Cowgirl"),
+	Gunman	UMETA(DisplayName = "Gunman")
+};
+
 UCLASS()
 class STRANGESHOWDOWN_API ASTPlayerBase : public ACharacter
 {
@@ -22,4 +31,8 @@ public:
 	// Stat Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	TObjectPtr<USTStatComponent> StatComp;
+
+	// Player Mesh Type
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	EPlayerMeshType PlayerMeshType;
 };
