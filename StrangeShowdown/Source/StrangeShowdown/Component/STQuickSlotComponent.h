@@ -65,4 +65,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
 	int32 QuickSlotSize = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
+	int32 CurrentSelectQuickSlotIndex;
 };

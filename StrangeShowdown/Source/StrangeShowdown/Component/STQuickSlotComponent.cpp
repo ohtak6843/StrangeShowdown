@@ -60,6 +60,12 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		return false;
 	}
 
+	// 1번 슬롯은 무기가 고정되어야 함
+	if (TargetQuickSlotIndex == 0)
+	{
+		return false;
+	}
+
 	// 인벤토리에서 아이템 가져오기
 	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
