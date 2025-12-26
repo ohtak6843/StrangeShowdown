@@ -10,6 +10,7 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
+	Weapon,
 	HealPack,
 	WirelessSet,
 	EnhancePower,
