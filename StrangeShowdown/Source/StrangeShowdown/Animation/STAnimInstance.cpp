@@ -4,6 +4,7 @@
 #include "Animation/STAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Player/STPlayerBase.h"
 
 USTAnimInstance::USTAnimInstance()
 {
@@ -33,5 +34,13 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshold;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshold);
+	}
+
+	TObjectPtr<ASTPlayerBase> Player = Cast<ASTPlayerBase>(Owner);
+	if (Player)
+	{
+		bIsArmedRifle = Player->bIsArmedRifle;
+		bIsAiming = Player->bIsAiming;
+		Pitch = Player->GetBaseAimRotation().Pitch;
 	}
 }

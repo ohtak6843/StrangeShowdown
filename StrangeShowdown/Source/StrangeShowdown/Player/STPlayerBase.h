@@ -35,4 +35,12 @@ public:
 	// Player Mesh Type
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	EPlayerMeshType PlayerMeshType;
+
+public:
+	// Character State
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
+	uint8 bIsArmedRifle : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
+	uint8 bIsAiming : 1;
 };
