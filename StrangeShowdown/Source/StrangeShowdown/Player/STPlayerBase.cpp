@@ -32,5 +32,8 @@ ASTPlayerBase::ASTPlayerBase()
 	StatComp->Action = StatComp->MaxAction;
 	StatComp->Prize = 0;
 	StatComp->bAlive = true;
+
+	// Character State
+	bIsArmedRifle = true;
 }
 
