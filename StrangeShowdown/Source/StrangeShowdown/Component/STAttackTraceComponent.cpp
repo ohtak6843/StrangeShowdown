@@ -40,9 +40,9 @@ void USTAttackTraceComponent::TickComponent(
 	// 3. UI 위치 갱신 (타겟이 있을 때만)
 	if (TracingFieldPlayer && AttackTraceWidget)
 	{
-		// FieldPlayer의 메쉬를 가져와서 머리 위치를 계산하면 좋을 거같음
+		auto Mesh = TracingFieldPlayer->GetMesh();
 		const FVector WorldPos =
-			TracingFieldPlayer->GetActorLocation() + FVector(0.f, 0.f, 0.f);
+			Mesh->GetSocketLocation("spine_03");
 
 		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 		{
