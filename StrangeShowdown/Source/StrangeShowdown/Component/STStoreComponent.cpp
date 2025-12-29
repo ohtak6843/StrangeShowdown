@@ -30,6 +30,7 @@ void USTStoreComponent::InitStore()
 	for (int32 i = 0; i < Slots.Num(); i++)
 	{
 		Slots[i].ItemData = StoreItemPool[0];
+		Slots[i].SlotIndex = i;
 		Slots[i].bSold = false;
 	}
 }

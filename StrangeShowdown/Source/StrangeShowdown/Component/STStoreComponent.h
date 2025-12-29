@@ -17,6 +17,9 @@ public:
 	USTItemDataAssetBase* ItemData = nullptr;
 
 	UPROPERTY(BlueprintReadWrite)
+	int32 SlotIndex = -1;
+
+	UPROPERTY(BlueprintReadWrite)
 	bool bSold = false;
 };
 
@@ -32,10 +35,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
 	TArray<USTItemDataAssetBase*> StoreItemPool;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
 	TArray<FStoreSlot> Slots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
