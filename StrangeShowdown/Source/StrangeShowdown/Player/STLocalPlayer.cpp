@@ -25,6 +25,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 
 	// Store Component
 	StoreComp = CreateDefaultSubobject<USTStoreComponent>(TEXT("StoreComp"));
+
+	// Attack Trace Component
+	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
 }
 
 void ASTLocalPlayer::BeginPlay()

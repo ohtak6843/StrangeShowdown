@@ -12,6 +12,7 @@ ASTFeildPlayer::ASTFeildPlayer()
 	StatWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatWidgetComponent"));
 	StatWidgetComponent->SetupAttachment(RootComponent);
 	StatWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+
 }
 
 void ASTFeildPlayer::Tick(float DeltaTime)

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Player/STPlayerBase.h"
 #include "Component/STInventoryComponent.h"
+#include "Component/STAttackTraceComponent.h"
 #include "STLocalPlayer.generated.h"
 
 class USTStoreComponent;
@@ -43,4 +44,8 @@ public:
 	// Store Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Store")
 	TObjectPtr<USTStoreComponent> StoreComp;
+
+	// Attack Trace Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
+	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
 };
