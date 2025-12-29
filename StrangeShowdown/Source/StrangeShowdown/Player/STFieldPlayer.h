@@ -5,18 +5,18 @@
 #include "CoreMinimal.h"
 #include "Player/STPlayerBase.h"
 #include "Components/WidgetComponent.h"
-#include "STFeildPlayer.generated.h"
+#include "STFieldPlayer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTFeildPlayer : public ASTPlayerBase
+class STRANGESHOWDOWN_API ASTFieldPlayer : public ASTPlayerBase
 {
 	GENERATED_BODY()
 
 public:
-	ASTFeildPlayer();
+	ASTFieldPlayer();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

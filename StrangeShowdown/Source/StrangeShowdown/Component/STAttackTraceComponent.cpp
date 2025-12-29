@@ -1,5 +1,5 @@
 #include "Component/STAttackTraceComponent.h"
-#include "Player/STFeildPlayer.h"
+#include "Player/STFieldPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 
@@ -32,7 +32,7 @@ void USTAttackTraceComponent::TickComponent(
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// 1. 타겟 판단
-	ASTFeildPlayer* NewTarget = FindTargetInSight();
+	ASTFieldPlayer* NewTarget = FindTargetInSight();
 
 	// 2. 상태 변화 처리 (델리게이트 발생 지점)
 	SetTracingTarget(NewTarget);
@@ -40,6 +40,7 @@ void USTAttackTraceComponent::TickComponent(
 	// 3. UI 위치 갱신 (타겟이 있을 때만)
 	if (TracingFieldPlayer && AttackTraceWidget)
 	{
+		// FieldPlayer의 메쉬를 가져와서 머리 위치를 계산하면 좋을 거같음
 		const FVector WorldPos =
 			TracingFieldPlayer->GetActorLocation() + FVector(0.f, 0.f, 0.f);
 
@@ -54,7 +55,7 @@ void USTAttackTraceComponent::TickComponent(
 	}
 }
 
-void USTAttackTraceComponent::HandleTargetAcquired(ASTFeildPlayer* NewTarget)
+void USTAttackTraceComponent::HandleTargetAcquired(ASTFieldPlayer* NewTarget)
 {
 	if (AttackTraceWidget)
 		return;
@@ -84,7 +85,7 @@ void USTAttackTraceComponent::HandleTargetLost()
 	AttackTraceWidget = nullptr;
 }
 
-void USTAttackTraceComponent::SetTracingTarget(ASTFeildPlayer* NewTarget)
+void USTAttackTraceComponent::SetTracingTarget(ASTFieldPlayer* NewTarget)
 {
 	if (TracingFieldPlayer == NewTarget)
 		return;
@@ -103,7 +104,7 @@ void USTAttackTraceComponent::SetTracingTarget(ASTFeildPlayer* NewTarget)
 	}
 }
 
-ASTFeildPlayer* USTAttackTraceComponent::FindTargetInSight() const
+ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -117,7 +118,6 @@ ASTFeildPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	FRotator CameraRotation;
 	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-	const float TraceDistance = 1500.f;
 	const FVector Start = CameraLocation;
 	const FVector End = Start + CameraRotation.Vector() * TraceDistance;
 
@@ -142,12 +142,12 @@ ASTFeildPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	PC->GetViewportSize(ViewX, ViewY);
 	const FVector2D ScreenCenter(ViewX * 0.5f, ViewY * 0.5f);
 
-	ASTFeildPlayer* BestTarget = nullptr;
+	ASTFieldPlayer* BestTarget = nullptr;
 	float BestScore = FLT_MAX;
 
 	for (const FHitResult& Hit : HitResults)
 	{
-		ASTFeildPlayer* Player = Cast<ASTFeildPlayer>(Hit.GetActor());
+		ASTFieldPlayer* Player = Cast<ASTFieldPlayer>(Hit.GetActor());
 		if (!Player)
 			continue;
 

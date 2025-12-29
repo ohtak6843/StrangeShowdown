@@ -5,7 +5,7 @@
 #include "STAttackTraceComponent.generated.h"
 
 class UUserWidget;
-class ASTFeildPlayer;
+class ASTFieldPlayer;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STRANGESHOWDOWN_API USTAttackTraceComponent : public UActorComponent
@@ -24,7 +24,7 @@ public:
 
 	// 델리게이트를 받아 위젯에 타겟 획득 알림, 위치 Set, 위젯 삭제
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void HandleTargetAcquired(ASTFeildPlayer* NewTarget);
+	void HandleTargetAcquired(ASTFieldPlayer* NewTarget);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void HandleTargetLost();
@@ -32,7 +32,7 @@ public:
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 		FOnAttackTraceTargetAcquired,
-		ASTFeildPlayer*, NewTarget
+		ASTFieldPlayer*, NewTarget
 	);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(
@@ -46,7 +46,7 @@ public:
 
 	// 현재 추적 중인 플레이어
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AttackTrace|State")
-	TObjectPtr<ASTFeildPlayer> TracingFieldPlayer;
+	TObjectPtr<ASTFieldPlayer> TracingFieldPlayer;
 
 	// 실제 생성된 위젯 인스턴스
 	UPROPERTY(Transient)
@@ -64,11 +64,15 @@ public:
 	// 공격 추적 시작 여부
 	UPROPERTY(BlueprintReadWrite, Category = "AttackTrace|Bool")
 	bool bStartAttackTrace;
+	
+	// 추적 사거리
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AttackTrace|Config")
+	float TraceDistance = 1500.f;
 
 private:
 	// 타겟 변경 처리
-	void SetTracingTarget(ASTFeildPlayer* NewTarget);
+	void SetTracingTarget(ASTFieldPlayer* NewTarget);
 
 	// 시야 검사
-	ASTFeildPlayer* FindTargetInSight() const;
+	ASTFieldPlayer* FindTargetInSight() const;
 };

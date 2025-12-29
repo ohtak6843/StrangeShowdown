@@ -1,13 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Player/STFeildPlayer.h"
+#include "Player/STFieldPlayer.h"
 
-ASTFeildPlayer::ASTFeildPlayer()
+ASTFieldPlayer::ASTFieldPlayer()
 {
-	// Root
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
 	// Stat Widget Component
 	StatWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatWidgetComponent"));
 	StatWidgetComponent->SetupAttachment(RootComponent);
@@ -15,7 +12,7 @@ ASTFeildPlayer::ASTFeildPlayer()
 
 }
 
-void ASTFeildPlayer::Tick(float DeltaTime)
+void ASTFieldPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
