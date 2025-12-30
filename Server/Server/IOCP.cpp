@@ -59,7 +59,7 @@ bool IOCP::Start()
 
 	auto thread_number{
 		// static_cast<int>(std::thread::hardware_concurrency())
-		1
+		4
 	};
 
 	for (int i = 0; i < thread_number; ++i) {
@@ -68,7 +68,7 @@ bool IOCP::Start()
 
 
 	//for (int i = 0; i < thread_number; ++i) {
-	_workers.emplace_back([this]() { WorkerThread(); });
+	// _workers.emplace_back([this]() { WorkerThread(); });
 	//}
 
 
