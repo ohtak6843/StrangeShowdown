@@ -2,6 +2,7 @@
 #include "Player/STFieldPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/SkeletalMeshComponent.h"
 
 USTAttackTraceComponent::USTAttackTraceComponent()
 {
@@ -12,16 +13,17 @@ void USTAttackTraceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 상태 변화 델리게이트 바인딩
-	OnTargetAcquired.AddDynamic(
-		this,
-		&USTAttackTraceComponent::HandleTargetAcquired
-	);
+	OnTargetAcquired.AddDynamic(this, &USTAttackTraceComponent::HandleTargetAcquired);
+	OnTargetLost.AddDynamic(this, &USTAttackTraceComponent::HandleTargetLost);
 
-	OnTargetLost.AddDynamic(
-		this,
-		&USTAttackTraceComponent::HandleTargetLost
-	);
+	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner());
+	AttackTraceWidgetComponent->RegisterComponent();
+
+	AttackTraceWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+	AttackTraceWidgetComponent->SetDrawSize(FVector2D(100.f, 100.f));
+	// 앞뒤면 모두 렌더링
+	AttackTraceWidgetComponent->SetTwoSided(true);
+	AttackTraceWidgetComponent->SetVisibility(false);
 }
 
 void USTAttackTraceComponent::TickComponent(
@@ -31,58 +33,41 @@ void USTAttackTraceComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// 1. 타겟 판단
 	ASTFieldPlayer* NewTarget = FindTargetInSight();
-
-	// 2. 상태 변화 처리 (델리게이트 발생 지점)
 	SetTracingTarget(NewTarget);
-
-	// 3. UI 위치 갱신 (타겟이 있을 때만)
-	if (TracingFieldPlayer && AttackTraceWidget)
-	{
-		auto Mesh = TracingFieldPlayer->GetMesh();
-		const FVector WorldPos =
-			Mesh->GetSocketLocation("spine_03");
-
-		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-		{
-			FVector2D ScreenPos;
-			if (PC->ProjectWorldLocationToScreen(WorldPos, ScreenPos))
-			{
-				AttackTraceWidget->SetPositionInViewport(ScreenPos);
-			}
-		}
-	}
 }
 
 void USTAttackTraceComponent::HandleTargetAcquired(ASTFieldPlayer* NewTarget)
 {
-	if (AttackTraceWidget)
+	if (!AttackTraceWidgetComponent || !AttackTraceWidgetClass)
 		return;
 
-	if (!AttackTraceWidgetClass)
+	AttackTraceWidgetComponent->SetWidgetClass(AttackTraceWidgetClass);
+
+	USkeletalMeshComponent* Mesh = NewTarget->GetMesh();
+	if (!Mesh)
 		return;
 
-	// 위젯 생성
-	AttackTraceWidget = CreateWidget<UUserWidget>(
-		GetWorld(),
-		AttackTraceWidgetClass
+	AttackTraceWidgetComponent->AttachToComponent(
+		Mesh,
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		TEXT("spine_03")
 	);
 
-	if (AttackTraceWidget)
-	{
-		AttackTraceWidget->AddToViewport();
-	}
+	AttackTraceWidgetComponent->SetRelativeLocation(FVector(0.f, 30.f, 0.f));
+	AttackTraceWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	AttackTraceWidgetComponent->SetVisibility(true);
 }
 
 void USTAttackTraceComponent::HandleTargetLost()
 {
-	if (!AttackTraceWidget)
+	if (!AttackTraceWidgetComponent)
 		return;
 
-	// 위젯 삭제
-	AttackTraceWidget->RemoveFromParent();
-	AttackTraceWidget = nullptr;
+	AttackTraceWidgetComponent->SetVisibility(false);
+	AttackTraceWidgetComponent->DetachFromComponent(
+		FDetachmentTransformRules::KeepWorldTransform
+	);
 }
 
 void USTAttackTraceComponent::SetTracingTarget(ASTFieldPlayer* NewTarget)
@@ -90,10 +75,10 @@ void USTAttackTraceComponent::SetTracingTarget(ASTFieldPlayer* NewTarget)
 	if (TracingFieldPlayer == NewTarget)
 		return;
 
-	// 타겟 변경
+	// 새로운 타겟으로 변경
 	TracingFieldPlayer = NewTarget;
 
-	// 델리게이트를 받아서 처리
+	// 델리게이트 브로드캐스트
 	if (TracingFieldPlayer)
 	{
 		OnTargetAcquired.Broadcast(TracingFieldPlayer);
@@ -121,9 +106,11 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	const FVector Start = CameraLocation;
 	const FVector End = Start + CameraRotation.Vector() * TraceDistance;
 
+	// 설정된 채널로 스윕 트레이스 수행
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
+	// 다중 히트 결과 수집
 	TArray<FHitResult> HitResults;
 	bool bHit = World->SweepMultiByChannel(
 		HitResults,
@@ -138,13 +125,16 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	if (!bHit)
 		return nullptr;
 
+	// 화면 중심에 가장 가까운 타겟 선택
 	int32 ViewX, ViewY;
 	PC->GetViewportSize(ViewX, ViewY);
 	const FVector2D ScreenCenter(ViewX * 0.5f, ViewY * 0.5f);
 
+	// 가장 적합한 타겟
 	ASTFieldPlayer* BestTarget = nullptr;
 	float BestScore = FLT_MAX;
 
+	// 모든 히트 결과 순회해서 타겟 찾기
 	for (const FHitResult& Hit : HitResults)
 	{
 		ASTFieldPlayer* Player = Cast<ASTFieldPlayer>(Hit.GetActor());

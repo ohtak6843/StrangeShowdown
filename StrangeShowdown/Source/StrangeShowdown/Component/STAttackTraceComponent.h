@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "STAttackTraceComponent.generated.h"
 
-class UUserWidget;
+class UWidgetComponent;
 class ASTFieldPlayer;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -50,7 +50,7 @@ public:
 
 	// 角力 积己等 困连 牢胶畔胶
 	UPROPERTY(Transient)
-	TObjectPtr<UUserWidget> AttackTraceWidget;
+	TObjectPtr<UWidgetComponent> AttackTraceWidgetComponent;
 
 public:
 	// 鸥百 裙垫 矫
