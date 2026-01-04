@@ -37,6 +37,10 @@ public:
 	EPlayerMeshType PlayerMeshType;
 
 public:
+	// Character Name
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
+	FString PlayerNickName = TEXT("NoName");
+
 	// Character State
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
 	uint8 bIsArmedRifle : 1;
