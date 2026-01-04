@@ -7,6 +7,7 @@
 #include "Item/STItemDataAssetBase.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Player/STLocalPlayer.h"
 #include "STPickupItem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnter);
@@ -68,5 +69,5 @@ public:
 
 	// 아이템과 오버랩 중인 플레이어 저장
 	UPROPERTY()
-	ACharacter* OverlappedPlayer = nullptr;
+	ASTLocalPlayer* OverlappedPlayer = nullptr;
 };

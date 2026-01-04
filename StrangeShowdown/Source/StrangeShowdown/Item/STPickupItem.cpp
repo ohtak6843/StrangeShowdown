@@ -91,7 +91,7 @@ void ASTPickupItem::BeginPlay()
 void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
+	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(OtherActor))
 	{
 		OverlappedPlayer = Player;
 		OnPlayerEnter.Broadcast();
@@ -105,7 +105,7 @@ void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 void ASTPickupItem::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex)
 {
-	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
+	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(OtherActor))
 	{
 		OverlappedPlayer = nullptr;
 		OnPlayerExit.Broadcast();

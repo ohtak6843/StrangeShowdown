@@ -44,13 +44,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AttackTrace|UI")
 	TSubclassOf<UUserWidget> AttackTraceWidgetClass;
 
+	// 실제 생성된 위젯 인스턴스
+	UPROPERTY(Transient)
+	TObjectPtr<UWidgetComponent> AttackTraceWidgetComponent;
+
 	// 현재 추적 중인 플레이어
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AttackTrace|State")
 	TObjectPtr<ASTFieldPlayer> TracingFieldPlayer;
 
-	// 실제 생성된 위젯 인스턴스
-	UPROPERTY(Transient)
-	TObjectPtr<UWidgetComponent> AttackTraceWidgetComponent;
+	// spine03으로부터 위젯 생성 위치
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AttackTrace|UI")
+	FVector WidgetOffset = FVector(0.f, 0.f, 0.f);
 
 public:
 	// 타겟 획득 시

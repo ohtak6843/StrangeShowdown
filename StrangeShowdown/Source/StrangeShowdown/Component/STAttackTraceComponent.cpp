@@ -1,5 +1,6 @@
 #include "Component/STAttackTraceComponent.h"
 #include "Player/STFieldPlayer.h"
+#include "Player/STLocalPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -18,8 +19,9 @@ void USTAttackTraceComponent::BeginPlay()
 
 	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner());
 	AttackTraceWidgetComponent->RegisterComponent();
+	AttackTraceWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	AttackTraceWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+	AttackTraceWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	AttackTraceWidgetComponent->SetDrawSize(FVector2D(100.f, 100.f));
 	// 앞뒤면 모두 렌더링
 	AttackTraceWidgetComponent->SetTwoSided(true);
@@ -33,6 +35,16 @@ void USTAttackTraceComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// 줌 상태일때만 트레이스
+	if(Cast<ASTLocalPlayer>(GetOwner()))
+	{
+		ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(GetOwner());
+		if (!LocalPlayer->bIsAiming)
+		{
+			SetTracingTarget(nullptr);
+			return;
+		}
+	}
 	ASTFieldPlayer* NewTarget = FindTargetInSight();
 	SetTracingTarget(NewTarget);
 }
@@ -54,7 +66,7 @@ void USTAttackTraceComponent::HandleTargetAcquired(ASTFieldPlayer* NewTarget)
 		TEXT("spine_03")
 	);
 
-	AttackTraceWidgetComponent->SetRelativeLocation(FVector(0.f, 30.f, 0.f));
+	AttackTraceWidgetComponent->SetRelativeLocation(WidgetOffset);
 	AttackTraceWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	AttackTraceWidgetComponent->SetVisibility(true);
 }
@@ -125,7 +137,7 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	if (!bHit)
 		return nullptr;
 
-	// 화면 중심에 가장 가까운 타겟 선택
+	// 화면 중심 좌표 계산
 	int32 ViewX, ViewY;
 	PC->GetViewportSize(ViewX, ViewY);
 	const FVector2D ScreenCenter(ViewX * 0.5f, ViewY * 0.5f);
@@ -141,10 +153,12 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 		if (!Player)
 			continue;
 
+		// 월드 위치를 화면 좌표로 변환
 		FVector2D ScreenPos;
 		if (!PC->ProjectWorldLocationToScreen(Player->GetActorLocation(), ScreenPos))
 			continue;
 
+		// 화면 중심과의 거리 계산
 		const float DistToCenter = FVector2D::Distance(ScreenPos, ScreenCenter);
 		if (DistToCenter < BestScore)
 		{
