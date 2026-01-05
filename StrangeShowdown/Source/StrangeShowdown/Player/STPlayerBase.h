@@ -29,7 +29,7 @@ public:
 
 public:
 	// Stat Component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	TObjectPtr<USTStatComponent> StatComp;
 
 	// Player Mesh Type

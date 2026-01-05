@@ -2,6 +2,7 @@
 
 
 #include "Game/STGameMode.h"
+#include "Game/STGameState.h"
 
 ASTGameMode::ASTGameMode()
 {
@@ -17,5 +18,12 @@ ASTGameMode::ASTGameMode()
 	if (PlayerControllerClassRef.Class)
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;
+	}
+
+	// GameStateClass
+	static ConstructorHelpers::FClassFinder<AGameStateBase> GameStateClassRef(TEXT("/Game/StrangeShowdown/Blueprint/BP_GameState.BP_GameState_C"));
+	if (GameStateClassRef.Class)
+	{
+		GameStateClass = GameStateClassRef.Class;
 	}
 }
