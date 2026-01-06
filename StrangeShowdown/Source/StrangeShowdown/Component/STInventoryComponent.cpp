@@ -24,7 +24,7 @@ void USTInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
+bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex)
 {
 	if (!NewItem || Count <= 0)
 		return false;
@@ -38,6 +38,7 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 
 		Slots[StackSlot].Count += AddCount;
 		Count -= AddCount;
+		OutAddedInventoryIndex = StackSlot;
 
 		if (Count <= 0)
 			return true;
@@ -55,6 +56,7 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 		Slots[EmptyIndex].Count = AddCount;
 
 		Count -= AddCount;
+		OutAddedInventoryIndex = EmptyIndex;
 	}
 
 	return true;

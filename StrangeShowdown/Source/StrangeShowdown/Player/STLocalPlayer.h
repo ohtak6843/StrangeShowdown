@@ -26,7 +26,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	void Interact();
+	void Interact(int32& OutAddedInventoryIndex);
 
 public:
 	// Spring Arm Component

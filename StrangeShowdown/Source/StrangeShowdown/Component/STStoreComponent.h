@@ -52,9 +52,6 @@ public:
 	void InitStore();
 
 	UFUNCTION(BlueprintCallable, Category = "Store")
-	bool BuyItem(int32 Index);
-
-	UFUNCTION(BlueprintCallable, Category = "Store")
 	void Reroll();
 
 private:

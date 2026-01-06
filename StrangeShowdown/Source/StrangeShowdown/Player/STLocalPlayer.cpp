@@ -37,29 +37,43 @@ void ASTLocalPlayer::BeginPlay()
 
 }
 
-void ASTLocalPlayer::Interact()
+void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 {
 	FVector Start = CameraComp->GetComponentLocation();
 	FVector ForwardVector = CameraComp->GetForwardVector();
 	FVector End = ((ForwardVector * 500.f) + Start);
-	
+
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
+
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		CollisionParams
+	);
+
+	if (!bIsHit)
+		return;
+
+	ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
+	if (!PickupItem || !InventoryComp || !PickupItem->ItemData)
+		return;
+
+	int32 AddedInventoryIndex = -1;
+
+	bool bAdded = InventoryComp->AddItem(
+		PickupItem->ItemData,
+		1,
+		AddedInventoryIndex
+	);
+
+	if (!bAdded || AddedInventoryIndex == -1)
+		return;
 	
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
-	if (bIsHit)
-	{
-		ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
-		if (PickupItem)
-		{
-			if (InventoryComp && PickupItem->ItemData)
-			{
-				bool bAdded = InventoryComp->AddItem(PickupItem->ItemData, 1);
-				if (bAdded)
-				{
-					PickupItem->Destroy();
-				}
-			}
-		}
-	}
+	// AddInventoryIndex ¹ÝÈ¯
+	OutAddedInventoryIndex = AddedInventoryIndex;
+
+	PickupItem->Destroy();
 }

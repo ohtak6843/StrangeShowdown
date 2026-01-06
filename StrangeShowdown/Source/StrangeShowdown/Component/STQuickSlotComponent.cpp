@@ -2,6 +2,7 @@
 
 
 #include "Component/STQuickSlotComponent.h"
+#include "Item/STItemDataAssetBase.h"
 
 // Sets default values for this component's properties
 USTQuickSlotComponent::USTQuickSlotComponent()
@@ -55,6 +56,27 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		return false;
 	}
 
+	// TargetQuickSlotIndex가 -2면 빈 슬롯에 추가(바로 추가)
+	if (TargetQuickSlotIndex == -2)
+	{
+		// 빈 슬롯 찾기
+		for (int32 i = 1; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == nullptr)
+			{
+				TargetQuickSlotIndex = i;
+				break;
+			}
+		}
+
+		// 빈 슬롯을 못 찾으면 실패
+		if (TargetQuickSlotIndex == -2)
+		{
+			return false;
+		}
+	}
+
+	// TargetQuickSlotIndex가 유효한 인덱스인지 검사
 	if (!QuickSlots.IsValidIndex(TargetQuickSlotIndex))
 	{
 		return false;

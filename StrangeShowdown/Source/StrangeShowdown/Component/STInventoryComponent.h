@@ -44,7 +44,7 @@ public:
 
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count = 1);
+	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex);
 
 	// 아이템 제거
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
