@@ -44,7 +44,7 @@ public:
 
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count = 1);
+	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex);
 
 	// 아이템 제거
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -52,7 +52,7 @@ public:
 
 	// 아이템 사용
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool UseItem(int32 SlotIndex, class ASTLocalPlayer* Player, int32 StaminaCost);
+	bool UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot);
 
 	// 슬롯 교환
 	UFUNCTION(BlueprintCallable, Category = "Inventory")

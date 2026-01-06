@@ -24,7 +24,7 @@ void USTInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
+bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex)
 {
 	if (!NewItem || Count <= 0)
 		return false;
@@ -38,6 +38,7 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 
 		Slots[StackSlot].Count += AddCount;
 		Count -= AddCount;
+		OutAddedInventoryIndex = StackSlot;
 
 		if (Count <= 0)
 			return true;
@@ -55,6 +56,7 @@ bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count)
 		Slots[EmptyIndex].Count = AddCount;
 
 		Count -= AddCount;
+		OutAddedInventoryIndex = EmptyIndex;
 	}
 
 	return true;
@@ -96,8 +98,10 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	return true;
 }
 
-bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost)
+bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot)
 {
+	OutSlot = FInventorySlot();
+
 	if (!Slots.IsValidIndex(SlotIndex))
 	{
 		return false;
@@ -110,31 +114,41 @@ bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int
 		return false;
 	}
 
-	// 아이템 사용
+	// UseEffectClass가 없으면 사용 불가
 	if (!Slot.ItemData->UseEffectClass)
 		return false;
 
-	USTItemUseEffect* Effect =
-		NewObject<USTItemUseEffect>(this, Slot.ItemData->UseEffectClass);
+	// 사용 전 슬롯 정보 복사(블루프린트로 전달할 값)
+	FInventorySlot PreUseSlot = Slot;
 
-	if (Effect)
+	USTItemUseEffect* Effect = NewObject<USTItemUseEffect>(this, Slot.ItemData->UseEffectClass);
+	if (!Effect)
 	{
-		if (!Effect->CanUse(Player, Slot.ItemData))
-		{
-			return false;
-		}
-		else
-		{
-			int StaminaCost = Slot.ItemData->StaminaCost;
-			Player->StatComp->AddStamina(-StaminaCost);
-			RemoveItem(SlotIndex, 1);
-			Effect->Use(Player, Slot.ItemData);
-		}
+		return false;
 	}
 
-	// 인벤토리 업데이트
+	// 사용 가능 검사
+	if (!Effect->CanUse(Player, Slot.ItemData))
+	{
+		return false;
+	}
+
+	// 스태미나 차감(인자로 들어온 값 우선, 없으면 아이템 데이터 사용)
+	const int Cost = (StaminaCost > 0) ? StaminaCost : Slot.ItemData->StaminaCost;
+	if (Player && Player->StatComp)
+	{
+		Player->StatComp->AddStamina(-Cost);
+	}
+
+	// 아이템 소비 및 효과 실행
+	RemoveItem(SlotIndex, 1);
+	Effect->Use(Player, Slot.ItemData);
+
+	// 인벤토리 업데이트 브로드캐스트
 	OnInventoryUpdated.Broadcast();
 
+	// 사용 전 슬롯 정보를 OutSlot에 채워서 반환
+	OutSlot = PreUseSlot;
 	return true;
 }
 

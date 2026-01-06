@@ -12,6 +12,7 @@ enum class EItemType : uint8
 {
 	Weapon,
 	HealPack,
+	Whiskey,
 	WirelessSet,
 	EnhancePower,
 	BodyArmor,

@@ -35,28 +35,6 @@ void USTStoreComponent::InitStore()
 	}
 }
 
-bool USTStoreComponent::BuyItem(int32 Index)
-{
-	if (!Slots.IsValidIndex(Index))
-		return false;
-
-	if (Slots[Index].bSold)
-		return false;
-
-	if (!OwnerPlayer || !OwnerPlayer->StatComp || !OwnerPlayer->InventoryComp)
-		return false;
-
-	USTItemDataAssetBase* ItemData = Slots[Index].ItemData;
-	if (!ItemData)
-		return false;
-
-	OwnerPlayer->StatComp->AddGold(-ItemData->GoldCost);
-	OwnerPlayer->InventoryComp->AddItem(ItemData, 1);
-
-	Slots[Index].bSold = true;
-	return true;
-}
-
 void USTStoreComponent::Reroll()
 {
 	if (!OwnerPlayer || !OwnerPlayer->StatComp)
