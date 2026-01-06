@@ -56,12 +56,21 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		return false;
 	}
 
+	// 인벤토리에서 아이템 가져오기
+	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
+
 	// TargetQuickSlotIndex가 -2면 빈 슬롯에 추가(바로 추가)
 	if (TargetQuickSlotIndex == -2)
 	{
 		// 빈 슬롯 찾기
 		for (int32 i = 1; i < QuickSlots.Num(); i++)
 		{
+			// 만약 퀵슬롯에 같은 아이템이 있으면 패스
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				return false;
+			}
+
 			if (QuickSlots[i].ItemData == nullptr)
 			{
 				TargetQuickSlotIndex = i;
@@ -87,9 +96,6 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	{
 		return false;
 	}
-
-	// 인벤토리에서 아이템 가져오기
-	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 해당 아이템이 몇번인지 저장
 	InventorySlotIndex[TargetQuickSlotIndex] = InventoryItemIndex;
