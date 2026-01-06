@@ -4,6 +4,8 @@
 #include "Player/STLocalPlayer.h"
 #include "Item/STPickupItem.h"
 #include "Component/STStoreComponent.h" 
+#include "Component/STInventoryComponent.h"
+#include "Component/STQuickSlotComponent.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -68,6 +70,22 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 		1,
 		AddedInventoryIndex
 	);
+
+	// 만약 퀵슬롯에 추가한 아이템이 이미 있다면 퀵슬롯의 count도 증가
+	USTQuickSlotComponent* QuickSlotComp = InventoryComp->GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
+	if (bAdded && QuickSlotComp)
+	{
+		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
+		{
+			FInventorySlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+			if (QuickSlot.ItemData == PickupItem->ItemData)
+			{
+				QuickSlot.Count += 1;
+				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+				break;
+			}
+		}
+	}
 
 	if (!bAdded || AddedInventoryIndex == -1)
 		return;
