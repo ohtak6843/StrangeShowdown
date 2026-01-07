@@ -86,11 +86,17 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	{
 		for (int32 i = 0; i < QuickSlotComp->InventorySlotIndex.Num(); i++)
 		{
-			if (QuickSlotComp->InventorySlotIndex[i] == SlotIndex && Slot.ItemData == nullptr)
+			
+
+			if (QuickSlotComp->InventorySlotIndex[i] == SlotIndex)
 			{
-				QuickSlotComp->QuickSlots[i].ItemData = nullptr;
-				QuickSlotComp->QuickSlots[i].Count = 0;
-				QuickSlotComp->InventorySlotIndex[i] = -1;
+				QuickSlotComp->QuickSlots[i].Count--;
+				if (Slot.ItemData == nullptr)
+				{
+					QuickSlotComp->QuickSlots[i].ItemData = nullptr;
+					QuickSlotComp->QuickSlots[i].Count = 0;
+					QuickSlotComp->InventorySlotIndex[i] = -1;
+				}
 			}
 		}
 	}
