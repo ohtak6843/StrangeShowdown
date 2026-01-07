@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/WidgetComponent.h"
 #include "STInventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -88,7 +89,7 @@ public:
 	TArray<FInventorySlot> Slots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	int32 MaxSlots = 20;
+	int32 MaxSlots = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 CurrentSlotCount = 0;
