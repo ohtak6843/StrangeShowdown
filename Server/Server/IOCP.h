@@ -3,6 +3,7 @@
 #include "session.h"
 #include "OverlappedEx.h"
 
+
 class IOCP
 {
 	DECLARE_SINGLE(IOCP)
@@ -12,45 +13,50 @@ public:
 
 public:
 	bool Init();
-	bool Start();
+	void Start();
 
+	// void Disconnect(Session* client_id);
 
-	void DoSend(int client_id, void* packet);
-	void Disconnect(const int client_id);
-
+	void DeleteSession(const uint64 session_id);
 
 private:
 
-	// GQCS를 통해 패킷을 recv하고 id에 맞추어서 dispatch하는 스레드.
-	// I/O 완료 패킷을 다시 Room별 Queue에 넣는 Light Dispatcher 역할
-	void GQCSThread();
-
-	// GQCS Thread로부터 전달된 패킷을 방 별로 싱글 스레드로 처리하는 스레드.
+	// GQCS를 통해 패킷을 받고 처리.
 	void WorkerThread();
 
-	// listen socket accept
+	// accept
 	void DoAccept();
+	void OnAcceptCompleted();
 
-	void DoRecv(std::shared_ptr<Session>& client_info) const;
-	void DoSend(std::shared_ptr<Session>& client_info, void* packet);
-
-	void SendPacketToWorker(int key, char* p);
-	void ProcessPacket(int key, char* p);
+	// void ProcessPacket(int key, char* p);
+	// -> New Class PacketHandler 
 
 private:
 
+	// iocp handle
 	HANDLE		_IOCPHandle{ INVALID_HANDLE_VALUE };
-	int			_sessionCnt{ 0 };
+
+	// listen
 	SOCKET		_listenSocket{ INVALID_SOCKET };
+
+	// accept
 	SOCKET		_acceptSocket{ INVALID_SOCKET };
 	OverlappedEx _acceptOverlappedEx{};
+	// todo: over 내부 버퍼를 활용해보자
+	// accpet 전용. 실제로 사용하지는 않음.
+	std::array<char, BUFFER_SIZE> _acceptBuffer{};
 
+	// threads
 	std::vector<std::thread> _workers{};
 
-	std::queue<std::pair<int, PacketType>> _packetQueue{};
+	// std::queue<std::pair<int, PacketType>> _packetQueue{};
+	// job으로 대체
 
-	concurrency::concurrent_unordered_map<
-		int, std::atomic<std::shared_ptr<Session>>> _sessionHash;
+	// 개선이 필요.
+
+	// 특수 상황 조회 시, 생명주기 관리 ( 안전성 )
+	uint64	_sessionCnt{ 0 };
+	std::unordered_map<uint64, std::shared_ptr<Session>> _sessionHash{};
 
 };
 

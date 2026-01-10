@@ -1,8 +1,6 @@
 #pragma once
 
-constexpr int BUFFER_SIZE{ 200 };
 constexpr int PORT_NUMBER{ 7777 };
-
 constexpr const char* SERVER_IP{ "127.0.0.1" };
 
 constexpr float MOVE_PACKET_TIME_MS{ 75.f }; // 초당 13.3회
@@ -31,8 +29,16 @@ struct Header
 	Header(const unsigned char size, const Type type) :
 		size{ size },
 		type{ type }
+	{}
+
+	// TODO: 직렬화 코드
+	std::vector<char> Serialize() const
 	{
+		std::vector<char> buffer(size);
+		std::memcpy(buffer.data(), this, size);
+		return buffer;
 	}
+
 };
 
 
@@ -42,8 +48,7 @@ struct SCLogin : Header
 {
 	SCLogin() :
 		Header{ sizeof(SCLogin), Type::SC_LOGIN }
-	{
-	}
+	{}
 };
 
 
@@ -53,8 +58,7 @@ struct CSLogin : Header
 {
 	CSLogin() :
 		Header{ sizeof(CSLogin), Type::CS_LOGIN }
-	{
-	}
+	{}
 };
 
 #pragma pack(pop)

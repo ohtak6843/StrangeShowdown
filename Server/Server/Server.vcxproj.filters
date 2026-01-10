@@ -24,6 +24,18 @@
     <ClCompile Include="Session.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
     <ClCompile Include="OverlappedEx.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -44,11 +56,26 @@
     <ClInclude Include="protocol.h">
       <Filter>pch</Filter>
     </ClInclude>
-    <ClInclude Include="OverlappedEx.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="type.h">
       <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="define.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlappedEx.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

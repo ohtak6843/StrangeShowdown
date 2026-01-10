@@ -53,14 +53,6 @@ struct Vec2f
 	}
 };
 
-enum class IOOperation
-{
-	NONE,
-	ACCEPT,
-	RECV,
-	SEND
-};
-
 enum class IOState
 {
 	NONE,

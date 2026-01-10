@@ -130,11 +130,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IOCP.cpp" />
+    <ClCompile Include="Job.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="OverlappedEx.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="Room.cpp" />
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="define.h" />
+    <ClInclude Include="Job.h" />
+    <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="Room.h" />
     <ClInclude Include="struct.h" />
     <ClInclude Include="IOCP.h" />
     <ClInclude Include="OverlappedEx.h" />

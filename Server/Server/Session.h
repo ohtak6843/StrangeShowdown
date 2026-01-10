@@ -2,22 +2,61 @@
 
 #include "OverlappedEx.h"
 
-class Session
+class Session : public std::enable_shared_from_this<Session>
 {
 public:
-	Session();
-	Session(SOCKET socket);
-	~Session();
+
+	Session() = delete;
+	Session(const SOCKET client_socket, const uint64 id);
 
 
+	// method
 
-public:
-	// RECV에 사용할 Overlapped 변수
-	OverlappedEx	OverEx{};
-	SOCKET			ClientSocket{ INVALID_SOCKET };
+	// recv
+	void DoRecv();
+	// recv 완료 및 recv 다시 등록
+	void OnRecvCompleted(const uint32 bytesTransferred);
 
-	// 패킷 재조립을 위한 패킷 처리 후 남은 데이터 크기를 저장 
-	int				CurrentDataSize{ 0 };
-	IOState			IOState{ IOState::NONE };
+	// send
+	void DoSend();
+	// send 완료
+	void OnSendCompleted();
+
+	// reference counting
+	void IncreaseRef() { ++_refCnt; };
+	void ReleaseRef();
+
+	// reference counting 및 recv 시작
+	void Start();
+
+
+	// getter and setter
+
+	int GetCurrentDataSize() const { return _currentDataSize; }
+	std::array<char, BUFFER_SIZE>& GetRecvBuffer() { return _recvBuffer; }
+
+private:
+	// 패킷 재조립 및 패킷 처리
+	void ReassemblePacket();
+
+
+private:
+
+	// network info
+	uint64			_sessionID{ 0 };
+	SOCKET			_clientSocket{ INVALID_SOCKET };
+
+	// RECV:
+	// Overlapped 변수
+	OverlappedEx	_overlappedEx{};
+	// 패킷 재조립 버퍼
+	std::array<char, BUFFER_SIZE> _recvBuffer{};
+	// 남은 데이터 크기 
+	uint32				_currentDataSize{ 0 };
+
+
+	// reference count
+	// 세션을 raw pointer로 사용하기 위한 카운터
+	std::atomic<int>	_refCnt{ 0 };
 
 };

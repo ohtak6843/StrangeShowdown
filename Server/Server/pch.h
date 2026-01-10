@@ -23,10 +23,12 @@
 #include <atomic>
 #include <mutex>
 #include <numeric>
+#include <functional>
 
 #include "struct.h"
 #include "type.h"
 #include "protocol.h"
+#include "define.h"
 
-using PacketType = std::array<char, BUFFER_SIZE>;
+// using PacketType = std::array<char, BUFFER_SIZE>;
 

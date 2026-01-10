@@ -1,20 +1,48 @@
 #include "pch.h"
 #include "OverlappedEx.h"
+#include "Session.h"
 
-OverlappedEx::OverlappedEx() :
-	operation{ IOOperation::RECV }
+OverlappedEx::OverlappedEx()
 {
-	wsabuf.len = BUFFER_SIZE;
-	wsabuf.buf = dataBuffer.data();
-	ZeroMemory(&over, sizeof(over));
+	Clear();
 }
 
-OverlappedEx::OverlappedEx(unsigned char* packet)
+void OverlappedEx::Clear()
 {
-	wsabuf.len = packet[0];
-	wsabuf.buf = dataBuffer.data();
-	ZeroMemory(&over, sizeof(over));
-	operation = IOOperation::SEND;
-	memcpy(dataBuffer.data(), packet, packet[0]);
+	ZeroMemory(&_overlapped, sizeof(_overlapped));
+	_wsabuf.buf = nullptr;
+	_wsabuf.len = 0ul;
+	_operation = IOOperation::NONE;
+}
 
+void OverlappedEx::PrepareRecv()
+{
+	Clear();
+	if (auto session{ _session.lock() })
+	{
+		_wsabuf.len = BUFFER_SIZE - session->GetCurrentDataSize();
+		_wsabuf.buf = session->GetRecvBuffer().data() + session->GetCurrentDataSize();
+	}
+	else
+	{
+		// todo:
+		// 세션이 없으면 오류.
+
+	}
+	_operation = IOOperation::RECV;
+}
+
+void OverlappedEx::PrepareSend(std::vector<char>&& packet)
+{
+	Clear();
+	_dataBuffer = std::move(packet);
+	_wsabuf.len = static_cast<uint8>(packet[0]);
+	_wsabuf.buf = _dataBuffer.data();
+	_operation = IOOperation::SEND;
+}
+
+void OverlappedEx::PrepareAccept()
+{
+	Clear();
+	_operation = IOOperation::ACCEPT;
 }
