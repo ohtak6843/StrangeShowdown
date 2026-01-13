@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/STPlayerBase.h"
+#include "Player/STPlayerBase.h"
 #include "Component/STInventoryComponent.h"
 #include "STLocalPlayer.generated.h"
 
+class USTStoreComponent;
 /**
  * 
  */
@@ -29,13 +30,17 @@ protected:
 public:
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	USpringArmComponent* SpringArmComp;
+	TObjectPtr<USpringArmComponent> SpringArmComp;
 
 	// Camera Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	UCameraComponent* CameraComp;
+	TObjectPtr<UCameraComponent> CameraComp;
 
 	// Inventory Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	USTInventoryComponent* InventoryComp;
+	TObjectPtr<USTInventoryComponent> InventoryComp;
+
+	// Store Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Store")
+	TObjectPtr<USTStoreComponent> StoreComp;
 };

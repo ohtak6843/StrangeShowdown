@@ -11,8 +11,8 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	HealPack,
-	WeaponEnforce,
 	WirelessSet,
+	EnhancePower,
 	BodyArmor,
 	Temp
 };
@@ -53,6 +53,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
 	UStaticMesh* PickupMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
+	UStaticMesh* PickupSubMesh;
+
+	// 메쉬 위치
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
+	FVector MeshPos = FVector(0.f, 0.f, 0.f);
+
 	// 메쉬 크기
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
 	FVector MeshScale = FVector(1.f, 1.f, 1.f);
@@ -60,6 +67,14 @@ public:
 	// Max Stack Count
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 MaxStack = 1;
+
+	// 스태미너 코스트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	int32 StaminaCost;
+
+	// 골드 코스트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	int32 GoldCost;
 
 	// 아이템 사용 효과
 	UPROPERTY(EditAnywhere, Category = "Item")

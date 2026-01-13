@@ -2,9 +2,21 @@
 
 
 #include "Item/STItemUseEffect.h"
+#include "Player/STLocalPlayer.h"
+#include "Item/STItemDataAssetBase.h"
 #include "STItemUseEffect.h"
 
-void USTItemUseEffect::Use_Implementation(ASTLocalPlayer* User)
+bool USTItemUseEffect::CanUse(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
+{
+	if (ItemData->StaminaCost > User->StatComp->Stamina)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot use item due to insufficient stamina."));
+		return false;
+	}
+	return true;
+}
+
+void USTItemUseEffect::Use_Implementation(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
 
 }

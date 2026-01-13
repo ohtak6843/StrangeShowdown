@@ -16,7 +16,10 @@ class STRANGESHOWDOWN_API USTItemUseEffect : public UObject
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Item")
-	void Use(ASTLocalPlayer* User);
+	void Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData);
 
-	virtual void Use_Implementation(ASTLocalPlayer* User);
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	bool CanUse(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData);
+
+	virtual void Use_Implementation(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData);
 };

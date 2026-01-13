@@ -1,5 +1,6 @@
 #include "Component/STInventoryComponent.h"
 #include "Item/STItemDataAssetBase.h"
+#include "Player/STLocalPlayer.h"
 #include "STQuickSlotComponent.h"
 
 USTInventoryComponent::USTInventoryComponent()
@@ -95,7 +96,7 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	return true;
 }
 
-bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player)
+bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost)
 {
 	if (!Slots.IsValidIndex(SlotIndex))
 	{
@@ -116,9 +117,20 @@ bool USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player)
 	USTItemUseEffect* Effect =
 		NewObject<USTItemUseEffect>(this, Slot.ItemData->UseEffectClass);
 
-	if (Effect) Effect->Use(Player);
-
-	RemoveItem(SlotIndex, 1);
+	if (Effect)
+	{
+		if (!Effect->CanUse(Player, Slot.ItemData))
+		{
+			return false;
+		}
+		else
+		{
+			int StaminaCost = Slot.ItemData->StaminaCost;
+			Player->StatComp->AddStamina(-StaminaCost);
+			RemoveItem(SlotIndex, 1);
+			Effect->Use(Player, Slot.ItemData);
+		}
+	}
 
 	// 인벤토리 업데이트
 	OnInventoryUpdated.Broadcast();
