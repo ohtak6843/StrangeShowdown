@@ -121,6 +121,4 @@ void USTQuickSlotComponent::CallMouseDropToQuickSlot(int32 InventoryItemIndex, U
 void USTQuickSlotComponent::AddToQuickSlot_FromEvent(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex)
 {
 	AddToQuickSlot(BeforeInventorySystem, InventoryItemIndex, QuickSlotIndex);
-	
-	OnQuickSlotUpdated.Broadcast();
 }
