@@ -60,7 +60,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 만약 퀵슬롯에 같은 아이템이 있으면 기존 슬롯을 제거
-	for (int32 i = 1; i < QuickSlots.Num(); i++)
+	for (int32 i = 0; i < QuickSlots.Num(); i++)
 	{
 		if (QuickSlots[i].ItemData == ItemSlot.ItemData)
 		{
@@ -74,7 +74,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	if (TargetQuickSlotIndex == -2)
 	{
 		// 빈 슬롯 찾기
-		for (int32 i = 1; i < QuickSlots.Num(); i++)
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
 		{
 			if (QuickSlots[i].ItemData == nullptr)
 			{
@@ -92,12 +92,6 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 
 	// TargetQuickSlotIndex가 유효한 인덱스인지 검사
 	if (!QuickSlots.IsValidIndex(TargetQuickSlotIndex))
-	{
-		return false;
-	}
-
-	// 1번 슬롯은 무기가 고정되어야 함
-	if (TargetQuickSlotIndex == 0)
 	{
 		return false;
 	}
