@@ -7,18 +7,6 @@
 #include "STItemUseEffect.h"
 #include "STItemDataAssetBase.generated.h"
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-	Weapon,
-	HealPack,
-	Whiskey,
-	WirelessSet,
-	EnhancePower,
-	BodyArmor,
-	Temp
-};
-
 /**
  * 
  */
@@ -47,16 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UTexture2D* Icon;
 
-	// 아이템 종류
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	EItemType ItemType;
-
 	// 픽업용 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
 	UStaticMesh* PickupMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
-	UStaticMesh* PickupSubMesh;
 
 	// 메쉬 위치
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
