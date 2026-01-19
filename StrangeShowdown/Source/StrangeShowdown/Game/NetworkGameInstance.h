@@ -6,6 +6,8 @@
 #include "Engine/GameInstance.h"
 #include "NetworkGameInstance.generated.h"
 
+class SocketIO;
+
 /**
  * @brief: 서버와의 네트워크 연결을 담당하는 GameInstance
  */
@@ -25,7 +27,7 @@ public:
 
 
 public:
-	FSocket*	Socket;
-
+	FSocket* Socket{};
+	TSharedPtr<SocketIO> SocketIOInstance{};
 
 };

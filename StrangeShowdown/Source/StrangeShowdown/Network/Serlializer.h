@@ -5,11 +5,16 @@
 #include "CoreMinimal.h"
 
 /**
- * 
+ * Socket I/O Ελ½Ε
  */
-class STRANGESHOWDOWN_API RecvWorker
+class STRANGESHOWDOWN_API Serlializer
 {
 public:
-	RecvWorker();
-	~RecvWorker();
+	Serlializer();
+	~Serlializer();
+
+
+
+private:
+
 };

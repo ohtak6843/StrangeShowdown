@@ -124,6 +124,8 @@ void IOCP::WorkerThread()
 			OnAcceptCompleted();
 
 			DoAccept();
+
+			std::println("Accept Completed");
 		}
 		break;
 
@@ -131,6 +133,8 @@ void IOCP::WorkerThread()
 		{
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
 			session->OnRecvCompleted(io_size);
+
+			std::println("Recv Completed");
 		}
 		break;
 
@@ -141,7 +145,8 @@ void IOCP::WorkerThread()
 
 			// todo: 이 delete를 OnSendCompleted에서 메모리 풀 반납.
 			delete curr_over_ex;
-			break;
+
+			std::println("Send Completed");
 		}
 		break;
 
@@ -227,6 +232,9 @@ void IOCP::OnAcceptCompleted()
 
 	// 세션 시작
 	new_client->Start();
+
+	// todo: 임시로 한번 send
+	new_client->DoSend();
 }
 
 // TODO:

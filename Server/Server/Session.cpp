@@ -7,7 +7,9 @@
 Session::Session(const SOCKET client_socket, const uint64 id)
 	: _clientSocket{ client_socket }
 	, _sessionID{ id }
-{}
+{
+	std::println("Session {} created.", _sessionID);
+}
 
 void Session::DoRecv()
 {
@@ -65,12 +67,17 @@ void Session::DoSend()
 	IncreaseRef();
 
 	// todo:
-	// 일단 임시로 new delete 사용
+	// 일단 임시로 new delete 사용, 임시로 login packet 전송
 	// 나중에 shared ptr reference count 해결할 방도가 생각나면 
 	auto overlapped_ex{ new OverlappedEx() };
 	packet::SCLogin packet;
-	auto buffer{ packet.Serialize() };
-	overlapped_ex->PrepareSend(std::move(buffer));
+
+	// TODO: 직렬화 해주는 클래스 만들기
+	// auto buffer{ packet.Serialize() };
+	std::vector<char> buffer(packet.size);
+	std::memcpy(buffer.data(), &packet, packet.size);
+
+	overlapped_ex->PrepareSend(buffer);
 
 	auto ret{ WSASend(
 		_clientSocket,
@@ -144,6 +151,8 @@ void Session::ReleaseRef()
 
 void Session::Start()
 {
+	std::println("Session {} start.", _sessionID);
+
 	// Start 세션 시작
 	IncreaseRef();
 

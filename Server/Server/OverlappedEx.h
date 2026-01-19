@@ -19,7 +19,7 @@ public:
 	void Clear();
 
 	void PrepareRecv();
-	void PrepareSend(std::vector<char>&& packet);
+	void PrepareSend(const std::vector<char>& packet);
 	void PrepareAccept();
 
 

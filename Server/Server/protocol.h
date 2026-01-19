@@ -32,12 +32,12 @@ struct Header
 	{}
 
 	// TODO: 직렬화 코드
-	std::vector<char> Serialize() const
-	{
-		std::vector<char> buffer(size);
-		std::memcpy(buffer.data(), this, size);
-		return buffer;
-	}
+	//std::vector<char> Serialize() const
+	//{
+	//	std::vector<char> buffer(size);
+	//	std::memcpy(buffer.data(), this, size);
+	//	return buffer;
+	//}
 
 };
 

@@ -5,6 +5,7 @@
 OverlappedEx::OverlappedEx()
 {
 	Clear();
+	std::println("created overlapped");
 }
 
 void OverlappedEx::Clear()
@@ -17,6 +18,7 @@ void OverlappedEx::Clear()
 
 void OverlappedEx::PrepareRecv()
 {
+	std::println("prepare recv");
 	Clear();
 	if (auto session{ _session.lock() })
 	{
@@ -32,17 +34,19 @@ void OverlappedEx::PrepareRecv()
 	_operation = IOOperation::RECV;
 }
 
-void OverlappedEx::PrepareSend(std::vector<char>&& packet)
+void OverlappedEx::PrepareSend(const std::vector<char>& packet)
 {
+	std::println("prepare send");
 	Clear();
-	_dataBuffer = std::move(packet);
-	_wsabuf.len = static_cast<uint8>(packet[0]);
+	_dataBuffer.assign_range(packet);
+	_wsabuf.len = static_cast<uint8>(_dataBuffer[0]);
 	_wsabuf.buf = _dataBuffer.data();
 	_operation = IOOperation::SEND;
 }
 
 void OverlappedEx::PrepareAccept()
 {
+	std::println("prepare accpet");
 	Clear();
 	_operation = IOOperation::ACCEPT;
 }

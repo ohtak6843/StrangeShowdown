@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Game/RecvWorker.h"
+#include "Network/Serlializer.h"
 
-RecvWorker::RecvWorker()
+Serlializer::Serlializer()
 {
 }
 
-RecvWorker::~RecvWorker()
+Serlializer::~Serlializer()
 {
 }

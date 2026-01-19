@@ -7,6 +7,8 @@
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "SocketSubsystem.h"
 
+#include "Network/SocketIO.h"
+
 void UNetworkGameInstance::ConnectToGameServer()
 {
 	// Socket Subsystem
@@ -19,19 +21,24 @@ void UNetworkGameInstance::ConnectToGameServer()
 
 	// Port 
 	int Port{ 7777 };
-	TSharedRef<FInternetAddr> InternetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+	TSharedRef<FInternetAddr> InternetAddr{ ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr() };
 	InternetAddr->SetIp(Ip.Value);
 	InternetAddr->SetPort(Port);
 
 
 	// Connect to server
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connecting To Server...")));
-	bool Connected = Socket->Connect(*InternetAddr);
+	bool Connected{ Socket->Connect(*InternetAddr) };
 
 	// Check Connection
 	if (Connected)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connection Success")));
+
+		
+		SocketIOInstance = MakeShared<SocketIO>(Socket);
+		SocketIOInstance->Init();
+		SocketIOInstance->Start();
 	}
 	else
 	{
@@ -43,7 +50,9 @@ void UNetworkGameInstance::DisconnectFromGameServer()
 {
 	if (Socket)
 	{
-		ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get();
+		SocketIOInstance->Disconnect();
+
+		ISocketSubsystem* SocketSubsystem{ ISocketSubsystem::Get() };
 		SocketSubsystem->DestroySocket(Socket);
 		Socket = nullptr;
 	}
