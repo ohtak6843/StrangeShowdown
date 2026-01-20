@@ -12,10 +12,14 @@
 UENUM(BlueprintType)
 enum class EPlayerMeshType : uint8
 {
-	Badguy	UMETA(DisplayName = "Badguy"),
-	Cowboy	UMETA(DisplayName = "Cowboy"),
-	Cowgirl	UMETA(DisplayName = "Cowgirl"),
-	Gunman	UMETA(DisplayName = "Gunman")
+	Badguy			UMETA(DisplayName = "Badguy"),
+	BuisinessMan	UMETA(DisplayName = "BuisinessMan"),
+	Cowboy			UMETA(DisplayName = "Cowboy"),
+	Cowgirl			UMETA(DisplayName = "Cowgirl"),
+	Gunman			UMETA(DisplayName = "Gunman"),
+	Sheriff			UMETA(DisplayName = "Sheriff"),
+	Woman			UMETA(DisplayName = "Woman"),
+	WorkingGirl		UMETA(DisplayName = "WorkingGirl")
 };
 
 UCLASS()
