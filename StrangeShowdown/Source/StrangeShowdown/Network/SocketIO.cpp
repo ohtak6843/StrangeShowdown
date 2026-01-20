@@ -73,9 +73,27 @@ void RecvWorker::DoRecv()
 		}
 	}
 
-	// 패킷 완성.
-	// todo: SocketIO로 전달
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Recv Success")));
+	// 패킷 완성. SocketIO로 전달.
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Recv Success. Enqueue to SocketIO")));
+	
+	if (auto locked_ptr{ SocketIOPtr.Pin() })
+	{
+		locked_ptr->PushRecvPacket(buffer);
+	}
+
+	// todo: 임시로 cslogin 보내기
+
+	// serlalize code
+	// 
+	packet::CSLogin login_packet{};
+	TArray<uint8> data;
+	data.AddUninitialized(login_packet.size);
+	FMemory::Memcpy(data.GetData(), &login_packet, login_packet.size);
+	
+	if (auto locked_ptr{ SocketIOPtr.Pin() })
+	{
+		locked_ptr->PushSendPacket(data);
+	}
 
 }
 
@@ -128,7 +146,7 @@ uint32 SendWorker::Run()
 {
 	while (Running)
 	{
-
+		DoSend();
 	}
 
 	return 0;
@@ -136,11 +154,46 @@ uint32 SendWorker::Run()
 
 void SendWorker::Exit()
 {
+
 }
 
 void SendWorker::Destroy()
 {
 	Running = false;
+}
+
+void SendWorker::DoSend()
+{
+
+	// SocketIO에서 보낼 패킷 꺼내오기
+	TArray<uint8> buffer;
+	if (auto locked_ptr{ SocketIOPtr.Pin() })
+	{
+		if (false == locked_ptr->PopSendPacket(buffer))
+		{
+			return;
+		}
+	}
+
+	int32 total{};
+	int32 size{ static_cast<int32>(buffer[0]) };
+
+	// 원하는 크기만큼 수신될 때까지 반복
+	while (total < size)
+	{
+		// send
+		int32 bytes_sent{};
+		if (false == Socket->Send(buffer.GetData() + total, size - total, bytes_sent))
+		{
+			// 오류 처리
+			return;
+		}
+
+		// 보낸 만큼 누적
+		total += bytes_sent;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send Complete")));
 }
 
 
@@ -170,4 +223,32 @@ void SocketIO::Disconnect()
 {
 	RecvThread->Destroy();
 	SendThread->Destroy();
+}
+
+void SocketIO::PushRecvPacket(const TArray<uint8>& Packet)
+{
+	RecvPacketQueue.Enqueue(Packet);
+}
+
+bool SocketIO::PopRecvPacket(OUT TArray<uint8>& OutPacket)
+{
+	if (RecvPacketQueue.Dequeue(OUT OutPacket))
+	{
+		return true;
+	}
+	return false;
+}
+
+void SocketIO::PushSendPacket(const TArray<uint8>& Packet)
+{
+	SendPacketQueue.Enqueue(Packet);
+}
+
+bool SocketIO::PopSendPacket(OUT TArray<uint8>& OutPacket)
+{
+	if (SendPacketQueue.Dequeue(OUT OutPacket))
+	{
+		return true;
+	}
+	return false;
 }

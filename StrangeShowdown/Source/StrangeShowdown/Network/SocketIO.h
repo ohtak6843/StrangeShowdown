@@ -49,6 +49,7 @@ public:
 	virtual void Exit() override;
 
 	void Destroy();
+	void DoSend();
 
 private:
 	FSocket*			Socket;
@@ -74,8 +75,18 @@ public:
 	void Start();
 	void Disconnect();
 
+	void PushRecvPacket(const TArray<uint8>& Packet);
+	bool PopRecvPacket(OUT TArray<uint8>& OutPacket);
+
+	void PushSendPacket(const TArray<uint8>& Packet);
+	bool PopSendPacket(OUT TArray<uint8>& OutPacket);
+
 private:
 	FSocket* Socket{};
 	TSharedPtr<RecvWorker> RecvThread{};
 	TSharedPtr<SendWorker> SendThread{};
+
+	// lf
+	TQueue<TArray<uint8>> RecvPacketQueue{};
+	TQueue<TArray<uint8>> SendPacketQueue{};
 };
