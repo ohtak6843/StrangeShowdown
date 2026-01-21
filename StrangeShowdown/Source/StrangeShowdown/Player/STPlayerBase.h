@@ -47,4 +47,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
 	uint8 bIsAiming : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
+	uint8 bIsLookingUp : 1;
 };

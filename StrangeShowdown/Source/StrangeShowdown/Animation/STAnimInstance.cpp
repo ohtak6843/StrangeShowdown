@@ -42,6 +42,7 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		bIsArmedRifle = Player->bIsArmedRifle;
 		bIsAiming = Player->bIsAiming;
+		bIsLookingUp = Player->bIsLookingUp;
 		Pitch = Player->GetBaseAimRotation().Pitch;
 	}
 }
