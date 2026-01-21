@@ -3,7 +3,11 @@
 
 #include "Game/STGameInstance.h"
 
-void USTGameInstance::AddRoomToList(URoomInfoObject* NewRoom)
+void USTGameInstance::AddRoom(URoomInfoObject* NewRoom)
 {
+	// 방 목록 추가
 	RoomList.Add(NewRoom);
+
+	// 방 목록이 업데이트되었음을 UI에게 알림
+	OnRoomListUpdated.Broadcast();
 }

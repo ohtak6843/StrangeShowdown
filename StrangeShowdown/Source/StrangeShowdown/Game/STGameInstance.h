@@ -10,15 +10,23 @@
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoomListUpdated);
+
 UCLASS()
 class STRANGESHOWDOWN_API USTGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
 public:
+	// 방 목록이 업데이트되었음을 알리는 델리게이트
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomListUpdated OnRoomListUpdated;
+
+	// 방 목록을 저장하는 배열
 	UPROPERTY(BlueprintReadWrite)
 	TArray<URoomInfoObject*> RoomList;
 
-	// TitlePlayerController에서 방 정보를 추가하는 함수
-	void AddRoomToList(URoomInfoObject* NewRoom);
+	// 새로운 방을 추가
+	void AddRoom(URoomInfoObject* NewRoom);
 };

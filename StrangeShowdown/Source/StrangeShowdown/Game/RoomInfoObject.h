@@ -9,26 +9,30 @@
 USTRUCT(BlueprintType)
 struct FRoomInfo
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadOnly)
-    FString RoomName;
+	UPROPERTY(BlueprintReadWrite)
+	FString RoomName;
 
-    UPROPERTY(BlueprintReadOnly)
-    int32 CurrentPlayers;
+	UPROPERTY(BlueprintReadWrite)
+	int32 CurrentPlayers;
 
-    UPROPERTY(BlueprintReadOnly)
-    int32 MaxPlayers = 5;
+	UPROPERTY(BlueprintReadWrite)
+	int32 MaxPlayers = 5;
 
-    UPROPERTY(BlueprintReadOnly)
-    bool bHasPassword;
+	UPROPERTY(BlueprintReadWrite)
+	bool bHasPassword;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString Password;
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class STRANGESHOWDOWN_API URoomInfoObject : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-    FRoomInfo RoomInfo;
+	UPROPERTY(BlueprintReadWrite)
+	FRoomInfo RoomInfo;
 };
