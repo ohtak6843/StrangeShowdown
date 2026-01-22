@@ -37,3 +37,23 @@ ASTPlayerBase::ASTPlayerBase()
 	bIsArmedRifle = true;
 }
 
+float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (ActualDamage <= 0.f)
+	{
+		return 0.f;
+	}
+
+	StatComp->AddHp(-ActualDamage);
+
+	// TODO: Check Death
+	if (StatComp->Hp <= 0.f)
+	{
+		
+	}
+
+	return ActualDamage;
+}
+

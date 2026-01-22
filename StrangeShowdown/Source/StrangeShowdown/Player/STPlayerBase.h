@@ -28,6 +28,10 @@ public:
 	ASTPlayerBase();
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+public:
 	// Stat Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	TObjectPtr<USTStatComponent> StatComp;
