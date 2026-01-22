@@ -60,13 +60,27 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 만약 퀵슬롯에 같은 아이템이 있으면 기존 슬롯을 제거
-	for (int32 i = 0; i < QuickSlots.Num(); i++)
+	if (TargetQuickSlotIndex == -2)
 	{
-		if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
 		{
-			QuickSlots[i] = FInventorySlot();
-			InventorySlotIndex[i] = -1;
-			break;
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				TargetQuickSlotIndex = i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				QuickSlots[i] = FInventorySlot();
+				InventorySlotIndex[i] = -1;
+				break;
+			}
 		}
 	}
 
