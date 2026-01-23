@@ -16,5 +16,4 @@ class STRANGESHOWDOWN_API ASTPlayerController : public APlayerController
 
 protected:
 	virtual void BeginPlay() override;
-	
 };
