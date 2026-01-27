@@ -6,6 +6,8 @@
 
 void USTGameInstance::Init()
 {
+	Super::Init();
+
 	// GameUserSettings 설정 로드
 	UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
 	if (UserSettings)
