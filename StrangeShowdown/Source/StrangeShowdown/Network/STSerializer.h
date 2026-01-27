@@ -7,11 +7,11 @@
 /**
  * Socket I/O Ελ½Ε
  */
-class STRANGESHOWDOWN_API Serlializer
+class STRANGESHOWDOWN_API STSerializer
 {
 public:
-	Serlializer();
-	~Serlializer();
+	STSerializer();
+	~STSerializer();
 
 
 

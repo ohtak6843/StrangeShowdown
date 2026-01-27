@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "PacketHandler.h"
+#include "RoomManager.h"
+#include "IOCP.h"
 
 //void PacketHandler::HandlePacket(std::shared_ptr<Session> session, char* buffer, int len) {
 //    PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
@@ -34,7 +36,56 @@
 void PacketHandler::HandlePacket(std::shared_ptr<Session> session, char* buffer, int len)
 {
 	// todo: 패킷 핸들러 구현
-	std::println("HandlePacket called with packet length: {}", len);
 
-	// 역직렬화 후 패킷 만들고
+	// todo 이걸 switch-case 대신 함수 포인터 테이블로 바꾸기
+	packet::Type packet_id{ static_cast<uint8>(buffer[1]) };
+	switch (packet_id)
+	{
+		case packet::Type::CS_LOGIN:
+		{
+			// HandleCSLogin(session, buffer);
+			std::println("Login Successed for session id: {}", session->GetSessionID());
+			break;
+		}
+
+		case packet::Type::CS_MOVE_PLAYER:
+		{
+			PacketHandler::HandleCSMovePlayer(session, buffer);
+			break;
+		}
+	}
+}
+
+void PacketHandler::HandleCSMovePlayer(std::shared_ptr<Session> session, void* packet)
+{
+	auto* move_packet{ static_cast<packet::CSMovePlayer*>(packet) };
+
+	auto id{ session->GetSessionID() };
+	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
+
+	player->_position = move_packet->pos;
+	player->_direction = move_packet->dir;
+
+	// todo: 변경
+	// 다른 플레이어에게도 전파
+	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
+	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };
+	for (; begin_iter != end_iter; ++begin_iter)
+	{
+		auto other_session{ begin_iter->second };
+		if (other_session->GetSessionID() == id)
+		{
+			continue;
+		}
+
+		// todo: 이부분을 수정
+		packet::SCMoveObject move_object_packet{
+			id,
+			player->_position,
+			player->_direction
+		};
+		std::vector<char> buffer(move_object_packet.size);
+		std::memcpy(buffer.data(), &move_object_packet, move_object_packet.size);
+		other_session->DoSend(buffer);
+	}
 }

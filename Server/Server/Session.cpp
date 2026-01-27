@@ -7,9 +7,7 @@
 Session::Session(const SOCKET client_socket, const uint64 id)
 	: _clientSocket{ client_socket }
 	, _sessionID{ id }
-{
-	std::println("Session {} created.", _sessionID);
-}
+{}
 
 void Session::DoRecv()
 {
@@ -62,7 +60,7 @@ void Session::OnRecvCompleted(const uint32 recieved_bytes)
 	ReleaseRef();
 }
 
-void Session::DoSend()
+void Session::DoSend(const std::vector<char>& data)
 {
 	IncreaseRef();
 
@@ -70,14 +68,13 @@ void Session::DoSend()
 	// 일단 임시로 new delete 사용, 임시로 login packet 전송
 	// 나중에 shared ptr reference count 해결할 방도가 생각나면 
 	auto overlapped_ex{ new OverlappedEx() };
-	packet::SCLogin packet;
-
+	//packet::SCLogin packet;
 	// TODO: 직렬화 해주는 클래스 만들기
 	// auto buffer{ packet.Serialize() };
-	std::vector<char> buffer(packet.size);
-	std::memcpy(buffer.data(), &packet, packet.size);
+	//std::vector<char> buffer(packet.size);
+	//std::memcpy(buffer.data(), &packet, packet.size);
 
-	overlapped_ex->PrepareSend(buffer);
+	overlapped_ex->PrepareSend(data);
 
 	auto ret{ WSASend(
 		_clientSocket,
@@ -126,7 +123,9 @@ void Session::ReassemblePacket()
 			break;
 		}
 
-		// 패킷 처리
+		// todo:
+		// 나중엔 room별 job 큐에 넣어야 함.
+		// 임시로 패킷 처리를 여기서
 		PacketHandler::HandlePacket(shared_from_this(), _recvBuffer.data(), packet_size);
 	
 		// 버퍼 당기기

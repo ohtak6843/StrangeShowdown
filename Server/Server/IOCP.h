@@ -56,6 +56,9 @@ private:
 
 	// 특수 상황 조회 시, 생명주기 관리 ( 안전성 )
 	uint64	_sessionCnt{ 0 };
+
+	// todo: 이걸 private화
+public:
 	std::unordered_map<uint64, std::shared_ptr<Session>> _sessionHash{};
 
 };

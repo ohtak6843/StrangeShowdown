@@ -16,9 +16,13 @@ enum class Type : unsigned char
 
 	// prepare
 	SC_LOGIN,
-	CS_LOGIN
+	CS_LOGIN,
+
+	SC_MOVE_OBJECT,
+	CS_MOVE_PLAYER
 };
 
+// todo: 나중에 packet size, type의 크기를 바꿔야 함.
 #pragma pack(push, 1)
 struct Header
 {
@@ -60,6 +64,39 @@ struct CSLogin : Header
 		Header{ sizeof(CSLogin), Type::CS_LOGIN }
 	{}
 };
+
+// Param:
+//		Vec3f dir
+// 클라이언트 로그인 요청 패킷
+struct SCMoveObject : Header
+{
+	uint64 objectID;
+	Vec3f pos;
+	Vec3f dir;
+
+	SCMoveObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
+		Header{ sizeof(CSLogin), Type::SC_MOVE_OBJECT },
+		objectID{ _objectID },
+		pos{ _pos },
+		dir{ _dir }
+	{}
+};
+
+// Param:
+//		Vec3f dir
+// 클라이언트 로그인 요청 패킷
+struct CSMovePlayer : Header
+{
+	Vec3f pos;
+	Vec3f dir;
+
+	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir) :
+		Header{ sizeof(CSLogin), Type::CS_MOVE_PLAYER },
+		pos{ _pos },
+		dir{ _dir }
+	{}
+};
+
 
 #pragma pack(pop)
 PACKET_END

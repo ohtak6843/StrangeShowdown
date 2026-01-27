@@ -2,6 +2,7 @@
 #include "IOCP.h"
 #include "OverlappedEx.h"
 #include "Session.h"
+#include "RoomManager.h"
 
 
 bool IOCP::Init()
@@ -59,7 +60,8 @@ void IOCP::Start()
 	DoAccept();
 
 	auto thread_number {
-		 static_cast<int>(std::thread::hardware_concurrency())
+		1
+		 // static_cast<int>(std::thread::hardware_concurrency())
 	};
 
 	for (int i = 0; i < thread_number; ++i)
@@ -124,8 +126,6 @@ void IOCP::WorkerThread()
 			OnAcceptCompleted();
 
 			DoAccept();
-
-			std::println("Accept Completed");
 		}
 		break;
 
@@ -133,8 +133,6 @@ void IOCP::WorkerThread()
 		{
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
 			session->OnRecvCompleted(io_size);
-
-			std::println("Recv Completed");
 		}
 		break;
 
@@ -145,8 +143,6 @@ void IOCP::WorkerThread()
 
 			// todo: 이 delete를 OnSendCompleted에서 메모리 풀 반납.
 			delete curr_over_ex;
-
-			std::println("Send Completed");
 		}
 		break;
 
@@ -230,11 +226,14 @@ void IOCP::OnAcceptCompleted()
 	// sessionHash에 클라이언트 정보 저장
 	_sessionHash[id] = new_client;
 
+	// 추가 정보 저장
+	// todo: 나중에 새로운 객체 생성 시점을 job을 통해 생성하도록 변경
+	// 누가 이 객체를 소유해야 하는가?
+	new_client->SetSessionID(id);
+	GET_SINGLE(RoomManager)->AddPlayer(id, std::make_shared<Player>());
+
 	// 세션 시작
 	new_client->Start();
-
-	// todo: 임시로 한번 send
-	new_client->DoSend();
 }
 
 // TODO:

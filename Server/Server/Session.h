@@ -18,7 +18,7 @@ public:
 	void OnRecvCompleted(const uint32 bytesTransferred);
 
 	// send
-	void DoSend();
+	void DoSend(const std::vector<char>& data);
 	// send 완료
 	void OnSendCompleted();
 
@@ -34,6 +34,9 @@ public:
 
 	int GetCurrentDataSize() const { return _currentDataSize; }
 	std::array<char, BUFFER_SIZE>& GetRecvBuffer() { return _recvBuffer; }
+
+	void SetSessionID(const uint64 id) { _sessionID = id; }
+	uint64 GetSessionID() const { return _sessionID; }
 
 private:
 	// 패킷 재조립 및 패킷 처리
