@@ -13,10 +13,13 @@ struct FStoreSlot
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	USTItemDataAssetBase* ItemData = nullptr;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
+	int32 SlotIndex = -1;
+
+	UPROPERTY(BlueprintReadWrite)
 	bool bSold = false;
 };
 
@@ -32,10 +35,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
 	TArray<USTItemDataAssetBase*> StoreItemPool;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
 	TArray<FStoreSlot> Slots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
@@ -47,9 +50,6 @@ public:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void InitStore();
-
-	UFUNCTION(BlueprintCallable, Category = "Store")
-	bool BuyItem(int32 Index);
 
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void Reroll();

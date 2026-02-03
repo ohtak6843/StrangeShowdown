@@ -4,6 +4,8 @@
 #include "Player/STLocalPlayer.h"
 #include "Item/STPickupItem.h"
 #include "Component/STStoreComponent.h" 
+#include "Component/STInventoryComponent.h"
+#include "Component/STQuickSlotComponent.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -25,6 +27,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 
 	// Store Component
 	StoreComp = CreateDefaultSubobject<USTStoreComponent>(TEXT("StoreComp"));
+
+	// Attack Trace Component
+	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
 }
 
 void ASTLocalPlayer::BeginPlay()
@@ -34,29 +39,59 @@ void ASTLocalPlayer::BeginPlay()
 
 }
 
-void ASTLocalPlayer::Interact()
+void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 {
 	FVector Start = CameraComp->GetComponentLocation();
 	FVector ForwardVector = CameraComp->GetForwardVector();
 	FVector End = ((ForwardVector * 500.f) + Start);
-	
+
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
-	
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
-	if (bIsHit)
+
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		CollisionParams
+	);
+
+	if (!bIsHit)
+		return;
+
+	ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
+	if (!PickupItem || !InventoryComp || !PickupItem->ItemData)
+		return;
+
+	int32 AddedInventoryIndex = -1;
+
+	bool bAdded = InventoryComp->AddItem(
+		PickupItem->ItemData,
+		1,
+		AddedInventoryIndex
+	);
+
+	// 만약 퀵슬롯에 추가한 아이템이 이미 있다면 퀵슬롯의 count도 증가
+	USTQuickSlotComponent* QuickSlotComp = InventoryComp->GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
+	if (bAdded && QuickSlotComp)
 	{
-		ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
-		if (PickupItem)
+		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
 		{
-			if (InventoryComp && PickupItem->ItemData)
+			FInventorySlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+			if (QuickSlot.ItemData == PickupItem->ItemData)
 			{
-				bool bAdded = InventoryComp->AddItem(PickupItem->ItemData, 1);
-				if (bAdded)
-				{
-					PickupItem->Destroy();
-				}
+				QuickSlot.Count += 1;
+				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+				break;
 			}
 		}
 	}
+
+	if (!bAdded || AddedInventoryIndex == -1)
+		return;
+	
+	// AddInventoryIndex 반환
+	OutAddedInventoryIndex = AddedInventoryIndex;
+
+	PickupItem->Destroy();
 }

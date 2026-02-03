@@ -2,6 +2,7 @@
 
 
 #include "Component/STQuickSlotComponent.h"
+#include "Item/STItemDataAssetBase.h"
 
 // Sets default values for this component's properties
 USTQuickSlotComponent::USTQuickSlotComponent()
@@ -55,13 +56,59 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		return false;
 	}
 
+	// 인벤토리에서 아이템 가져오기
+	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
+
+	// 만약 퀵슬롯에 같은 아이템이 있으면 기존 슬롯을 제거
+	if (TargetQuickSlotIndex == -2)
+	{
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				TargetQuickSlotIndex = i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				QuickSlots[i] = FInventorySlot();
+				InventorySlotIndex[i] = -1;
+				break;
+			}
+		}
+	}
+
+	// TargetQuickSlotIndex가 -2면 빈 슬롯에 추가(바로 추가)
+	if (TargetQuickSlotIndex == -2)
+	{
+		// 빈 슬롯 찾기
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == nullptr)
+			{
+				TargetQuickSlotIndex = i;
+				break;
+			}
+		}
+
+		// 빈 슬롯을 못 찾으면 실패
+		if (TargetQuickSlotIndex == -2)
+		{
+			return false;
+		}
+	}
+
+	// TargetQuickSlotIndex가 유효한 인덱스인지 검사
 	if (!QuickSlots.IsValidIndex(TargetQuickSlotIndex))
 	{
 		return false;
 	}
-
-	// 인벤토리에서 아이템 가져오기
-	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 해당 아이템이 몇번인지 저장
 	InventorySlotIndex[TargetQuickSlotIndex] = InventoryItemIndex;
@@ -82,6 +129,4 @@ void USTQuickSlotComponent::CallMouseDropToQuickSlot(int32 InventoryItemIndex, U
 void USTQuickSlotComponent::AddToQuickSlot_FromEvent(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex)
 {
 	AddToQuickSlot(BeforeInventorySystem, InventoryItemIndex, QuickSlotIndex);
-	
-	OnQuickSlotUpdated.Broadcast();
 }

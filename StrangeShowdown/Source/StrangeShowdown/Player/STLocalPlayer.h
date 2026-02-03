@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Player/STPlayerBase.h"
 #include "Component/STInventoryComponent.h"
+#include "Component/STAttackTraceComponent.h"
 #include "STLocalPlayer.generated.h"
 
 class USTStoreComponent;
@@ -25,7 +26,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	void Interact();
+	void Interact(int32& OutAddedInventoryIndex);
 
 public:
 	// Spring Arm Component
@@ -43,4 +44,8 @@ public:
 	// Store Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Store")
 	TObjectPtr<USTStoreComponent> StoreComp;
+
+	// Attack Trace Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
+	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
 };

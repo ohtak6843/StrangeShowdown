@@ -51,31 +51,6 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 		Mesh->SetRelativeScale3D(ItemData->MeshScale);
 		// 위치 조정 (루트에 대한 상대 위치)
 		Mesh->SetRelativeLocation(ItemData->MeshPos);
-
-		// sub Mesh가 있으면 설정
-		if (ItemData->PickupSubMesh)
-		{
-			// SubMesh가 없으면 생성 후 Mesh에 붙임
-			if (!SubMesh)
-			{
-				SubMesh = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("SubMesh"));
-				SubMesh->RegisterComponent();
-				// 부모를 Mesh로 하여 상대 transform이 Mesh 기준이 되게 함
-				SubMesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
-			}
-
-			SubMesh->SetStaticMesh(ItemData->PickupSubMesh);
-			SubMesh->SetRelativeScale3D(FVector::OneVector);
-			SubMesh->SetRelativeLocation(FVector::ZeroVector);
-		}
-		else
-		{
-			if (SubMesh)
-			{
-				SubMesh->DestroyComponent();
-				SubMesh = nullptr;
-			}
-		}
 	}
 }
 
@@ -91,7 +66,7 @@ void ASTPickupItem::BeginPlay()
 void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
+	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(OtherActor))
 	{
 		OverlappedPlayer = Player;
 		OnPlayerEnter.Broadcast();
@@ -105,7 +80,7 @@ void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 void ASTPickupItem::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 BodyIndex)
 {
-	if (ACharacter* Player = Cast<ACharacter>(OtherActor))
+	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(OtherActor))
 	{
 		OverlappedPlayer = nullptr;
 		OnPlayerExit.Broadcast();
