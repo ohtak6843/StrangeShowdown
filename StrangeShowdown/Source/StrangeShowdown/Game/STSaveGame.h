@@ -18,12 +18,12 @@ class STRANGESHOWDOWN_API USTSaveGame : public USaveGame
 public:
 	// »ç¿îµå
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "SaveData")
-	float MasterVolume = 1.0f;
+	float MasterVolume = 0.5f;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "SaveData")
-	float BGMVolume = 1.0f;
+	float BGMVolume = 0.5f;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "SaveData")
-	float SFXVolume = 1.0f;
+	float SFXVolume = 0.5f;
 
 };
