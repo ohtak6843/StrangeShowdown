@@ -4,6 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+
+#include "Containers/Map.h"
+#include "StrangeShowdown.h"
+#include "Player/STPlayerBase.h"
+
 #include "NetworkGameInstance.generated.h"
 
 class SocketIO;
@@ -16,8 +21,6 @@ class STRANGESHOWDOWN_API UNetworkGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-
-
 public:
 	UFUNCTION(BlueprintCallable)
 	void ConnectToGameServer();
@@ -25,9 +28,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DisconnectFromGameServer();
 
+	UFUNCTION(BlueprintCallable)
+	void HandleRecvPackets();
+
+
+	void HandleSpawn(packet::SCSpawnObject* spawn_packet);
+public:
+
 
 public:
 	FSocket* Socket{};
 	TSharedPtr<SocketIO> SocketIOInstance{};
 
+
+	// 어떤 블프 클래스인지 알아야 함.
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTPlayerBase> OtherPlayerClass;
+
+	TMap<uint64, ASTPlayerBase> PlayerMap;
 };

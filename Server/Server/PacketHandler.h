@@ -28,4 +28,6 @@ public:
 
 private:
     static void HandleCSMovePlayer(std::shared_ptr<Session> session, void* packet);
+	static void HandleCSLogin(std::shared_ptr<Session> session, void* packet);
+
 };

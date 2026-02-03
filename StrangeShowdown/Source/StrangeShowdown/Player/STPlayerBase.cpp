@@ -34,3 +34,8 @@ ASTPlayerBase::ASTPlayerBase()
 	StatComp->bAlive = true;
 }
 
+void ASTPlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+

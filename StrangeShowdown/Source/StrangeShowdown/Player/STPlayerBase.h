@@ -27,6 +27,8 @@ public:
 	// Sets default values for this character's properties
 	ASTPlayerBase();
 
+	virtual void BeginPlay() override;
+
 public:
 	// Stat Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")

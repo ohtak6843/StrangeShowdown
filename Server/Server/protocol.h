@@ -18,6 +18,8 @@ enum class Type : unsigned char
 	SC_LOGIN,
 	CS_LOGIN,
 
+	SC_SPAWN_OBJECT,
+
 	SC_MOVE_OBJECT,
 	CS_MOVE_PLAYER
 };
@@ -68,14 +70,34 @@ struct CSLogin : Header
 // Param:
 //		Vec3f dir
 // 클라이언트 로그인 요청 패킷
+struct SCSpawnObject : Header
+{
+	unsigned long long objectID;
+	Vec3f pos;
+	Vec3f dir;
+
+	SCSpawnObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
+		Header{ sizeof(SCSpawnObject), Type::SC_SPAWN_OBJECT },
+		objectID{ _objectID },
+		pos{ _pos },
+		dir{ _dir }
+	{
+	}
+};
+
+
+// Param:
+//		uint64 id
+//		Vec3f pos
+//		Vec3f dir
 struct SCMoveObject : Header
 {
-	uint64 objectID;
+	unsigned long long objectID;
 	Vec3f pos;
 	Vec3f dir;
 
 	SCMoveObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(CSLogin), Type::SC_MOVE_OBJECT },
+		Header{ sizeof(SCMoveObject), Type::SC_MOVE_OBJECT },
 		objectID{ _objectID },
 		pos{ _pos },
 		dir{ _dir }
@@ -91,7 +113,7 @@ struct CSMovePlayer : Header
 	Vec3f dir;
 
 	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(CSLogin), Type::CS_MOVE_PLAYER },
+		Header{ sizeof(CSMovePlayer), Type::CS_MOVE_PLAYER },
 		pos{ _pos },
 		dir{ _dir }
 	{}

@@ -3,7 +3,8 @@
 
 #include "Network/SocketIO.h"
 #include "Sockets.h"
-#include "../../Server/Server/protocol.h"
+#include "StrangeShowdown.h"
+
 
 // --
 // RecvWorker
@@ -46,6 +47,7 @@ void RecvWorker::Destroy()
 	Running = false;
 }
 
+
 void RecvWorker::DoRecv()
 {
 	TArray<uint8> buffer;
@@ -85,15 +87,15 @@ void RecvWorker::DoRecv()
 
 	// serlalize code
 	// 
-	packet::CSLogin login_packet{};
-	TArray<uint8> data;
-	data.AddUninitialized(login_packet.size);
-	FMemory::Memcpy(data.GetData(), &login_packet, login_packet.size);
-	
-	if (auto locked_ptr{ SocketIOPtr.Pin() })
-	{
-		locked_ptr->PushSendPacket(data);
-	}
+	//packet::CSLogin login_packet{};
+	//TArray<uint8> data;
+	//data.AddUninitialized(login_packet.size);
+	//FMemory::Memcpy(data.GetData(), &login_packet, login_packet.size);
+	//
+	//if (auto locked_ptr{ SocketIOPtr.Pin() })
+	//{
+	//	locked_ptr->PushSendPacket(data);
+	//}
 
 }
 
@@ -169,10 +171,14 @@ void SendWorker::DoSend()
 	TArray<uint8> buffer;
 	if (auto locked_ptr{ SocketIOPtr.Pin() })
 	{
-		if (false == locked_ptr->PopSendPacket(buffer))
+		if (false == locked_ptr->PopSendPacket(buffer) || 0 == buffer.Num())
 		{
 			return;
 		}
+	}
+	else
+	{
+		return;
 	}
 
 	int32 total{};
@@ -185,7 +191,8 @@ void SendWorker::DoSend()
 		int32 bytes_sent{};
 		if (false == Socket->Send(buffer.GetData() + total, size - total, bytes_sent))
 		{
-			// 坷幅 贸府
+			// todo: 坷幅 贸府
+			Running = false;
 			return;
 		}
 
@@ -246,6 +253,7 @@ void SocketIO::PushSendPacket(const TArray<uint8>& Packet)
 
 bool SocketIO::PopSendPacket(OUT TArray<uint8>& OutPacket)
 {
+
 	if (SendPacketQueue.Dequeue(OUT OutPacket))
 	{
 		return true;

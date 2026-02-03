@@ -45,6 +45,7 @@ void PacketHandler::HandlePacket(std::shared_ptr<Session> session, char* buffer,
 		{
 			// HandleCSLogin(session, buffer);
 			std::println("Login Successed for session id: {}", session->GetSessionID());
+			PacketHandler::HandleCSLogin(session, buffer);
 			break;
 		}
 
@@ -87,5 +88,52 @@ void PacketHandler::HandleCSMovePlayer(std::shared_ptr<Session> session, void* p
 		std::vector<char> buffer(move_object_packet.size);
 		std::memcpy(buffer.data(), &move_object_packet, move_object_packet.size);
 		other_session->DoSend(buffer);
+	}
+}
+
+void PacketHandler::HandleCSLogin(std::shared_ptr<Session> session, void* packet)
+{
+	auto id{ session->GetSessionID() };
+
+	// todo: 여기서 생성을 해야지
+	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
+
+
+	// todo: 변경
+	// 다른 플레이어에게도 전파
+	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
+	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };
+	for (; begin_iter != end_iter; ++begin_iter)
+	{
+		auto other_session{ begin_iter->second };
+		auto other_player{ GET_SINGLE(RoomManager)->GetPlayer(
+			other_session->GetSessionID())
+		};
+		if (other_session->GetSessionID() == id)
+		{
+			continue;
+		}
+
+		// todo: 아래 부분을 수정
+
+		// 다른 플레이어에게 새로 접속한 플레이어 정보 전파
+		packet::SCSpawnObject move_object_packet{
+			id,
+			player->_position,
+			player->_direction
+		};
+		std::vector<char> buffer(move_object_packet.size);
+		std::memcpy(buffer.data(), &move_object_packet, move_object_packet.size);
+		other_session->DoSend(buffer);
+
+		// 현재 클라이언트에 기존 플레이어 정보 전달
+		packet::SCSpawnObject other_spawn_packet{
+			other_session->GetSessionID(),
+			other_player->_position,
+			other_player->_direction
+		};
+		std::vector<char> other_buffer(other_spawn_packet.size);
+		std::memcpy(other_buffer.data(), &other_spawn_packet, other_spawn_packet.size);
+		session->DoSend(other_buffer);
 	}
 }

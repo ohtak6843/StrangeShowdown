@@ -8,6 +8,7 @@
 #include "SocketSubsystem.h"
 
 #include "Network/SocketIO.h"
+#include "Player/STPlayerBase.h"
 
 void UNetworkGameInstance::ConnectToGameServer()
 {
@@ -32,13 +33,20 @@ void UNetworkGameInstance::ConnectToGameServer()
 
 	// Check Connection
 	if (Connected)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connection Success")));
-
-		
+	{	
 		SocketIOInstance = MakeShared<SocketIO>(Socket);
 		SocketIOInstance->Init();
 		SocketIOInstance->Start();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connection Success")));
+
+		// todo: 임시로 CS_LOGIN 패킷 전송
+		// todo: 나중에 함수화
+		TArray<uint8> Packet;
+		packet::CSLogin login_packet{};
+		Packet.AddUninitialized(login_packet.size);
+		FMemory::Memcpy(Packet.GetData(), &login_packet, login_packet.size);
+		SocketIOInstance->PushSendPacket(Packet);
+
 	}
 	else
 	{
@@ -52,8 +60,68 @@ void UNetworkGameInstance::DisconnectFromGameServer()
 	{
 		SocketIOInstance->Disconnect();
 
-		ISocketSubsystem* SocketSubsystem{ ISocketSubsystem::Get() };
-		SocketSubsystem->DestroySocket(Socket);
-		Socket = nullptr;
+		//ISocketSubsystem* SocketSubsystem{ ISocketSubsystem::Get() };
+		//SocketSubsystem->DestroySocket(Socket);
+		//Socket = nullptr;
 	}
+}
+
+void UNetworkGameInstance::HandleRecvPackets()
+{
+	if (nullptr == Socket || nullptr == SocketIOInstance)
+		return;
+
+	while (true)
+	{
+		TArray<uint8> Packet;
+		if (false == SocketIOInstance->PopRecvPacket(Packet)) {
+			break;
+		}
+		
+		// todo: 이 스위치를 변경
+		auto type{ static_cast<packet::Type>(Packet[1]) };
+		switch (type)
+		{
+		case packet::Type::SC_SPAWN_OBJECT:
+		{
+			auto* LoginPacket{ reinterpret_cast<packet::SCSpawnObject*>(Packet.GetData()) };
+			HandleSpawn(LoginPacket);
+			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
+		}
+		default:
+			break;
+		}
+	}
+}
+
+void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
+{
+
+	// transform
+	FTransform transform{ FTransform::Identity };
+
+	// todo: 수정 필요
+	transform.SetLocation(FVector(spawn_packet->pos.x, spawn_packet->pos.y, spawn_packet->pos.z));
+	transform.SetRotation(FQuat::Identity);
+	// 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	if (nullptr == OtherPlayerClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("OtherPlayerClass is NOT assigned!"));
+		return;
+	}
+
+	auto* player{ GetWorld()->SpawnActor<ASTPlayerBase>(
+		OtherPlayerClass,
+		transform,
+		SpawnParams
+	)};
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawn Packet Process Complete")));
+	
+	// playerid 넣기
+	// PlayerMap.Add(spawn_packet->objectID, *player);
+
 }
