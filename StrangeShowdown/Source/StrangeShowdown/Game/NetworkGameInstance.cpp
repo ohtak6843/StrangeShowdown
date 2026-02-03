@@ -88,6 +88,13 @@ void UNetworkGameInstance::HandleRecvPackets()
 			HandleSpawn(LoginPacket);
 			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
 		}
+
+		case packet::Type::SC_MOVE_OBJECT:
+		{
+			auto* LoginPacket{ reinterpret_cast<packet::SCMoveObject*>(Packet.GetData()) };
+			HandleMove(LoginPacket);
+			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
+		}
 		default:
 			break;
 		}
@@ -122,6 +129,24 @@ void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawn Packet Process Complete")));
 	
 	// playerid ³Ö±â
-	// PlayerMap.Add(spawn_packet->objectID, *player);
+	PlayerMap.Add(spawn_packet->objectID, player);
 
+}
+
+void UNetworkGameInstance::HandleMove(packet::SCMoveObject* move_packet)
+{
+	if (ASTPlayerBase** player_ptr{ PlayerMap.Find(move_packet->objectID) })
+	{
+		ASTPlayerBase* player{ *player_ptr };
+		player->SetActorLocation(FVector( move_packet->pos.x, move_packet->pos.y, move_packet->pos.z ));
+		player->SetActorRotation(FRotator( move_packet->dir.x, move_packet->dir.y, move_packet->dir.z ));
+	}
+}
+
+void UNetworkGameInstance::SendPacket(const TArray<uint8>& data)
+{
+	if (SocketIOInstance)
+	{
+		SocketIOInstance->PushSendPacket(data);
+	}
 }

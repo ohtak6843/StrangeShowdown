@@ -25,6 +25,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
 
@@ -48,4 +50,7 @@ public:
 	// Attack Trace Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
+
+private:
+	float SendDeltaTime{};
 };

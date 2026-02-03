@@ -33,6 +33,10 @@ public:
 
 
 	void HandleSpawn(packet::SCSpawnObject* spawn_packet);
+	void HandleMove(packet::SCMoveObject* move_packet);
+
+	void SendPacket(const TArray<uint8>& data);
+
 public:
 
 
@@ -45,5 +49,5 @@ public:
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
 	TSubclassOf<ASTPlayerBase> OtherPlayerClass;
 
-	TMap<uint64, ASTPlayerBase> PlayerMap;
+	TMap<uint64, ASTPlayerBase*> PlayerMap;
 };
