@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Game/RoomInfoObject.h"
+#include "Game/STRoomInfoObject.h"
 #include "Engine/GameInstance.h"
 #include "STGameInstance.generated.h"
 
@@ -26,7 +26,7 @@ public:
 public:
 	// 방 목록을 저장하는 배열
 	UPROPERTY(BlueprintReadWrite)
-	TArray<URoomInfoObject*> RoomList;
+	TArray<USTRoomInfoObject*> RoomList;
 
 	// 해상도
 	UPROPERTY(BlueprintReadWrite)
@@ -50,5 +50,5 @@ public:
 	virtual void Init() override;
 
 	// 새로운 방을 추가
-	void AddRoom(URoomInfoObject* NewRoom);
+	void AddRoom(USTRoomInfoObject* NewRoom);
 };
