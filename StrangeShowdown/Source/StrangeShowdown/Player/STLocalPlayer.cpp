@@ -37,38 +37,15 @@ ASTLocalPlayer::ASTLocalPlayer()
 void ASTLocalPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
 
 void ASTLocalPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	SendDeltaTime += DeltaTime;
-
-	if (SendDeltaTime >= 0.1f)
-	{
-		SendDeltaTime -= 0.1f;
-
-		TArray<uint8> SendBuffer;
-		auto rotation{ GetActorRotation() };
-		packet::CSMovePlayer move_packet{
-			Vec3f{
-				static_cast<float>(GetActorLocation().X),
-				static_cast<float>(GetActorLocation().Y),
-				static_cast<float>(GetActorLocation().Z)
-			},
-			Vec3f{
-				static_cast<float>(rotation.Pitch),
-				static_cast<float>(rotation.Yaw),
-				static_cast<float>(rotation.Roll)
-			}
-		};
-		SendBuffer.AddUninitialized(move_packet.size);
-		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
-		Cast<UNetworkGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
-	}
+	
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
 }
 
 void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
@@ -126,4 +103,32 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	OutAddedInventoryIndex = AddedInventoryIndex;
 
 	PickupItem->Destroy();
+}
+
+void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
+{
+	SendDeltaTime += DeltaTime;
+
+	if (SendDeltaTime >= 0.1f)
+	{
+		SendDeltaTime -= 0.1f;
+
+		TArray<uint8> SendBuffer;
+		auto rotation{ GetActorRotation() };
+		packet::CSMovePlayer move_packet{
+			Vec3f{
+				static_cast<float>(GetActorLocation().X),
+				static_cast<float>(GetActorLocation().Y),
+				static_cast<float>(GetActorLocation().Z)
+			},
+			Vec3f{
+				static_cast<float>(rotation.Pitch),
+				static_cast<float>(rotation.Yaw),
+				static_cast<float>(rotation.Roll)
+			}
+		};
+		SendBuffer.AddUninitialized(move_packet.size);
+		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
+		Cast<UNetworkGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
+	}
 }

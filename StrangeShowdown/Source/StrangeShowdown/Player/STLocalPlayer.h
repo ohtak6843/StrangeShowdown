@@ -30,6 +30,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
 
+private:
+	void SendMovePacket(const float DeltaTime);
+
 public:
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -53,4 +56,5 @@ public:
 
 private:
 	float SendDeltaTime{};
+	
 };
