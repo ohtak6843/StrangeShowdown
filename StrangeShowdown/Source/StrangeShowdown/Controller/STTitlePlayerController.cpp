@@ -22,13 +22,13 @@ void ASTTitlePlayerController::BeginPlay()
 	bShowMouseCursor = true;
 }
 
-void ASTTitlePlayerController::SetRoomInfo(URoomInfoObject* NewRoom)
+void ASTTitlePlayerController::SetRoomInfo(USTRoomInfoObject* NewRoom)
 {
 	RoomInfo = NewRoom;
 	AddRoomToList(NewRoom);
 }
 
-void ASTTitlePlayerController::AddRoomToList(URoomInfoObject* NewRoom)
+void ASTTitlePlayerController::AddRoomToList(USTRoomInfoObject* NewRoom)
 {
 	USTGameInstance* GameInstance = Cast<USTGameInstance>(GetGameInstance());
 	if (GameInstance)
@@ -44,7 +44,7 @@ void ASTTitlePlayerController::AddRoomToList(URoomInfoObject* NewRoom)
 void ASTTitlePlayerController::CreateTestRoom()
 {
 	static int tempRoomID = 1;
-	URoomInfoObject* TestRoom = NewObject<URoomInfoObject>();
+	USTRoomInfoObject* TestRoom = NewObject<USTRoomInfoObject>();
 	TestRoom->RoomInfo.RoomName = FString::Printf(TEXT("Test Room %d"), tempRoomID++);
 	TestRoom->RoomInfo.CurrentPlayers = 3;
 	TestRoom->RoomInfo.MaxPlayers = 5;

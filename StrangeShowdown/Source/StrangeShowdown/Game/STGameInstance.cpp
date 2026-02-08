@@ -32,7 +32,7 @@ void USTGameInstance::Init()
 	}
 }
 
-void USTGameInstance::AddRoom(URoomInfoObject* NewRoom)
+void USTGameInstance::AddRoom(USTRoomInfoObject* NewRoom)
 {
 	// 방 목록 추가
 	RoomList.Add(NewRoom);
