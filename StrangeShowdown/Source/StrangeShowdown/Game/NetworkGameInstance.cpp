@@ -8,6 +8,7 @@
 #include "SocketSubsystem.h"
 
 #include "Network/SocketIO.h"
+#include "Network/STSerializer.h"
 
 void UNetworkGameInstance::ConnectToGameServer()
 {
@@ -36,13 +37,9 @@ void UNetworkGameInstance::ConnectToGameServer()
 		SocketIOInstance->Init();
 		SocketIOInstance->Start();
 
-
-		// todo: 임시로 CS_LOGIN 패킷 전송
-		// todo: 나중에 함수화
-		TArray<uint8> Packet;
-		packet::CSLogin login_packet{};
-		Packet.AddUninitialized(login_packet.size);
-		FMemory::Memcpy(Packet.GetData(), &login_packet, login_packet.size);
+		// login packet 전송
+		packet::CSLogin LoginPacket{};
+		auto Packet{ STSerializer::Serialize(LoginPacket) };
 		SocketIOInstance->PushSendPacket(Packet);
 
 		UE_LOG(LogTemp, Log, TEXT("Success to connect to Server"));
@@ -59,10 +56,13 @@ void UNetworkGameInstance::DisconnectFromGameServer()
 	if (Socket)
 	{
 		SocketIOInstance->Disconnect();
-
-		//ISocketSubsystem* SocketSubsystem{ ISocketSubsystem::Get() };
-		//SocketSubsystem->DestroySocket(Socket);
-		//Socket = nullptr;
+		Socket->Close();
+		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(Socket);
+		while (false == SocketIOInstance->IsWorkerTerminated())
+		{
+			FPlatformProcess::Sleep(0.1f);
+		}
+		Socket = nullptr;
 	}
 }
 
@@ -78,21 +78,21 @@ void UNetworkGameInstance::HandleRecvPackets()
 			break;
 		}
 		
-		// todo: 이 스위치를 변경
-		auto type{ static_cast<packet::Type>(Packet[1]) };
-		switch (type)
+		// todo: packet 처리를 핸들러로
+		auto Type{ static_cast<packet::Type>(Packet[1]) };
+		switch (Type)
 		{
 		case packet::Type::SC_SPAWN_OBJECT:
 		{
-			auto* LoginPacket{ reinterpret_cast<packet::SCSpawnObject*>(Packet.GetData()) };
-			HandleSpawn(LoginPacket);
+			auto SpawnPacket{ STSerializer::Deserialize<packet::SCSpawnObject>(Packet) };
+			HandleSpawn(SpawnPacket);
 			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
 		}
 
 		case packet::Type::SC_MOVE_OBJECT:
 		{
-			auto* LoginPacket{ reinterpret_cast<packet::SCMoveObject*>(Packet.GetData()) };
-			HandleMove(LoginPacket);
+			auto MovePacket{ STSerializer::Deserialize<packet::SCMoveObject>(Packet) };
+			HandleMove(MovePacket);
 			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
 		}
 		default:
@@ -101,14 +101,14 @@ void UNetworkGameInstance::HandleRecvPackets()
 	}
 }
 
-void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
+void UNetworkGameInstance::HandleSpawn(const packet::SCSpawnObject& SpawnPacket)
 {
 
 	// transform
 	FTransform transform{ FTransform::Identity };
 
 	// todo: 수정 필요
-	transform.SetLocation(FVector(spawn_packet->pos.x, spawn_packet->pos.y, spawn_packet->pos.z));
+	transform.SetLocation(FVector(SpawnPacket.pos.x, SpawnPacket.pos.y, SpawnPacket.pos.z));
 	transform.SetRotation(FQuat::Identity);
 	// 
 	FActorSpawnParameters SpawnParams;
@@ -127,18 +127,18 @@ void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
 	)};
 	
 	// playerid 넣기
-	PlayerMap.Add(spawn_packet->objectID, player);
+	PlayerMap.Add(SpawnPacket.objectID, player);
 
 }
 
-void UNetworkGameInstance::HandleMove(packet::SCMoveObject* move_packet)
+void UNetworkGameInstance::HandleMove(const packet::SCMoveObject& MovePacket)
 {
-	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(move_packet->objectID) })
+	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.objectID) })
 	{
 		ASTFieldPlayer* player{ *player_ptr };
 
-		FVector location{ move_packet->pos.x, move_packet->pos.y, move_packet->pos.z };
-		FRotator rotation{ move_packet->dir.x, move_packet->dir.y, move_packet->dir.z };
+		FVector location{ MovePacket.pos.x, MovePacket.pos.y, MovePacket.pos.z };
+		FRotator rotation{ MovePacket.dir.x, MovePacket.dir.y, MovePacket.dir.z };
 		player->Move(location, rotation);
 	}
 }

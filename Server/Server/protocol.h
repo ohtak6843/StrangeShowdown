@@ -72,17 +72,17 @@ struct CSLogin : Header
 // 클라이언트 로그인 요청 패킷
 struct SCSpawnObject : Header
 {
-	unsigned long long objectID;
-	Vec3f pos;
-	Vec3f dir;
+	unsigned long long objectID{};
+	Vec3f pos{};
+	Vec3f dir{};
 
+	SCSpawnObject() = default;
 	SCSpawnObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
 		Header{ sizeof(SCSpawnObject), Type::SC_SPAWN_OBJECT },
 		objectID{ _objectID },
 		pos{ _pos },
 		dir{ _dir }
-	{
-	}
+	{}
 };
 
 
@@ -92,10 +92,11 @@ struct SCSpawnObject : Header
 //		Vec3f dir
 struct SCMoveObject : Header
 {
-	unsigned long long objectID;
-	Vec3f pos;
-	Vec3f dir;
+	unsigned long long objectID{};
+	Vec3f pos{};
+	Vec3f dir{};
 
+	SCMoveObject() = default;
 	SCMoveObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
 		Header{ sizeof(SCMoveObject), Type::SC_MOVE_OBJECT },
 		objectID{ _objectID },
@@ -109,9 +110,10 @@ struct SCMoveObject : Header
 // 클라이언트 로그인 요청 패킷
 struct CSMovePlayer : Header
 {
-	Vec3f pos;
-	Vec3f dir;
+	Vec3f pos{};
+	Vec3f dir{};
 
+	CSMovePlayer() = default;
 	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir) :
 		Header{ sizeof(CSMovePlayer), Type::CS_MOVE_PLAYER },
 		pos{ _pos },

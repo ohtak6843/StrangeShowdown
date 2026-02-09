@@ -21,7 +21,7 @@ public:
 
 	void Destroy();
 	void DoRecv();
-	bool IsTerminated() const;
+	bool IsTerminated() const { return Terminated; };
 
 	// 원하는 크기만큼 데이터 수신
 	bool RecvData(uint8* data, const int32 size);
@@ -50,7 +50,7 @@ public:
 
 	void Destroy();
 	void DoSend();
-	bool IsTerminated() const;
+	bool IsTerminated() const { return Terminated; };
 
 private:
 	FSocket*			Socket;
@@ -76,6 +76,7 @@ public:
 	void Init();
 	void Start();
 	void Disconnect();
+	bool IsWorkerTerminated() const;
 
 	void PushRecvPacket(const TArray<uint8>& Packet);
 	bool PopRecvPacket(OUT TArray<uint8>& OutPacket);

@@ -33,8 +33,8 @@ public:
 	void HandleRecvPackets();
 
 
-	void HandleSpawn(packet::SCSpawnObject* spawn_packet);
-	void HandleMove(packet::SCMoveObject* move_packet);
+	void HandleSpawn(const packet::SCSpawnObject& SpawnPacket);
+	void HandleMove(const packet::SCMoveObject& MovePacket);
 
 	void SendPacket(const TArray<uint8>& data);
 

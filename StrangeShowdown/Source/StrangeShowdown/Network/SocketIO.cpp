@@ -57,11 +57,10 @@ void RecvWorker::DoRecv()
 	// 헤더 recv
 	if (false == RecvData(buffer.GetData(), header_size))
 	{
-		// todo: 오류 처리
+		Running = false;
 		return;
 	}
 
-	// todo: 이를 Serlalizer로 옮기기
 	uint32 remain_size{ buffer[0] - header_size };
 
 	if (remain_size > 0)
@@ -70,7 +69,7 @@ void RecvWorker::DoRecv()
 		buffer.AddZeroed(remain_size);
 		if (false == RecvData(buffer.GetData() + header_size, remain_size))
 		{
-			// todo: 오류 처리
+			Running = false;
 			return;
 		}
 	}
@@ -93,7 +92,8 @@ bool RecvWorker::RecvData(uint8* data, const int32 size)
 		int32 bytes_read{};
 		auto ret{ Socket->Recv(data + total, size - total, bytes_read) };
 
-		// 오류 처리
+		// 오류 발생 시 스레드 종료
+		// todo: socket close도 해줘야 할듯?
 		if (false == ret || bytes_read <= 0)
 		{
 			return false;
@@ -132,7 +132,6 @@ uint32 SendWorker::Run()
 	{
 		DoSend();
 	}
-
 	Terminated = true;
 	return 0;
 }
@@ -214,6 +213,11 @@ void SocketIO::Disconnect()
 {
 	RecvThread->Destroy();
 	SendThread->Destroy();
+}
+
+bool SocketIO::IsWorkerTerminated() const
+{
+	return RecvThread->IsTerminated() && SendThread->IsTerminated();
 }
 
 void SocketIO::PushRecvPacket(const TArray<uint8>& Packet)
