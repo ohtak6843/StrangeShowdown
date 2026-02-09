@@ -107,11 +107,11 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 {
-	SendDeltaTime += DeltaTime;
+	SendMoveDeltaTime += DeltaTime;
 
-	if (SendDeltaTime >= 0.1f)
+	if (SendMoveDeltaTime >= SendMoveMaxTime)
 	{
-		SendDeltaTime -= 0.1f;
+		SendMoveDeltaTime -= SendMoveMaxTime;
 
 		TArray<uint8> SendBuffer;
 		auto rotation{ GetActorRotation() };

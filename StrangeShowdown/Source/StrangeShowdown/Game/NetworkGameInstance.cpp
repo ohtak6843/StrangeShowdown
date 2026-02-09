@@ -8,7 +8,6 @@
 #include "SocketSubsystem.h"
 
 #include "Network/SocketIO.h"
-#include "Player/STPlayerBase.h"
 
 void UNetworkGameInstance::ConnectToGameServer()
 {
@@ -28,7 +27,6 @@ void UNetworkGameInstance::ConnectToGameServer()
 
 
 	// Connect to server
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connecting To Server...")));
 	bool Connected{ Socket->Connect(*InternetAddr) };
 
 	// Check Connection
@@ -37,7 +35,7 @@ void UNetworkGameInstance::ConnectToGameServer()
 		SocketIOInstance = MakeShared<SocketIO>(Socket);
 		SocketIOInstance->Init();
 		SocketIOInstance->Start();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connection Success")));
+
 
 		// todo: 임시로 CS_LOGIN 패킷 전송
 		// todo: 나중에 함수화
@@ -47,10 +45,12 @@ void UNetworkGameInstance::ConnectToGameServer()
 		FMemory::Memcpy(Packet.GetData(), &login_packet, login_packet.size);
 		SocketIOInstance->PushSendPacket(Packet);
 
+		UE_LOG(LogTemp, Log, TEXT("Success to connect to Server"));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connection Failed")));
+		// fail message
+		UE_LOG(LogTemp, Log, TEXT("Failed to connect to server"));
 	}
 }
 
@@ -116,17 +116,15 @@ void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
 
 	if (nullptr == OtherPlayerClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("OtherPlayerClass is NOT assigned!"));
+		UE_LOG(LogTemp, Log, TEXT("OtherPlayerClass is NOT assigned!"));
 		return;
 	}
 
-	auto* player{ GetWorld()->SpawnActor<ASTPlayerBase>(
+	auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
 		OtherPlayerClass,
 		transform,
 		SpawnParams
 	)};
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawn Packet Process Complete")));
 	
 	// playerid 넣기
 	PlayerMap.Add(spawn_packet->objectID, player);
@@ -135,11 +133,13 @@ void UNetworkGameInstance::HandleSpawn(packet::SCSpawnObject* spawn_packet)
 
 void UNetworkGameInstance::HandleMove(packet::SCMoveObject* move_packet)
 {
-	if (ASTPlayerBase** player_ptr{ PlayerMap.Find(move_packet->objectID) })
+	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(move_packet->objectID) })
 	{
-		ASTPlayerBase* player{ *player_ptr };
-		player->SetActorLocation(FVector( move_packet->pos.x, move_packet->pos.y, move_packet->pos.z ));
-		player->SetActorRotation(FRotator( move_packet->dir.x, move_packet->dir.y, move_packet->dir.z ));
+		ASTFieldPlayer* player{ *player_ptr };
+
+		FVector location{ move_packet->pos.x, move_packet->pos.y, move_packet->pos.z };
+		FRotator rotation{ move_packet->dir.x, move_packet->dir.y, move_packet->dir.z };
+		player->Move(location, rotation);
 	}
 }
 

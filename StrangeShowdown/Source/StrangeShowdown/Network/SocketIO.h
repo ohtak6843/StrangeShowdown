@@ -20,9 +20,8 @@ public:
 	virtual void Exit() override;
 
 	void Destroy();
-
-	// 패킷 수신
 	void DoRecv();
+	bool IsTerminated() const;
 
 	// 원하는 크기만큼 데이터 수신
 	bool RecvData(uint8* data, const int32 size);
@@ -30,6 +29,7 @@ public:
 private:
 	FSocket*			Socket;
 	bool				Running{ true };
+	bool				Terminated{ false };
 	FRunnableThread*	Thread{ nullptr };
 	TWeakPtr<SocketIO>	SocketIOPtr;
 };
@@ -50,10 +50,12 @@ public:
 
 	void Destroy();
 	void DoSend();
+	bool IsTerminated() const;
 
 private:
 	FSocket*			Socket;
 	bool				Running{ true };
+	bool				Terminated{ false };
 	FRunnableThread*	Thread{ nullptr };
 	TWeakPtr<SocketIO>	SocketIOPtr;
 };

@@ -42,17 +42,13 @@ private:
 	// accept
 	SOCKET		_acceptSocket{ INVALID_SOCKET };
 	OverlappedEx _acceptOverlappedEx{};
+
 	// todo: over 내부 버퍼를 활용해보자
 	// accpet 전용. 실제로 사용하지는 않음.
 	std::array<char, BUFFER_SIZE> _acceptBuffer{};
 
 	// threads
 	std::vector<std::thread> _workers{};
-
-	// std::queue<std::pair<int, PacketType>> _packetQueue{};
-	// job으로 대체
-
-	// 개선이 필요.
 
 	// 특수 상황 조회 시, 생명주기 관리 ( 안전성 )
 	uint64	_sessionCnt{ 0 };

@@ -2,6 +2,8 @@
 
 
 #include "Player/STFieldPlayer.h"
+#include "Animation/STAnimInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ASTFieldPlayer::ASTFieldPlayer()
 {
@@ -33,4 +35,46 @@ void ASTFieldPlayer::Tick(float DeltaTime)
 			StatWidgetComponent->SetWorldRotation(LookAtRotation);
 		}
 	}
+
+	// 이동 보간
+#if NETWORK_ENABLED
+
+	FVector CurrentLocation{ GetActorLocation() };
+	FVector NewLocation{ FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, MoveSpeed) };
+	SetActorLocation(NewLocation);
+	
+	FRotator CurrentRotation{ GetActorRotation() };
+	FRotator NewRotation{ FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed) };
+	SetActorRotation(NewRotation);
+#endif
 }
+
+void ASTFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
+{
+
+	// speed 미리 계산
+	float Speed{ 
+		static_cast<float>(FVector::Dist(Location, TargetLocation)) / SendMoveMaxTime
+	};
+
+	SetActorLocation(TargetLocation);
+	SetActorRotation(TargetRotation);
+
+	// 애니메이션
+	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
+	{
+		STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
+
+		// velocity 설정
+		auto* Movement{ GetCharacterMovement() };
+		if (Movement)
+		{
+			FVector Direction{ Location - TargetLocation };
+			Movement->Velocity = Direction * Speed;
+		}
+	}
+
+	TargetLocation = Location;
+	TargetRotation = Rotator;
+}
+

@@ -237,68 +237,6 @@ void IOCP::OnAcceptCompleted()
 }
 
 // TODO:
-// Session으로 이관 및 send 전용 OverlappedEx 풀을 통해 Send.
-//void IOCP::DoSend(std::shared_ptr<Session>& client_info, void* packet)
-//{
-//	if (nullptr == client_info) { return; }
-//	OverlappedEx* send_over_ex{ new OverlappedEx{ reinterpret_cast<unsigned char*>(packet) } };
-//	WSASend(client_info->ClientSocket, &send_over_ex->wsabuf, 1, 0, 0, &send_over_ex->over, 0);
-//}
-//
-//void IOCP::DoSend(int client_id, void* packet)
-//{
-//	auto client{ _sessionHash.at(client_id).load() };
-//	DoSend(client, packet);
-//}
-//
-//void IOCP::SendPacketToWorker(int key, char* p)
-//{
-//	PacketType packet{};
-//	std::copy(p, p + BUFFER_SIZE, packet.data());
-//	_packetQueue.push(std::make_pair(key, packet));
-//	// ProcessPacket(key, p);
-//}
-//
-//void IOCP::ProcessPacket(int key, char* p)
-//{
-//
-//	// IOCP에서 처리
-//	packet::Header* header{ reinterpret_cast<packet::Header*>(p) };
-//	auto client{ _sessionHash.at(key).load() };
-//	if (nullptr == client) {
-//		return;
-//	}
-//
-//	switch (header->type)
-//	{
-//	case packet::Type::CS_LOGIN:
-//	{
-//		packet::SCLogin sc_login{};
-//		DoSend(key, &sc_login);
-//	}
-//	break;
-//
-//	//case packet::Type::CS_MATCHMAKING:
-//	//{
-//
-//	//	// TODO: 나중에는 역할군 선택 기능도 지원해야 함.
-//	//	auto* packet{ reinterpret_cast<packet::CSMatchmaking*>(p) };
-//
-//	//	// 역할군 저장
-//	//	auto client{ _sessionHash.at(key).load() };
-//	//	if (nullptr == client) {
-//	//		break;
-//	//	}
-//
-//	//}
-//	break;
-//
-//	}
-//
-//
-//}
-
-// TODO:
 // sessionhash 개선 이후 손보기
 //void IOCP::Disconnect(const int client_id)
 //{

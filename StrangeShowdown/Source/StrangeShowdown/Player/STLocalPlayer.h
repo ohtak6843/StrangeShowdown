@@ -55,6 +55,7 @@ public:
 	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
 
 private:
-	float SendDeltaTime{};
+	float SendMoveDeltaTime{};
+	const float SendMoveMaxTime{ 0.1f };
 	
 };

@@ -15,7 +15,6 @@ RecvWorker::RecvWorker(FSocket* socket, TSharedPtr<SocketIO> socket_io) :
 	SocketIOPtr(socket_io)
 {
 	Thread = FRunnableThread::Create(this, TEXT("RecvWorkerThread"));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Created Recv Thread")));
 }
 
 RecvWorker::~RecvWorker()
@@ -35,6 +34,7 @@ uint32 RecvWorker::Run()
 		DoRecv();
 	}
 
+	Terminated = true;
 	return 0;
 }
 
@@ -76,27 +76,10 @@ void RecvWorker::DoRecv()
 	}
 
 	// 패킷 완성. SocketIO로 전달.
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Recv Success. Enqueue to SocketIO")));
-	
 	if (auto locked_ptr{ SocketIOPtr.Pin() })
 	{
 		locked_ptr->PushRecvPacket(buffer);
 	}
-
-	// todo: 임시로 cslogin 보내기
-
-	// serlalize code
-	// 
-	//packet::CSLogin login_packet{};
-	//TArray<uint8> data;
-	//data.AddUninitialized(login_packet.size);
-	//FMemory::Memcpy(data.GetData(), &login_packet, login_packet.size);
-	//
-	//if (auto locked_ptr{ SocketIOPtr.Pin() })
-	//{
-	//	locked_ptr->PushSendPacket(data);
-	//}
-
 }
 
 bool RecvWorker::RecvData(uint8* data, const int32 size)
@@ -132,7 +115,6 @@ SendWorker::SendWorker(FSocket* socket, TSharedPtr<SocketIO> socket_io) :
 	SocketIOPtr(socket_io)
 {
 	Thread = FRunnableThread::Create(this, TEXT("SendWorkerThread"));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Created Send Thread")));
 }
 
 SendWorker::~SendWorker()
@@ -151,6 +133,7 @@ uint32 SendWorker::Run()
 		DoSend();
 	}
 
+	Terminated = true;
 	return 0;
 }
 
@@ -178,6 +161,7 @@ void SendWorker::DoSend()
 	}
 	else
 	{
+		Running = false;
 		return;
 	}
 
@@ -189,9 +173,11 @@ void SendWorker::DoSend()
 	{
 		// send
 		int32 bytes_sent{};
-		if (false == Socket->Send(buffer.GetData() + total, size - total, bytes_sent))
+		auto ret{ Socket->Send(buffer.GetData() + total, size - total, bytes_sent) };
+
+		// 오류 처리
+		if (false == ret || bytes_sent <= 0)
 		{
-			// todo: 오류 처리
 			Running = false;
 			return;
 		}
@@ -200,7 +186,6 @@ void SendWorker::DoSend()
 		total += bytes_sent;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Send Complete")));
 }
 
 
@@ -217,7 +202,6 @@ SocketIO::~SocketIO()
 
 void SocketIO::Init()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Init SocketIO")));
 }
 
 void SocketIO::Start()

@@ -8,6 +8,7 @@
 #include "Containers/Map.h"
 #include "StrangeShowdown.h"
 #include "Player/STPlayerBase.h"
+#include "Player/STFieldPlayer.h"
 
 #include "NetworkGameInstance.generated.h"
 
@@ -47,7 +48,7 @@ public:
 
 	// 어떤 블프 클래스인지 알아야 함.
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTPlayerBase> OtherPlayerClass;
+	TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
 
-	TMap<uint64, ASTPlayerBase*> PlayerMap;
+	TMap<uint64, ASTFieldPlayer*> PlayerMap;
 };

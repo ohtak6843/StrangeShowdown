@@ -21,8 +21,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Move(const FVector& Location, const FRotator& Rotator);
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* StatWidgetComponent;
-	
+
+private:
+	FVector TargetLocation{};
+	FRotator TargetRotation{};
+	const float SendMoveMaxTime{ 0.1f };
+	const float MoveSpeed{ 12.f };
+	const float RotationSpeed{ 12.f };
+
 };
