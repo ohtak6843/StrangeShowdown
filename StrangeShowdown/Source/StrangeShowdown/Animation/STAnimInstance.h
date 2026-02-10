@@ -22,6 +22,9 @@ protected:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+public:
+	void SetAnimationValue(const float GroundSpeed_, const float Pitch_, const float Direction_);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class ACharacter> Owner;
@@ -64,4 +67,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float Pitch;
+
 };

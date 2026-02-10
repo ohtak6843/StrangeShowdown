@@ -57,3 +57,8 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return ActualDamage;
 }
 
+void ASTPlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+

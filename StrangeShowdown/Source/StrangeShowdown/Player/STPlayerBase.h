@@ -60,6 +60,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+protected:
+	virtual void BeginPlay() override;
+
 public:
 	// Stat Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")

@@ -6,6 +6,8 @@
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
+#include "Game/NetworkGameInstance.h"
+#include "StrangeShowdown.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -50,7 +52,6 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 	PoseElapsedTime += DeltaTime;
 	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
 
-	// 감각 좋게
 	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
 
 	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
@@ -58,6 +59,39 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 	FVector Rel = CameraComp->GetRelativeLocation();
 	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
 	CameraComp->SetRelativeLocation(Rel);
+
+	// Send Move Packet to Server
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
+}
+
+void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
+{
+	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
+	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
+
+	TargetPose = PoseSettings[NewPose];
+
+	PoseElapsedTime = 0.f;
+}
+
+void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+	case ECameraPose::Idle:
+		ChangeToIdle();
+		break;
+	case ECameraPose::Aiming:
+		ChangeToAiming();
+		break;
+	case ECameraPose::LookingUp:
+		ChangeToLookingUp();
+		break;
+	default:
+		break;
+	}
 }
 
 void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
@@ -117,34 +151,6 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	PickupItem->Destroy();
 }
 
-void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
-{
-	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
-	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
-
-	TargetPose = PoseSettings[NewPose];
-
-	PoseElapsedTime = 0.f;
-}
-
-void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
-{
-	switch (NewState)
-	{
-		case ECameraPose::Idle:
-			ChangeToIdle();
-			break;
-		case ECameraPose::Aiming:
-			ChangeToAiming();
-			break;
-		case ECameraPose::LookingUp:
-			ChangeToLookingUp();
-			break;
-		default:
-			break;
-	}
-}
-
 void ASTLocalPlayer::ChangeToIdle()
 {
 	RemoveState(EPlayerStateFlag::Aiming);
@@ -170,4 +176,32 @@ void ASTLocalPlayer::ChangeToLookingUp()
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::LookingUp);
+}
+
+void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
+{
+	SendMoveDeltaTime += DeltaTime;
+
+	if (SendMoveDeltaTime >= SendMoveMaxTime)
+	{
+		SendMoveDeltaTime -= SendMoveMaxTime;
+
+		TArray<uint8> SendBuffer;
+		auto rotation{ GetActorRotation() };
+		packet::CSMovePlayer move_packet{
+			Vec3f{
+				static_cast<float>(GetActorLocation().X),
+				static_cast<float>(GetActorLocation().Y),
+				static_cast<float>(GetActorLocation().Z)
+			},
+			Vec3f{
+				static_cast<float>(rotation.Pitch),
+				static_cast<float>(rotation.Yaw),
+				static_cast<float>(rotation.Roll)
+			}
+		};
+		SendBuffer.AddUninitialized(move_packet.size);
+		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
+		Cast<UNetworkGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
+	}
 }

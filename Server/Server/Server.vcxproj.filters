@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="main">
+      <UniqueIdentifier>{fe7d549a-72ab-4b34-8d70-59d1a3e1a3a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{5f9ab189-b82b-48ad-ad4a-9aabf83b5302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{365e947b-bb0f-4f62-b7b2-268a1cb148a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pch">
+      <UniqueIdentifier>{3dbf9891-7251-48cb-93a3-cb1e3c9babc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{d3c0db2f-e8b6-4f6e-8e4c-ec3f49ecdec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Object">
+      <UniqueIdentifier>{8a7964c2-783f-42c7-be3a-c9725da4983a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Content">
+      <UniqueIdentifier>{e2fa8e42-b286-4726-82f8-b9313fa0126f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCP.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlappedEx.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Game\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomManager.cpp">
+      <Filter>Game\Content</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IOCP.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="struct.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="define.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlappedEx.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Game\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomManager.h">
+      <Filter>Game\Content</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

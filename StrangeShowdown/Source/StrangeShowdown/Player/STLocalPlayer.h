@@ -72,11 +72,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
 
-// Change Camera Settings with State
+
 private:
+	// Change Camera Settings with State
 	void ChangeToIdle();
 	void ChangeToAiming();
 	void ChangeToLookingUp();
+
+	void SendMovePacket(const float DeltaTime);
 
 	TMap<ECameraPose, FCameraPoseSetting> PoseSettings;
 
@@ -85,4 +88,8 @@ private:
 
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
+
+	// Network
+	float SendMoveDeltaTime{};
+	const float SendMoveMaxTime{ 0.1f };
 };

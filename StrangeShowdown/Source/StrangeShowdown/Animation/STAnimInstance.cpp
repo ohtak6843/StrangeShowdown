@@ -35,6 +35,7 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshold;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshold);
+
 	}
 
 	TObjectPtr<ASTPlayerBase> Player = Cast<ASTPlayerBase>(Owner);
@@ -49,4 +50,11 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsAiming = Player->HasAnyState(EPlayerStateFlag::Aiming);
 		bIsLookingUp = Player->HasAnyState(EPlayerStateFlag::LookingUp);
 	}
+}
+
+void USTAnimInstance::SetAnimationValue(const float GroundSpeed_, const float Pitch_, const float Direction_)
+{
+	GroundSpeed = GroundSpeed_;
+	Pitch = Pitch_;
+	Direction = Direction_;
 }
