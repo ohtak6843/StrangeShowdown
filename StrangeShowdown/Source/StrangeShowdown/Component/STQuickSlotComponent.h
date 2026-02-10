@@ -68,4 +68,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
 	int32 CurrentSelectQuickSlotIndex;
+
+private:
+	// 고정 인덱스(빈 슬롯으로 사용 불가)
+	int fixIndex = 2;
 };
