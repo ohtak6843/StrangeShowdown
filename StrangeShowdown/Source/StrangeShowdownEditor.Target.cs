@@ -11,6 +11,6 @@ public class StrangeShowdownEditorTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("StrangeShowdown");
-		ProjectDefinitions.Add("NETWORK_ENABLED=1");
+		//ProjectDefinitions.Add("NETWORK_ENABLED=1");
 	}
 }
