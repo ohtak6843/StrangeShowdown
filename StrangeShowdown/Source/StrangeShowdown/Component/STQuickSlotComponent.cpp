@@ -89,7 +89,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	if (TargetQuickSlotIndex == -2)
 	{
 		// ºó ½½·Ô Ã£±â
-		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		for (int32 i = fixIndex; i < QuickSlots.Num(); i++)
 		{
 			if (QuickSlots[i].ItemData == nullptr)
 			{

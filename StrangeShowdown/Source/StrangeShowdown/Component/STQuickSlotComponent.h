@@ -64,8 +64,12 @@ public:
 	TArray<int32> InventorySlotIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
-	int32 QuickSlotSize = 5;
+	int32 QuickSlotSize = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
 	int32 CurrentSelectQuickSlotIndex;
+
+private:
+	// ∞Ì¡§ ¿Œµ¶Ω∫(∫Û ΩΩ∑‘¿∏∑Œ ªÁøÎ ∫“∞°)
+	int fixIndex = 2;
 };

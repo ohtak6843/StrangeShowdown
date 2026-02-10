@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "RoomInfoObject.generated.h"
+#include "STRoomInfoObject.generated.h"
 
 USTRUCT(BlueprintType)
 struct FRoomInfo
@@ -28,7 +28,7 @@ struct FRoomInfo
 };
 
 UCLASS(Blueprintable)
-class STRANGESHOWDOWN_API URoomInfoObject : public UObject
+class STRANGESHOWDOWN_API USTRoomInfoObject : public UObject
 {
 	GENERATED_BODY()
 	
