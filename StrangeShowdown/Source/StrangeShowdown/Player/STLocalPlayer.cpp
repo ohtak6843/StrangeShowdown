@@ -30,13 +30,34 @@ ASTLocalPlayer::ASTLocalPlayer()
 
 	// Attack Trace Component
 	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
+
+	// Camera Pose Settings
+	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
+	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
+	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
 }
 
 void ASTLocalPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void ASTLocalPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	// 감각 좋게
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
 }
 
 void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
@@ -94,4 +115,59 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	OutAddedInventoryIndex = AddedInventoryIndex;
 
 	PickupItem->Destroy();
+}
+
+void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
+{
+	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
+	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
+
+	TargetPose = PoseSettings[NewPose];
+
+	PoseElapsedTime = 0.f;
+}
+
+void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+		case ECameraPose::Idle:
+			ChangeToIdle();
+			break;
+		case ECameraPose::Aiming:
+			ChangeToAiming();
+			break;
+		case ECameraPose::LookingUp:
+			ChangeToLookingUp();
+			break;
+		default:
+			break;
+	}
+}
+
+void ASTLocalPlayer::ChangeToIdle()
+{
+	RemoveState(EPlayerStateFlag::Aiming);
+	RemoveState(EPlayerStateFlag::LookingUp);
+	bUseControllerRotationYaw = false;
+
+	SetCameraPose(ECameraPose::Idle);
+}
+
+void ASTLocalPlayer::ChangeToAiming()
+{
+	AddState(EPlayerStateFlag::Aiming);
+	RemoveState(EPlayerStateFlag::LookingUp);
+	bUseControllerRotationYaw = true;
+
+	SetCameraPose(ECameraPose::Aiming);
+}
+
+void ASTLocalPlayer::ChangeToLookingUp()
+{
+	AddState(EPlayerStateFlag::LookingUp);
+	RemoveState(EPlayerStateFlag::Aiming);
+	bUseControllerRotationYaw = true;
+
+	SetCameraPose(ECameraPose::LookingUp);
 }

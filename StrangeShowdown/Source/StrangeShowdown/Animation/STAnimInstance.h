@@ -54,7 +54,7 @@ protected:
 	float JumpingThreshold;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsArmedRifle : 1;
+	uint8 bIsArmedPistol : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsAiming : 1;
