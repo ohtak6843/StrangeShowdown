@@ -1,5 +1,6 @@
 #pragma once
 #include "Session.h"
+#include "Serializer.h"
 
 //class PacketHandler {
 //public:
@@ -23,11 +24,25 @@
 class PacketHandler
 {
 public:
-	static void HandlePacket(std::shared_ptr<Session> session, char* buffer, int len);
+	static void Init();
 
+	static void HandlePacket(SessionPtr session, const RecvBuffer& data);
 
 private:
-    static void HandleCSMovePlayer(std::shared_ptr<Session> session, void* packet);
-	static void HandleCSLogin(std::shared_ptr<Session> session, void* packet);
+    static void HandleMovePlayer(SessionPtr session, const packet::CSMovePlayer& packet);
+	static void HandleLogin(SessionPtr session, const packet::CSLogin& packet);
+
+	template <typename T>
+	static void RegisterHandler(packet::Type type, std::function<void(SessionPtr, const T&)> logic_func)
+	{
+		_handlerMap.emplace(type, [logic_func](SessionPtr session, const RecvBuffer& Data) {
+			T Pkt{ Serializer::Deserialize<T>(Data) };
+			logic_func(session, Pkt);
+			});
+	}
+
+
+	using HandlerFunc = std::function<void(std::shared_ptr<Session>, const RecvBuffer&)>;
+	static std::unordered_map<packet::Type, HandlerFunc> _handlerMap;
 
 };

@@ -63,8 +63,7 @@ private:
 	// Overlapped 변수
 	OverlappedEx	_overlappedEx{};
 	// 패킷 재조립 버퍼
-	 std::array<char, BUFFER_SIZE> _recvBuffer{};
-	//std::vector<char> _recvBuffer;
+	RecvBuffer _recvBuffer{};
 
 	// 남은 데이터 크기 
 	uint32				_currentDataSize{ 0 };

@@ -8,7 +8,6 @@ Session::Session(const SOCKET client_socket, const uint64 id)
 	: _clientSocket{ client_socket }
 	, _sessionID{ id }
 {
-	// _recvBuffer.resize(BUFFER_SIZE);
 }
 
 void Session::DoRecv()
@@ -128,7 +127,7 @@ void Session::ReassemblePacket()
 		// todo:
 		// 나중엔 room별 job 큐에 넣어야 함.
 		// 임시로 패킷 처리를 여기서
-		PacketHandler::HandlePacket(shared_from_this(), _recvBuffer.data(), packet_size);
+		PacketHandler::HandlePacket(shared_from_this(), _recvBuffer);
 	
 		// 버퍼 당기기
 		_currentDataSize -= packet_size;

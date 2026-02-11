@@ -30,5 +30,10 @@
 #include "protocol.h"
 #include "define.h"
 
-// using PacketType = std::array<char, BUFFER_SIZE>;
+using RecvBuffer = std::array<int8, BUFFER_SIZE>;
+using SendBuffer = std::vector<int8>;
+
+using SessionPtr = std::shared_ptr<class Session>;
+
+
 
