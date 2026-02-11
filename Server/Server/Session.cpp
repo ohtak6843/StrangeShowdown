@@ -7,7 +7,9 @@
 Session::Session(const SOCKET client_socket, const uint64 id)
 	: _clientSocket{ client_socket }
 	, _sessionID{ id }
-{}
+{
+	// _recvBuffer.resize(BUFFER_SIZE);
+}
 
 void Session::DoRecv()
 {

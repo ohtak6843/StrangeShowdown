@@ -68,6 +68,8 @@ void IOCP::Start()
 	{
 		_workers.emplace_back([this]() { WorkerThread(); });
 	}
+
+	std::println("IOCP Started with {} threads.", thread_number);
 }
 
 void IOCP::DeleteSession(const uint64 session_id)

@@ -2,6 +2,7 @@
 #include "PacketHandler.h"
 #include "RoomManager.h"
 #include "IOCP.h"
+#include "Serializer.h"
 
 //void PacketHandler::HandlePacket(std::shared_ptr<Session> session, char* buffer, int len) {
 //    PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
@@ -85,9 +86,7 @@ void PacketHandler::HandleCSMovePlayer(std::shared_ptr<Session> session, void* p
 			player->_position,
 			player->_direction
 		};
-		std::vector<char> buffer(move_object_packet.size);
-		std::memcpy(buffer.data(), &move_object_packet, move_object_packet.size);
-		other_session->DoSend(buffer);
+		other_session->DoSend(move_object_packet);
 	}
 }
 
@@ -122,9 +121,7 @@ void PacketHandler::HandleCSLogin(std::shared_ptr<Session> session, void* packet
 			player->_position,
 			player->_direction
 		};
-		std::vector<char> buffer(move_object_packet.size);
-		std::memcpy(buffer.data(), &move_object_packet, move_object_packet.size);
-		other_session->DoSend(buffer);
+		other_session->DoSend(move_object_packet);
 
 		// 현재 클라이언트에 기존 플레이어 정보 전달
 		packet::SCSpawnObject other_spawn_packet{
@@ -132,8 +129,6 @@ void PacketHandler::HandleCSLogin(std::shared_ptr<Session> session, void* packet
 			other_player->_position,
 			other_player->_direction
 		};
-		std::vector<char> other_buffer(other_spawn_packet.size);
-		std::memcpy(other_buffer.data(), &other_spawn_packet, other_spawn_packet.size);
-		session->DoSend(other_buffer);
+		session->DoSend(other_spawn_packet);
 	}
 }
