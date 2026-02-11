@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "StrangeShowdown.h"
 #include "Network/STSerializer.h"
-#include "Game/NetworkGameInstance.h"
+#include "Game/STGameInstance.h"
 
 /**
  * Socket I/O 통신
@@ -38,7 +38,7 @@ private:
 
 	// 현재 인스턴스
 	UPROPERTY()
-	TObjectPtr<UNetworkGameInstance> GameInstance;
+	TObjectPtr<USTGameInstance> GameInstance;
 
 	// 핸들러 함수 맵
 	using FPacketHandlerFunc = TFunction<void(const TArray<uint8>&)>;

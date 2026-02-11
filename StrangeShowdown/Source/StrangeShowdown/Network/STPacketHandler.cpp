@@ -6,7 +6,7 @@
 STPacketHandler::STPacketHandler()
 {
 	
-	GameInstance = Cast<UNetworkGameInstance>(GWorld->GetGameInstance());
+	GameInstance = Cast<USTGameInstance>(GWorld->GetGameInstance());
 
 	RegisterHandler<packet::SCSpawnObject>(
 		packet::Type::SC_SPAWN_OBJECT, [this](const auto& Pkt) {

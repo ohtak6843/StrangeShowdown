@@ -6,7 +6,7 @@
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
-#include "Game/NetworkGameInstance.h"
+#include "Game/STGameInstance.h"
 #include "StrangeShowdown.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -202,6 +202,6 @@ void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 		};
 		SendBuffer.AddUninitialized(move_packet.size);
 		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
-		Cast<UNetworkGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
+		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
 	}
 }
