@@ -23,13 +23,13 @@ ASTPlayerBase::ASTPlayerBase()
 
 	// Stat Component
 	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
-	StatComp->Hp = StatComp->MaxHp;
+	StatComp->CurrentHp = StatComp->MaxHp;
 	StatComp->Gold = 0;
 	StatComp->Kill = 0;
 	StatComp->Armor = 0;
 	StatComp->MoveSpeed = 500;
-	StatComp->Stamina = StatComp->MaxStamina - 2;
-	StatComp->Action = StatComp->MaxAction;
+	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
+	StatComp->CurrentAction = StatComp->UseAbleAction;
 	StatComp->Prize = 0;
 	StatComp->bAlive = true;
 
@@ -49,7 +49,7 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	StatComp->AddHp(-ActualDamage);
 
 	// TODO: Check Death
-	if (StatComp->Hp <= 0.f)
+	if (StatComp->CurrentHp <= 0.f)
 	{
 		
 	}
