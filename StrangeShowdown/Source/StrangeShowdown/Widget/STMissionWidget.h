@@ -23,6 +23,12 @@ public:
 	class UTextBlock* MissionTitle;
 
 public:
+	virtual void NativeConstruct() override;
+
 	UFUNCTION(BlueprintCallable, Category = "Mission")
 	void SetMission(const FText& NewTitle, const FText& NewMission);
+
+	// SetMission 호출 시 호출되는 블루프린트 함수
+	UFUNCTION(BlueprintImplementableEvent, Category = "Mission")
+	void OnMissionUpdated();
 };

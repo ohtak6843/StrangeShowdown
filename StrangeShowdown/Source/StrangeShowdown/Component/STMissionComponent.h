@@ -1,28 +1,34 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "STMissionComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FMissionUpdated,
+	const FText&, Title,
+	const FText&, Description
+);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STRANGESHOWDOWN_API USTMissionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
 	USTMissionComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "Mission")
+	void SetMission(const FText& NewTitle, const FText& NewDesc);
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+public:
+	UPROPERTY(BlueprintAssignable)
+	FMissionUpdated OnMissionUpdated;
 
-		
+private:
+	UPROPERTY()
+	FText CurrentTitle;
+
+	UPROPERTY()
+	FText CurrentMission;
 };
