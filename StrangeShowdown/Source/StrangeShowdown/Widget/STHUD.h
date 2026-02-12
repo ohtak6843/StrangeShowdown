@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Widget/STChatManagerWidget.h"
 #include "Widget/STStatWidget.h"
+#include "Widget/STMissionWidget.h"
 #include "STHUD.generated.h"
 
 /**
@@ -22,4 +23,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	USTStatWidget* StatWidget;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USTMissionWidget* MissionWidget;
 };
