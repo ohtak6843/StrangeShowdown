@@ -8,17 +8,18 @@ std::unordered_map<packet::Type, PacketHandler::HandlerFunc> PacketHandler::_han
 
 void PacketHandler::Init()
 {
+	// 핸들러 등록
 	RegisterHandler<packet::CSLogin>(
 		packet::Type::CS_LOGIN,
-		[](SessionPtr session, const auto& Pkt) {
-			HandleLogin(session, Pkt);
+		[](SessionPtr session, const auto& pkt) {
+			HandleLogin(session, pkt);
 		}
 	);
 
 	RegisterHandler<packet::CSMovePlayer>(
 		packet::Type::CS_MOVE_PLAYER,
-		[](SessionPtr session, const auto& Pkt) {
-			HandleMovePlayer(session, Pkt);
+		[](SessionPtr session, const auto& pkt) {
+			HandleMovePlayer(session, pkt);
 		}
 	);
 }

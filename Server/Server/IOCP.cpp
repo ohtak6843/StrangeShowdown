@@ -135,6 +135,9 @@ void IOCP::WorkerThread()
 		{
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
 			session->OnRecvCompleted(io_size);
+
+			// 세션에 소속한 방 잡큐에 작업이 있을 경우 실행
+			GET_SINGLE(RoomManager)->GetRoom(session->GetSessionID())->Update();
 		}
 		break;
 

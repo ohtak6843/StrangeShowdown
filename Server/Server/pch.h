@@ -34,6 +34,6 @@ using RecvBuffer = std::array<int8, BUFFER_SIZE>;
 using SendBuffer = std::vector<int8>;
 
 using SessionPtr = std::shared_ptr<class Session>;
-
+using PlayerPtr = std::shared_ptr<class Player>;
 
 

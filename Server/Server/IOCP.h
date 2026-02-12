@@ -28,9 +28,6 @@ private:
 	void DoAccept();
 	void OnAcceptCompleted();
 
-	// void ProcessPacket(int key, char* p);
-	// -> New Class PacketHandler 
-
 private:
 
 	// iocp handle

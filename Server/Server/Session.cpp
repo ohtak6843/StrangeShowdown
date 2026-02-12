@@ -3,6 +3,8 @@
 #include "OverlappedEx.h"
 #include "IOCP.h"
 #include "PacketHandler.h"
+#include "RoomManager.h"
+#include "Job.h"
 
 Session::Session(const SOCKET client_socket, const uint64 id)
 	: _clientSocket{ client_socket }
@@ -119,7 +121,7 @@ void Session::ReassemblePacket()
 		uint32 packet_size{ static_cast<uint8>(_recvBuffer[0]) };
 
 		// 패킷 처리 가능 여부 확인
-		if (0u == packet_size && packet_size > _currentDataSize)
+		if (0 == packet_size && packet_size > _currentDataSize)
 		{
 			break;
 		}
@@ -127,8 +129,27 @@ void Session::ReassemblePacket()
 		// todo:
 		// 나중엔 room별 job 큐에 넣어야 함.
 		// 임시로 패킷 처리를 여기서
-		PacketHandler::HandlePacket(shared_from_this(), _recvBuffer);
-	
+		// PacketHandler::HandlePacket(shared_from_this(), _recvBuffer);
+
+		// 현재 플레이어가 소속된 방이 있으면 방 작업 큐에 넣고
+		// 아니면 바로 실행
+		// 임시로 CS_Login은 바로 처리 -> 0번 방에 넣고 플레이어 생성 ( 나중에. 지금은 accept시 방에 넣기 )
+
+		// 일단 지금 모두 방 매니저에서 방을 가져와 작업 큐에 넣기
+		// 플레이어 세션id로 방을 가져올 수 있어야 함.
+		// todo: [세션id, 방번호id] unordered_map이 있어야 할듯. -> 나중에 추가
+		// Manager->GetRoom(SessionId)
+
+
+		// 이 핸들패킷은 싱글스레드가 보장
+		auto room{ GET_SINGLE(RoomManager)->GetRoom(_sessionID) };
+		Job job{ [this]() { PacketHandler::HandlePacket(shared_from_this(), _recvBuffer); } };
+		room->PushJob(job);
+
+		// 이 핸들패킷은 멀티스레드.
+		// 패킷핸들러를 바로 실행
+
+
 		// 버퍼 당기기
 		_currentDataSize -= packet_size;
 		if (_currentDataSize > 0)
@@ -144,7 +165,7 @@ void Session::ReassemblePacket()
 
 void Session::ReleaseRef()
 {
-	if (0 == --_refCnt) {
+	if (0 == --_referenceCount) {
 		GET_SINGLE(IOCP)->DeleteSession(_sessionID);
 	}
 }
