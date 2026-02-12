@@ -7,7 +7,7 @@
 #include "Components/ScrollBox.h"
 #include "Components/EditableTextBox.h"
 #include "Misc/DateTime.h"
-#include "STChatManager.generated.h"
+#include "STChatManagerWidget.generated.h"
 
 /**
  * 
@@ -29,7 +29,7 @@ struct FChatMessage
 };
 
 UCLASS()
-class STRANGESHOWDOWN_API USTChatManager : public UUserWidget
+class STRANGESHOWDOWN_API USTChatManagerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -51,7 +51,7 @@ public:
 
 	// 메시지 추가(UI 갱신)
 	UFUNCTION(BlueprintCallable, Category = "Chat")
-	void AddChatMessage(const FString& SenderNickName, const FString& Message);
+	void AddChatMessage(const FString& SenderNickName, const FString& Message, FDateTime Time);
 
 	// Enter 눌렀을 때 입력 처리, 입력 텍스트를 FChatMessage로 변환하여 ChatLog에 추가
 	UFUNCTION()

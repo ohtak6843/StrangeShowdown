@@ -1,34 +1,34 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Widget/STChatManager.h"
+#include "Widget/STChatManagerWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Player/STPlayerBase.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
-void USTChatManager::NativeConstruct()
+void USTChatManagerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	if (ChatInputTextBox)
 	{
-		ChatInputTextBox->OnTextCommitted.AddDynamic(this, &USTChatManager::OnChatInputCommitted);
+		ChatInputTextBox->OnTextCommitted.AddDynamic(this, &USTChatManagerWidget::OnChatInputCommitted);
 	}
 }
 
-void USTChatManager::AddChatMessage(const FString& SenderNickName, const FString& Message)
+void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const FString& Message, FDateTime Time)
 {
 	FChatMessage NewMessage;
 	NewMessage.SenderNickName = SenderNickName;
 	NewMessage.Message = Message;
-	NewMessage.Timestamp = FDateTime::Now();
+	NewMessage.Timestamp = Time;
 	ChatLog.Add(NewMessage);
 	RefreshChatUI();
 }
 
-void USTChatManager::OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod)
 {
 	if (CommitMethod == ETextCommit::OnEnter)
 	{
@@ -47,7 +47,8 @@ void USTChatManager::OnChatInputCommitted(const FText& Text, ETextCommit::Type C
 
 			FString NickName = Player->PlayerNickName;
 
-			AddChatMessage(NickName, InputMessage);
+			// 임시로 FDateTime::Now() 사용
+			AddChatMessage(NickName, InputMessage, FDateTime::Now());
 
 			ChatInputTextBox->SetText(FText::GetEmpty());
 		}
@@ -64,15 +65,14 @@ void USTChatManager::OnChatInputCommitted(const FText& Text, ETextCommit::Type C
 	}
 }
 
-void USTChatManager::RefreshChatUI()
+void USTChatManagerWidget::RefreshChatUI()
 {
 	if (!ChatScrollBox) return;
 
-	// 기존 메시지 제거
 	ChatScrollBox->ClearChildren();
+
 	for (const FChatMessage& ChatMessage : ChatLog)
 	{
-		// 새로운 텍스트 블록 생성 및 추가
 		UTextBlock* MessageTextBlock = NewObject<UTextBlock>(ChatScrollBox);
 		if (MessageTextBlock)
 		{
@@ -83,16 +83,21 @@ void USTChatManager::RefreshChatUI()
 
 			MessageTextBlock->SetText(FText::FromString(FormattedMessage));
 			MessageTextBlock->SetAutoWrapText(true);
-
 			ChatScrollBox->AddChild(MessageTextBlock);
-
-			// 스크롤을 가장 아래로 이동
-			ChatScrollBox->ScrollToEnd();
 		}
 	}
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			if (ChatScrollBox)
+			{
+				ChatScrollBox->ScrollToEnd();
+			}
+		}, 0.01f, false);
 }
 
-void USTChatManager::SetChatInputFocus()
+void USTChatManagerWidget::SetChatInputFocus()
 {
 	if (ChatInputTextBox)
 	{

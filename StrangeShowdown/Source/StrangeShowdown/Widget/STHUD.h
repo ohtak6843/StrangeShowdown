@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Widget/STChatManager.h"
+#include "Widget/STChatManagerWidget.h"
+#include "Widget/STStatWidget.h"
 #include "STHUD.generated.h"
 
 /**
@@ -17,5 +18,8 @@ class STRANGESHOWDOWN_API USTHUD : public UUserWidget
 	
 public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USTChatManager* ChatManagerWidget;
+	USTChatManagerWidget* ChatManagerWidget;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USTStatWidget* StatWidget;
 };
