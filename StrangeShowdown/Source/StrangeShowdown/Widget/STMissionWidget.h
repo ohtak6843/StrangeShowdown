@@ -5,30 +5,47 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/ListView.h"
 #include "STMissionWidget.generated.h"
 
 /**
  * 
  */
+
+USTRUCT(BlueprintType)
+struct FMissionInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	class UTextBlock* MissionText;
+
+	UPROPERTY(BlueprintReadWrite)
+	class UTextBlock* MissionTitle;
+};
+
 UCLASS()
 class STRANGESHOWDOWN_API USTMissionWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
-public:
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* MissionText;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* MissionTitle;
 
 public:
 	virtual void NativeConstruct() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Mission")
-	void SetMission(const FText& NewTitle, const FText& NewMission);
+	// MissionComponent에서 호출될 함수
+	UFUNCTION()
+	void AddMission(const FText& NewTitle, const FText& NewMission);
 
-	// SetMission 호출 시 호출되는 블루프린트 함수
-	UFUNCTION(BlueprintImplementableEvent, Category = "Mission")
-	void OnMissionUpdated();
+protected:
+	// UMG에서 BindWidget 체크
+	UPROPERTY(meta = (BindWidget))
+	UListView* MissionListView;
+
+private:
+	// 현재 저장된 미션 데이터
+	UPROPERTY()
+	TArray<UObject*> MissionItems;
+
+	// 최대 미션 개수
+	static constexpr int32 MaxMissionCount = 3;
 };

@@ -6,10 +6,10 @@ USTMissionComponent::USTMissionComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void USTMissionComponent::SetMission(const FText& NewTitle, const FText& NewMission)
+void USTMissionComponent::SetMission(const FText& Title, const FText& Mission)
 {
-	CurrentTitle = NewTitle;
-	CurrentMission = NewMission;
+	CurrentTitle = Title;
+	CurrentMission = Mission;
 
 	OnMissionUpdated.Broadcast(CurrentTitle, CurrentMission);
 }

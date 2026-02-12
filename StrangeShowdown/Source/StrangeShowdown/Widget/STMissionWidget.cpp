@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Widget/STMissionWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Game/STPlayerState.h"
 #include "Component/STMissionComponent.h"
+#include "Game/STMissionRowData.h"
 
 void USTMissionWidget::NativeConstruct()
 {
@@ -16,28 +14,36 @@ void USTMissionWidget::NativeConstruct()
 		{
 			if (PS->MissionComponent)
 			{
-				// 미션이 바뀌면 MissionWidget의 SetMission 함수 호출
-				// 브로드캐스트 델리게이트에 함수 바인딩
+				// MissionComponent 델리게이트 바인딩
 				PS->MissionComponent->OnMissionUpdated.AddDynamic(
 					this,
-					&USTMissionWidget::SetMission
+					&USTMissionWidget::AddMission
 				);
 			}
 		}
 	}
 }
 
-void USTMissionWidget::SetMission(const FText& NewTitle, const FText& NewMission)
+void USTMissionWidget::AddMission(const FText& NewTitle, const FText& NewMission)
 {
-	if (MissionTitle)
+	if (!MissionListView)
 	{
-		MissionTitle->SetText(NewTitle);
-	}
-	if (MissionText)
-	{
-		MissionText->SetText(NewMission);
+		UE_LOG(LogTemp, Warning, TEXT("MissionListView is null"));
+		return;
 	}
 
-	// 블루프린트에서 구현된 함수 호출
-	OnMissionUpdated();
+	// 최대 개수 제한
+	if (MissionItems.Num() >= MaxMissionCount)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mission limit exceeded (max 3)"));
+		return;
+	}
+
+	USTMissionRowData* NewItem = NewObject<USTMissionRowData>(this);
+	if (!NewItem) return;
+
+	NewItem->Init(NewTitle, NewMission);
+
+	MissionItems.Add(NewItem);
+	MissionListView->AddItem(NewItem);
 }
