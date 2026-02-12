@@ -12,8 +12,17 @@ Session::Session(const SOCKET client_socket, const uint64 id)
 {
 }
 
+Session::~Session()
+{
+}
+
 void Session::DoRecv()
 {
+	if (_ioState == IOState::DISCONNECT)
+	{
+		return;
+	}
+
 	// Recv IO 시작
 	IncreaseRef();
 
@@ -33,6 +42,7 @@ void Session::DoRecv()
 	};
 
 	// todo: 예외 처리
+	// recv에 문제 발생 시 나가
 	if (SOCKET_ERROR == ret)
 	{
 		int error{ WSAGetLastError() };
@@ -45,13 +55,12 @@ void Session::DoRecv()
 
 void Session::OnRecvCompleted(const uint32 recieved_bytes)
 {
-	// todo: disconnect
+	// 클라이언트 종료 처리는 OnRecv 호출 전 처리.
 	if (0 == recieved_bytes)
 	{
-		ReleaseRef();
+		Disconnect();
 		return;
 	}
-
 	// 패킷 재조립 및 처리
 	_currentDataSize += recieved_bytes;
 	ReassemblePacket();
@@ -65,17 +74,16 @@ void Session::OnRecvCompleted(const uint32 recieved_bytes)
 
 void Session::DoSend(const std::vector<char>& data)
 {
+	if (_ioState == IOState::DISCONNECT)
+	{
+		return;
+	}
+
 	IncreaseRef();
 
 	// todo:
-	// 일단 임시로 new delete 사용, 임시로 login packet 전송
-	// 나중에 shared ptr reference count 해결할 방도가 생각나면 
+	// 일단 임시로 new delete 사용 -> Memory manager
 	auto overlapped_ex{ new OverlappedEx() };
-	//packet::SCLogin packet;
-	// TODO: 직렬화 해주는 클래스 만들기
-	// auto buffer{ packet.Serialize() };
-	//std::vector<char> buffer(packet.size);
-	//std::memcpy(buffer.data(), &packet, packet.size);
 
 	overlapped_ex->PrepareSend(data);
 
@@ -127,19 +135,8 @@ void Session::ReassemblePacket()
 		}
 
 		// todo:
-		// 나중엔 room별 job 큐에 넣어야 함.
-		// 임시로 패킷 처리를 여기서
-		// PacketHandler::HandlePacket(shared_from_this(), _recvBuffer);
-
 		// 현재 플레이어가 소속된 방이 있으면 방 작업 큐에 넣고
 		// 아니면 바로 실행
-		// 임시로 CS_Login은 바로 처리 -> 0번 방에 넣고 플레이어 생성 ( 나중에. 지금은 accept시 방에 넣기 )
-
-		// 일단 지금 모두 방 매니저에서 방을 가져와 작업 큐에 넣기
-		// 플레이어 세션id로 방을 가져올 수 있어야 함.
-		// todo: [세션id, 방번호id] unordered_map이 있어야 할듯. -> 나중에 추가
-		// Manager->GetRoom(SessionId)
-
 
 		// 이 핸들패킷은 싱글스레드가 보장
 		auto room{ GET_SINGLE(RoomManager)->GetRoom(_sessionID) };
@@ -167,6 +164,12 @@ void Session::ReleaseRef()
 {
 	if (0 == --_referenceCount) {
 		GET_SINGLE(IOCP)->DeleteSession(_sessionID);
+
+		if (INVALID_SOCKET != _clientSocket)
+		{
+			closesocket(_clientSocket);
+		}
+		std::println("Session {} ended.", _sessionID);
 	}
 }
 
@@ -184,5 +187,11 @@ void Session::Start()
 	DoRecv();
 	
 	// Start 참조 해제
+	ReleaseRef();
+}
+
+void Session::Disconnect()
+{
+	_ioState = IOState::DISCONNECT;
 	ReleaseRef();
 }

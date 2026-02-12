@@ -79,6 +79,16 @@ void IOCP::DeleteSession(const uint64 session_id)
 }
 
 
+void IOCP::Disconnect(const uint64 session_id)
+{
+	auto session{ reinterpret_cast<Session*>(session_id) };
+	if (nullptr == session)
+	{
+		return;
+	}
+	session->Disconnect();
+}
+
 void IOCP::WorkerThread()
 {
 
@@ -91,8 +101,6 @@ void IOCP::WorkerThread()
 	// 
 	// send
 	// -> MemoryManager에 사용한 Send OverlappedEx 반환하기
-
-
 
 	while (true)
 	{
@@ -114,8 +122,19 @@ void IOCP::WorkerThread()
 
 		if (FALSE == ret)
 		{
-			// TODO:
-			// Disconnect(key);
+			// 시스템 오류
+			if (nullptr == over)
+			{
+				// 서버 종료
+				auto error{ GetLastError() };
+				std::println("Fatal Error : {}. Destory Worker.", error);
+				break;				
+			}
+			// 클라이언트 강제 종료
+			else
+			{
+				Disconnect(ul_session);
+			}
 			continue;
 		}
 
@@ -133,11 +152,16 @@ void IOCP::WorkerThread()
 
 		case IOOperation::RECV:
 		{
+			// 클라이언트 정상 종료
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
 			session->OnRecvCompleted(io_size);
 
 			// 세션에 소속한 방 잡큐에 작업이 있을 경우 실행
-			GET_SINGLE(RoomManager)->GetRoom(session->GetSessionID())->Update();
+			auto room{ GET_SINGLE(RoomManager)->GetRoom(session->GetSessionID()) };
+			if (nullptr != room)
+			{
+				room->Update();
+			}
 		}
 		break;
 
@@ -153,21 +177,6 @@ void IOCP::WorkerThread()
 
 		}
 	}
-
-	
-	//// 여기를 여러 스레드에서 동시에 방을 업데이트 해주도록 변경해야 한다.
-	//while (true) {
-	//	// 패킷 반영
-	//	while (not _packetQueue.empty())
-	//	{
-	//		auto& packet{ _packetQueue.front() };
-	//		ProcessPacket(packet.first, packet.second.data());
-	//		_packetQueue.pop();
-	//	}
-	//	// 업데이트 
-	//	// GET_SINGLE(Game)->Update();
-	//}
-
 }
 
 void IOCP::DoAccept()
@@ -232,27 +241,13 @@ void IOCP::OnAcceptCompleted()
 	_sessionHash[id] = new_client;
 
 	// 추가 정보 저장
-	// todo: 나중에 새로운 객체 생성 시점을 job을 통해 생성하도록 변경
-	// 누가 이 객체를 소유해야 하는가?
+	// todo: 플레이어 생성 시점을 여기가 아니라 방 입장시로 변경
 	new_client->SetSessionID(id);
 	GET_SINGLE(RoomManager)->AddPlayer(id, std::make_shared<Player>());
 
 	// 세션 시작
 	new_client->Start();
 }
-
-// TODO:
-// sessionhash 개선 이후 손보기
-//void IOCP::Disconnect(const int client_id)
-//{
-//	auto client{ _sessionHash.at(client_id).load() };
-//	if (nullptr == client) {
-//		return;
-//	}
-//	client->IOState = IOState::DISCONNECT;
-//	closesocket(client->ClientSocket);
-//}
-
 
 
 IOCP::~IOCP()

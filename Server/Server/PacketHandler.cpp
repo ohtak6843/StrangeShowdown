@@ -48,7 +48,7 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const packet::CSMovePla
 	player->_position = packet.pos;
 	player->_direction = packet.dir;
 
-	// todo: 변경
+	// todo: 변경: _sessionHash 직접 접근에서 RoomManager 통해 접근
 	// 다른 플레이어에게도 전파
 	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
 	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };
@@ -77,7 +77,7 @@ void PacketHandler::HandleLogin(SessionPtr session, const packet::CSLogin& packe
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
 
 
-	// todo: 변경
+	// todo: 변경: _sessionHash 직접 접근에서 RoomManager 통해 접근
 	// 다른 플레이어에게도 전파
 	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
 	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };

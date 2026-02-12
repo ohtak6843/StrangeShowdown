@@ -29,7 +29,7 @@ void RoomManager::RemovePlayer(uint64 playerId)
 void RoomManager::CreateRoom()
 {
 	// todo: 메모리 매니저에서 꺼내오자.
-	// todo: 현재 room이 있는지 검사할 필요가 있음.
-	// todo: 나중에 방 입장 코드도 필요
+	// 현재 room이 있는지 검사할 필요가 있음.
+	// 나중에 방 입장 코드도 필요
 	_rooms[_roomCounter++] = std::make_shared<Room>();
 }
