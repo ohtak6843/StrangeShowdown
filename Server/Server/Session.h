@@ -76,10 +76,11 @@ private:
 	// 남은 데이터 크기 
 	uint32				_currentDataSize{ 0 };
 
-
 	// reference count
 	// 세션을 raw pointer로 사용하기 위한 카운터
 	// IO 대기 중 shared_ptr로 만든 객체가 사라질 수 있어
 	// 이를 방지하기 위해 IO 작업중인 횟수를 저장한다.
 	std::atomic<int>	_referenceCount{ 0 };
+
+	// additional info
 };

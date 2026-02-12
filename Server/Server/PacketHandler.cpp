@@ -45,68 +45,55 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const packet::CSMovePla
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
 
-	player->_position = packet.pos;
-	player->_direction = packet.dir;
+	player->SetPosition(packet.pos);
+	player->SetDirection(packet.dir);
 
-	// todo: 변경: _sessionHash 직접 접근에서 RoomManager 통해 접근
 	// 다른 플레이어에게도 전파
-	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
-	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };
-	for (; begin_iter != end_iter; ++begin_iter)
+	auto player_map{ GET_SINGLE(RoomManager)->GetRoom(id)->GetPlayers() };
+
+	for (const auto& [other_id, other_player] : player_map)
 	{
-		auto other_session{ begin_iter->second };
-		if (other_session->GetSessionID() == id)
+		if (other_id == id)
 		{
 			continue;
 		}
 
-		// todo: 이부분을 수정
+		// 다른 플레이어에게 내 위치 전달
 		packet::SCMoveObject move_object_packet{
 			id,
-			player->_position,
-			player->_direction
+			player->GetPosition(),
+			player->GetDirection()
 		};
-		other_session->DoSend(move_object_packet);
+		other_player->GetOwnerSession()->DoSend(move_object_packet);
 	}
 }
 
 void PacketHandler::HandleLogin(SessionPtr session, const packet::CSLogin& packet)
 {
 	auto id{ session->GetSessionID() };
-
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
+	auto player_map{ GET_SINGLE(RoomManager)->GetRoom(id)->GetPlayers() };
 
-
-	// todo: 변경: _sessionHash 직접 접근에서 RoomManager 통해 접근
-	// 다른 플레이어에게도 전파
-	auto begin_iter{ GET_SINGLE(IOCP)->_sessionHash.begin() };
-	auto end_iter{ GET_SINGLE(IOCP)->_sessionHash.end() };
-	for (; begin_iter != end_iter; ++begin_iter)
+	for (const auto& [other_id, other_player] : player_map)
 	{
-		auto other_session{ begin_iter->second };
-		auto other_player{ GET_SINGLE(RoomManager)->GetPlayer(
-			other_session->GetSessionID())
-		};
-		if (other_session->GetSessionID() == id)
+		if (other_id == id)
 		{
 			continue;
 		}
 
-		// todo: 아래 부분을 수정
-
-		// 다른 플레이어에게 새로 접속한 플레이어 정보 전파
+		// 다른 플레이어에게 내 위치 전달
 		packet::SCSpawnObject move_object_packet{
 			id,
-			player->_position,
-			player->_direction
+			player->GetPosition(),
+			player->GetDirection(),
 		};
-		other_session->DoSend(move_object_packet);
+		other_player->GetOwnerSession()->DoSend(move_object_packet);
 
 		// 현재 클라이언트에 기존 플레이어 정보 전달
 		packet::SCSpawnObject other_spawn_packet{
-			other_session->GetSessionID(),
-			other_player->_position,
-			other_player->_direction
+			other_id,
+			other_player->GetPosition(),
+			other_player->GetDirection()
 		};
 		session->DoSend(other_spawn_packet);
 	}

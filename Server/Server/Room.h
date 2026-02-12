@@ -12,6 +12,22 @@ public:
 	// jobQueue에 LF로 job을 push
 	void PushJob(Job& job);
 
+	void AddPlayer(uint64 playerId, const std::shared_ptr<Player>& player)
+	{
+		_players[playerId] = player;
+	}
+
+	void RemovePlayer(uint64 playerId)
+	{
+		_players.erase(playerId);
+	}
+
+	// getter and setter
+	const std::unordered_map<uint64, std::shared_ptr<Player>>& GetPlayers() const
+	{
+		return _players;
+	}
+
 private:
 	// atomic 변수 필요 (job Queue 한 스레드 보장
 	std::atomic<bool> _busy{ false };

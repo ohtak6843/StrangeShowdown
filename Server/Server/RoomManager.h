@@ -11,7 +11,7 @@ public:
 	void Init();
 
 	// todo: ÇöÀç thread unsafe!!!!
-	void AddPlayer(uint64 playerId, const std::shared_ptr<Player>& player);
+	void AddPlayer(uint64 playerId, const std::shared_ptr<Player> player);
 
 	std::shared_ptr<Player> GetPlayer(uint64 playerId);
 

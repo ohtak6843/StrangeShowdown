@@ -6,10 +6,13 @@ void RoomManager::Init()
 	CreateRoom();
 }
 
-void RoomManager::AddPlayer(uint64 playerId, const std::shared_ptr<Player>& player)
+void RoomManager::AddPlayer(uint64 playerId, const std::shared_ptr<Player> player)
 {
 	// 메모리 메니저에서 꺼내오자
 	_players[playerId] = player;
+
+	// 추가로 일단 임시로 0번 방에 추가
+	_rooms[0]->AddPlayer(playerId, player);
 }
 
 std::shared_ptr<Player> RoomManager::GetPlayer(uint64 playerId)
@@ -24,6 +27,7 @@ std::shared_ptr<Player> RoomManager::GetPlayer(uint64 playerId)
 void RoomManager::RemovePlayer(uint64 playerId)
 {
 	_players.erase(playerId);
+	_rooms[0]->RemovePlayer(playerId);
 }
 
 void RoomManager::CreateRoom()

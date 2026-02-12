@@ -218,8 +218,7 @@ void IOCP::OnAcceptCompleted()
 	auto id{ _sessionCnt++ };
 
 	// 새로운 세션 생성
-	std::shared_ptr<Session>
-		new_client{ std::make_shared<Session>(_acceptSocket, id) };
+	SessionPtr new_client{ std::make_shared<Session>(_acceptSocket, id) };
 
 	// IOCP 객체에 받아들인 클라이언트의 소켓을 연결.
 	// 이때, key는 세션 포인터로 전달
@@ -243,7 +242,10 @@ void IOCP::OnAcceptCompleted()
 	// 추가 정보 저장
 	// todo: 플레이어 생성 시점을 여기가 아니라 방 입장시로 변경
 	new_client->SetSessionID(id);
-	GET_SINGLE(RoomManager)->AddPlayer(id, std::make_shared<Player>());
+
+	auto player{ std::make_shared<Player>() };
+	player->SetOwnerSession(new_client);
+	GET_SINGLE(RoomManager)->AddPlayer(id, player);
 
 	// 세션 시작
 	new_client->Start();
