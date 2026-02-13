@@ -48,7 +48,7 @@ void UNetworkGameInstance::ConnectToGameServer()
 	SocketIOInstance->Start();
 
 	// login packet Àü¼Û
-	packet::CSLogin LoginPacket{};
+	Common::CSLogin LoginPacket{};
 	auto Packet{ STSerializer::Serialize(LoginPacket) };
 	SendPacket(Packet);
 
@@ -88,7 +88,7 @@ void UNetworkGameInstance::HandleRecvPackets()
 	}
 }
 
-void UNetworkGameInstance::HandleSpawn(const packet::SCSpawnObject& SpawnPacket)
+void UNetworkGameInstance::HandleSpawn(const Common::SCSpawnObject& SpawnPacket)
 {
 
 	// transform
@@ -118,7 +118,7 @@ void UNetworkGameInstance::HandleSpawn(const packet::SCSpawnObject& SpawnPacket)
 
 }
 
-void UNetworkGameInstance::HandleMove(const packet::SCMoveObject& MovePacket)
+void UNetworkGameInstance::HandleMove(const Common::SCMoveObject& MovePacket)
 {
 	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.objectID) })
 	{

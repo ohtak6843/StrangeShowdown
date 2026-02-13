@@ -51,7 +51,7 @@ void RecvWorker::Destroy()
 void RecvWorker::DoRecv()
 {
 	TArray<uint8> buffer;
-	uint32 header_size{ sizeof(packet::Header) };
+	uint32 header_size{ sizeof(Common::Header) };
 	buffer.AddZeroed(header_size);
 
 	// Çì´õ recv

@@ -6,11 +6,36 @@ constexpr const char* SERVER_IP{ "127.0.0.1" };
 constexpr float MOVE_PACKET_TIME_MS{ 75.f }; // 초당 13.3회
 constexpr float MAX_NETWORK_DELAY_MS{ 100.f }; // 최대 네트워크 딜레이
 
-#define PACKET_START	namespace packet {
-#define PACKET_END		}
+#define COMMON_START	namespace Common {
+#define COMMON_END		}
 
-PACKET_START
-enum class Type : unsigned char
+COMMON_START
+enum class PlayerMeshType : uint8
+{
+	Badguy,
+	BuisinessMan,
+	Cowboy,
+	Cowgirl,
+	Gunman,
+	Sheriff,
+	Woman,
+	WorkingGirl,
+};
+
+enum class PlayerState : uint8
+{
+	None		= 0,
+	Idle		= 1 << 0,
+	Jumping		= 1 << 1,
+	HoldItem	= 1 << 2,
+	ArmedPistol = 1 << 3,
+	ArmedHammer = 1 << 4,
+	Aiming		= 1 << 5,
+	LookingUp	= 1 << 6,
+	Dead		= 1 << 7,
+};
+
+enum class PacketType : unsigned char
 {
 	NONE = 0,
 
@@ -29,10 +54,10 @@ enum class Type : unsigned char
 struct Header
 {
 	unsigned char	size{ sizeof(Header) };
-	Type			type{ Type::NONE };
+	PacketType		type{ PacketType::NONE };
 
 	Header() = default;
-	Header(const unsigned char size, const Type type) :
+	Header(const unsigned char size, const PacketType type) :
 		size{ size },
 		type{ type }
 	{}
@@ -53,7 +78,7 @@ struct Header
 struct SCLogin : Header
 {
 	SCLogin() :
-		Header{ sizeof(SCLogin), Type::SC_LOGIN }
+		Header{ sizeof(SCLogin), PacketType::SC_LOGIN }
 	{}
 };
 
@@ -63,7 +88,7 @@ struct SCLogin : Header
 struct CSLogin : Header
 {
 	CSLogin() :
-		Header{ sizeof(CSLogin), Type::CS_LOGIN }
+		Header{ sizeof(CSLogin), PacketType::CS_LOGIN }
 	{}
 };
 
@@ -78,7 +103,7 @@ struct SCSpawnObject : Header
 
 	SCSpawnObject() = default;
 	SCSpawnObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(SCSpawnObject), Type::SC_SPAWN_OBJECT },
+		Header{ sizeof(SCSpawnObject), PacketType::SC_SPAWN_OBJECT },
 		objectID{ _objectID },
 		pos{ _pos },
 		dir{ _dir }
@@ -98,7 +123,7 @@ struct SCMoveObject : Header
 
 	SCMoveObject() = default;
 	SCMoveObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(SCMoveObject), Type::SC_MOVE_OBJECT },
+		Header{ sizeof(SCMoveObject), PacketType::SC_MOVE_OBJECT },
 		objectID{ _objectID },
 		pos{ _pos },
 		dir{ _dir }
@@ -115,7 +140,7 @@ struct CSMovePlayer : Header
 
 	CSMovePlayer() = default;
 	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(CSMovePlayer), Type::CS_MOVE_PLAYER },
+		Header{ sizeof(CSMovePlayer), PacketType::CS_MOVE_PLAYER },
 		pos{ _pos },
 		dir{ _dir }
 	{}
@@ -123,4 +148,4 @@ struct CSMovePlayer : Header
 
 
 #pragma pack(pop)
-PACKET_END
+COMMON_END

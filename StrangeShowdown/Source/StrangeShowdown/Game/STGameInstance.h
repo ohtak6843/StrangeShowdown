@@ -83,8 +83,8 @@ public:
 	// packet handle
 
 
-	void HandleSpawn(const packet::SCSpawnObject& SpawnPacket);
-	void HandleMove(const packet::SCMoveObject& MovePacket);
+	void HandleSpawn(const Common::SCSpawnObject& SpawnPacket);
+	void HandleMove(const Common::SCMoveObject& MovePacket);
 
 	// util
 	void SendPacket(const TArray<uint8>& data);

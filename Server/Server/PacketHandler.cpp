@@ -4,20 +4,20 @@
 #include "IOCP.h"
 #include "Serializer.h"
 
-std::unordered_map<packet::Type, PacketHandler::HandlerFunc> PacketHandler::_handlerMap;
+std::unordered_map<Common::PacketType, PacketHandler::HandlerFunc> PacketHandler::_handlerMap;
 
 void PacketHandler::Init()
 {
 	// 핸들러 등록
-	RegisterHandler<packet::CSLogin>(
-		packet::Type::CS_LOGIN,
+	RegisterHandler<Common::CSLogin>(
+		Common::PacketType::CS_LOGIN,
 		[](SessionPtr session, const auto& pkt) {
 			HandleLogin(session, pkt);
 		}
 	);
 
-	RegisterHandler<packet::CSMovePlayer>(
-		packet::Type::CS_MOVE_PLAYER,
+	RegisterHandler<Common::CSMovePlayer>(
+		Common::PacketType::CS_MOVE_PLAYER,
 		[](SessionPtr session, const auto& pkt) {
 			HandleMovePlayer(session, pkt);
 		}
@@ -31,7 +31,7 @@ void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
 		return;
 	}
 
-	auto type{ static_cast<packet::Type>(buffer[1]) };
+	auto type{ static_cast<Common::PacketType>(buffer[1]) };
 	auto iter{ _handlerMap.find(type) };
 	if (_handlerMap.end() != iter)
 	{
@@ -40,7 +40,7 @@ void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
 	}
 }
 
-void PacketHandler::HandleMovePlayer(SessionPtr session, const packet::CSMovePlayer& packet)
+void PacketHandler::HandleMovePlayer(SessionPtr session, const Common::CSMovePlayer& packet)
 {
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
@@ -59,7 +59,7 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const packet::CSMovePla
 		}
 
 		// 다른 플레이어에게 내 위치 전달
-		packet::SCMoveObject move_object_packet{
+		Common::SCMoveObject move_object_packet{
 			id,
 			player->GetPosition(),
 			player->GetDirection()
@@ -68,7 +68,7 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const packet::CSMovePla
 	}
 }
 
-void PacketHandler::HandleLogin(SessionPtr session, const packet::CSLogin& packet)
+void PacketHandler::HandleLogin(SessionPtr session, const Common::CSLogin& packet)
 {
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
@@ -82,7 +82,7 @@ void PacketHandler::HandleLogin(SessionPtr session, const packet::CSLogin& packe
 		}
 
 		// 다른 플레이어에게 내 위치 전달
-		packet::SCSpawnObject move_object_packet{
+		Common::SCSpawnObject move_object_packet{
 			id,
 			player->GetPosition(),
 			player->GetDirection(),
@@ -90,7 +90,7 @@ void PacketHandler::HandleLogin(SessionPtr session, const packet::CSLogin& packe
 		other_player->GetOwnerSession()->DoSend(move_object_packet);
 
 		// 현재 클라이언트에 기존 플레이어 정보 전달
-		packet::SCSpawnObject other_spawn_packet{
+		Common::SCSpawnObject other_spawn_packet{
 			other_id,
 			other_player->GetPosition(),
 			other_player->GetDirection()

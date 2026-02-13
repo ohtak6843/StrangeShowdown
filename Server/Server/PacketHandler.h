@@ -10,11 +10,11 @@ public:
 	static void HandlePacket(SessionPtr session, const RecvBuffer& data);
 
 private:
-    static void HandleMovePlayer(SessionPtr session, const packet::CSMovePlayer& packet);
-	static void HandleLogin(SessionPtr session, const packet::CSLogin& packet);
+    static void HandleMovePlayer(SessionPtr session, const Common::CSMovePlayer& packet);
+	static void HandleLogin(SessionPtr session, const Common::CSLogin& packet);
 
 	template <typename T>
-	static void RegisterHandler(packet::Type type, std::function<void(SessionPtr, const T&)> logic_func)
+	static void RegisterHandler(Common::PacketType type, std::function<void(SessionPtr, const T&)> logic_func)
 	{
 		_handlerMap.emplace(type, [logic_func](SessionPtr session, const RecvBuffer& data) {
 			T Pkt{ Serializer::Deserialize<T>(data) };
@@ -24,6 +24,6 @@ private:
 
 
 	using HandlerFunc = std::function<void(SessionPtr, const RecvBuffer&)>;
-	static std::unordered_map<packet::Type, HandlerFunc> _handlerMap;
+	static std::unordered_map<Common::PacketType, HandlerFunc> _handlerMap;
 
 };

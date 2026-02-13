@@ -188,7 +188,7 @@ void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 
 		TArray<uint8> SendBuffer;
 		auto rotation{ GetActorRotation() };
-		packet::CSMovePlayer move_packet{
+		Common::CSMovePlayer move_packet{
 			Vec3f{
 				static_cast<float>(GetActorLocation().X),
 				static_cast<float>(GetActorLocation().Y),

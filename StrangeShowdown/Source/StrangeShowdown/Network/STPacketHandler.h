@@ -19,13 +19,13 @@ public:
 	void HandlePacket(const TArray<uint8>& Data);
 
 private:
-	void HandleSpawnObject(const packet::SCSpawnObject& Pkt);
-	void HandleMoveObject(const packet::SCMoveObject& Pkt);
+	void HandleSpawnObject(const Common::SCSpawnObject& Pkt);
+	void HandleMoveObject(const Common::SCMoveObject& Pkt);
 
 
 	// 핸들러 맵에 함수 등록
 	template <typename T>
-	void RegisterHandler(packet::Type Type, TFunction<void(const T&)> LogicFunc)
+	void RegisterHandler(Common::PacketType Type, TFunction<void(const T&)> LogicFunc)
 	{
 		HandlerMap.Add(Type, [LogicFunc](const TArray<uint8>& Data) {
 			T Pkt{ STSerializer::Deserialize<T>(Data) };
@@ -42,6 +42,6 @@ private:
 
 	// 핸들러 함수 맵
 	using FPacketHandlerFunc = TFunction<void(const TArray<uint8>&)>;
-	TMap<packet::Type, FPacketHandlerFunc> HandlerMap;
+	TMap<Common::PacketType, FPacketHandlerFunc> HandlerMap;
 
 };
