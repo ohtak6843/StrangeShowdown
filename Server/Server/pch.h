@@ -31,7 +31,6 @@
 
 #include "struct.h"
 #include "type.h"
-#include "protocol.h"
 #include "define.h"
 
 using RecvBuffer = std::array<int8, BUFFER_SIZE>;

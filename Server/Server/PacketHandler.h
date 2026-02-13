@@ -1,6 +1,7 @@
 #pragma once
 #include "Session.h"
 #include "Serializer.h"
+#include "protocol.h"
 
 class PacketHandler
 {

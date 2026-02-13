@@ -118,15 +118,16 @@ void UNetworkGameInstance::HandleSpawn(const Common::SCSpawnObject& SpawnPacket)
 
 }
 
-void UNetworkGameInstance::HandleMove(const Common::SCMoveObject& MovePacket)
+void UNetworkGameInstance::HandleMove(const Common::SCMovePlayer& MovePacket)
 {
-	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.objectID) })
+	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.id) })
 	{
 		ASTFieldPlayer* player{ *player_ptr };
 
 		FVector location{ MovePacket.pos.x, MovePacket.pos.y, MovePacket.pos.z };
 		FRotator rotation{ MovePacket.dir.x, MovePacket.dir.y, MovePacket.dir.z };
 		player->Move(location, rotation);
+		player->PlayerStateFlag = MovePacket.state;
 	}
 }
 

@@ -14,8 +14,8 @@ STPacketHandler::STPacketHandler()
 		}
 	);
 
-	RegisterHandler<Common::SCMoveObject>(
-		Common::PacketType::SC_MOVE_OBJECT, [this](const auto& Pkt) {
+	RegisterHandler<Common::SCMovePlayer>(
+		Common::PacketType::SC_MOVE_PLAYER, [this](const auto& Pkt) {
 			HandleMoveObject(Pkt);
 		}
 	);
@@ -43,7 +43,7 @@ void STPacketHandler::HandleSpawnObject(const Common::SCSpawnObject& Pkt)
 	GameInstance->HandleSpawn(Pkt);
 }
 
-void STPacketHandler::HandleMoveObject(const Common::SCMoveObject& Pkt)
+void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Pkt)
 {
 	if (nullptr == GameInstance)
 	{

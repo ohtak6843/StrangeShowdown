@@ -198,8 +198,10 @@ void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 				static_cast<float>(rotation.Pitch),
 				static_cast<float>(rotation.Yaw),
 				static_cast<float>(rotation.Roll)
-			}
+			},
+			PlayerStateFlag
 		};
+
 		SendBuffer.AddUninitialized(move_packet.size);
 		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
 		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);

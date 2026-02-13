@@ -35,7 +35,7 @@ public:
 
 
 	void HandleSpawn(const Common::SCSpawnObject& SpawnPacket);
-	void HandleMove(const Common::SCMoveObject& MovePacket);
+	void HandleMove(const Common::SCMovePlayer& MovePacket);
 
 	void SendPacket(const TArray<uint8>& data);
 

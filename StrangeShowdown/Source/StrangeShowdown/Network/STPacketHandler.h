@@ -20,7 +20,7 @@ public:
 
 private:
 	void HandleSpawnObject(const Common::SCSpawnObject& Pkt);
-	void HandleMoveObject(const Common::SCMoveObject& Pkt);
+	void HandleMoveObject(const Common::SCMovePlayer& Pkt);
 
 
 	// 핸들러 맵에 함수 등록

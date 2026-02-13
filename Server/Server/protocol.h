@@ -43,9 +43,12 @@ enum class PacketType : unsigned char
 	SC_LOGIN,
 	CS_LOGIN,
 
+	// object
 	SC_SPAWN_OBJECT,
 
 	SC_MOVE_OBJECT,
+
+	SC_MOVE_PLAYER,
 	CS_MOVE_PLAYER
 };
 
@@ -61,15 +64,6 @@ struct Header
 		size{ size },
 		type{ type }
 	{}
-
-	// TODO: 직렬화 코드
-	//std::vector<char> Serialize() const
-	//{
-	//	std::vector<char> buffer(size);
-	//	std::memcpy(buffer.data(), this, size);
-	//	return buffer;
-	//}
-
 };
 
 
@@ -115,34 +109,40 @@ struct SCSpawnObject : Header
 //		uint64 id
 //		Vec3f pos
 //		Vec3f dir
-struct SCMoveObject : Header
+struct SCMovePlayer : Header
 {
-	unsigned long long objectID{};
+	unsigned long long id{};
 	Vec3f pos{};
 	Vec3f dir{};
+	unsigned char state{};
 
-	SCMoveObject() = default;
-	SCMoveObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
-		Header{ sizeof(SCMoveObject), PacketType::SC_MOVE_OBJECT },
-		objectID{ _objectID },
+	SCMovePlayer() = default;
+	SCMovePlayer(const uint64 _id, const Vec3f& _pos, const Vec3f& _dir, const unsigned char _state) :
+		Header{ sizeof(SCMovePlayer), PacketType::SC_MOVE_PLAYER },
+		id{ _id },
 		pos{ _pos },
-		dir{ _dir }
+		dir{ _dir },
+		state{ _state }
 	{}
 };
 
 // Param:
+//		Vec3f pos
 //		Vec3f dir
-// 클라이언트 로그인 요청 패킷
+//		uint8 state
+// 
 struct CSMovePlayer : Header
 {
 	Vec3f pos{};
 	Vec3f dir{};
+	unsigned char state{};
 
 	CSMovePlayer() = default;
-	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir) :
+	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir, const unsigned char _state) :
 		Header{ sizeof(CSMovePlayer), PacketType::CS_MOVE_PLAYER },
 		pos{ _pos },
-		dir{ _dir }
+		dir{ _dir },
+		state{ _state }
 	{}
 };
 

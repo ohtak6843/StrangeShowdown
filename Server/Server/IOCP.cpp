@@ -3,6 +3,7 @@
 #include "OverlappedEx.h"
 #include "Session.h"
 #include "RoomManager.h"
+#include "protocol.h"
 
 
 bool IOCP::Init()

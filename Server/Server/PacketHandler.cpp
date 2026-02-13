@@ -45,8 +45,7 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const Common::CSMovePla
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
 
-	player->SetPosition(packet.pos);
-	player->SetDirection(packet.dir);
+	player->HandleMove(packet);
 
 	// 다른 플레이어에게도 전파
 	auto player_map{ GET_SINGLE(RoomManager)->GetRoom(id)->GetPlayers() };
@@ -59,10 +58,11 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const Common::CSMovePla
 		}
 
 		// 다른 플레이어에게 내 위치 전달
-		Common::SCMoveObject move_object_packet{
+		Common::SCMovePlayer move_object_packet{
 			id,
 			player->GetPosition(),
-			player->GetDirection()
+			player->GetDirection(),
+			player->GetState()
 		};
 		other_player->GetOwnerSession()->DoSend(move_object_packet);
 	}

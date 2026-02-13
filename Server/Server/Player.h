@@ -1,5 +1,6 @@
 #pragma once
 #include "Session.h"
+#include "protocol.h"
 
 class Player
 {
@@ -12,18 +13,10 @@ public:
 	{
 		return _position;
 	}
-	void SetPosition(const Vec3f& pos)
-	{
-		_position = pos;
-	}
 
 	const Vec3f& GetDirection() const
 	{
 		return _direction;
-	}
-	void SetDirection(const Vec3f& dir)
-	{
-		_direction = dir;
 	}
 
 	SessionPtr GetOwnerSession() const
@@ -35,9 +28,21 @@ public:
 		_ownerSession = session;
 	}
 
+	uint8 GetState() const
+	{
+		return _state;
+	}
+
+
+	void HandleMove(const Common::CSMovePlayer& packet);
+
 private:
+
+	// player ingame info
 	Vec3f _position{};
 	Vec3f _direction{};
+
+	uint8 _state{};
 
 	// owner
 	SessionPtr _ownerSession{ nullptr };
