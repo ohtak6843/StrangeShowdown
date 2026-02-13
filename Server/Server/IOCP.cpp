@@ -229,12 +229,11 @@ void IOCP::OnAcceptCompleted()
 		reinterpret_cast<ULONG_PTR>(new_client.get()),
 		0)
 	};
-
-	// TODO:
-	// 예외 처리		
-	if (ret == NULL) {
-		//Disconnect(key);
-		//break;
+	
+	if (NULL == ret) {
+		auto error{ GetLastError() };
+		std::println("accept failed with error: {}", error);
+		return;
 	}
 
 	// sessionHash에 클라이언트 정보 저장

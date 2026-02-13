@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "OverlappedEx.h"
 #include "Session.h"
+#include "protocol.h"
 
 OverlappedEx::OverlappedEx()
 {
@@ -25,9 +26,7 @@ void OverlappedEx::PrepareRecv()
 	}
 	else
 	{
-		// todo:
-		// 세션이 없으면 오류.
-
+		return;
 	}
 	_operation = IOOperation::RECV;
 }
@@ -36,7 +35,8 @@ void OverlappedEx::PrepareSend(const std::vector<char>& packet)
 {
 	Clear();
 	_dataBuffer.assign_range(packet);
-	_wsabuf.len = static_cast<uint8>(_dataBuffer[0]);
+	Common::Header& header{ *reinterpret_cast<Common::Header*>(_dataBuffer.data()) };
+	_wsabuf.len = header.GetSize();
 	_wsabuf.buf = _dataBuffer.data();
 	_operation = IOOperation::SEND;
 }

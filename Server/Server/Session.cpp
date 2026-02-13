@@ -41,8 +41,6 @@ void Session::DoRecv()
 		0)
 	};
 
-	// todo: 예외 처리
-	// recv에 문제 발생 시 나가
 	if (SOCKET_ERROR == ret)
 	{
 		int error{ WSAGetLastError() };
@@ -126,7 +124,8 @@ void Session::ReassemblePacket()
 		}
 
 		// 패킷 크기
-		uint32 packet_size{ static_cast<uint8>(_recvBuffer[0]) };
+		Common::Header& header{ *reinterpret_cast<Common::Header*>(_recvBuffer.data()) };
+		uint32 packet_size{ header.GetSize() };
 
 		// 패킷 처리 가능 여부 확인
 		if (0 == packet_size && packet_size > _currentDataSize)

@@ -35,13 +35,19 @@ enum class PlayerState : uint8
 	Dead		= 1 << 7,
 };
 
-enum class PacketType : unsigned char
+enum class PacketType : uint16
 {
 	NONE = 0,
 
 	// prepare
 	SC_LOGIN,
 	CS_LOGIN,
+
+	// room
+	CS_CRTEATE_ROOM,
+	CS_JOIN_ROOM,
+
+	
 
 	// object
 	SC_SPAWN_OBJECT,
@@ -56,14 +62,17 @@ enum class PacketType : unsigned char
 #pragma pack(push, 1)
 struct Header
 {
-	unsigned char	size{ sizeof(Header) };
-	PacketType		type{ PacketType::NONE };
+	uint16		size{ sizeof(Header) };
+	PacketType	type{ PacketType::NONE };
 
 	Header() = default;
-	Header(const unsigned char size, const PacketType type) :
+	Header(const uint16 size, const PacketType type) :
 		size{ size },
 		type{ type }
 	{}
+
+	uint16 GetSize() const { return size; }
+	PacketType GetPacketType() const { return type; }
 };
 
 

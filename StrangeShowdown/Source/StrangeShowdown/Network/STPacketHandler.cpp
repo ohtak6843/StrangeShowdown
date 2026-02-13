@@ -27,7 +27,8 @@ STPacketHandler::~STPacketHandler()
 
 void STPacketHandler::HandlePacket(const TArray<uint8>& Data)
 {
-	auto Type{ static_cast<Common::PacketType>(Data[1]) };
+	Common::Header& header{ *reinterpret_cast<Common::Header*>(const_cast<uint8*>(Data.GetData())) };
+	auto Type{ static_cast<Common::PacketType>(header.GetPacketType()) };
 	if (auto* Func{ HandlerMap.Find(Type) })
 	{
 		(*Func)(Data);

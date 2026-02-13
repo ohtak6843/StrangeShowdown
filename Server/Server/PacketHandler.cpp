@@ -31,7 +31,8 @@ void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
 		return;
 	}
 
-	auto type{ static_cast<Common::PacketType>(buffer[1]) };
+	Common::Header& header{ *reinterpret_cast<Common::Header*>(const_cast<int8*>(buffer.data())) };
+	auto type{ header.GetPacketType() };
 	auto iter{ _handlerMap.find(type) };
 	if (_handlerMap.end() != iter)
 	{
