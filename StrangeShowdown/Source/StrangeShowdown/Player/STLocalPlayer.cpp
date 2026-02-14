@@ -167,7 +167,11 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 void ASTLocalPlayer::HoldItem()
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
-	if (!ItemData) return;
+	if (!ItemData)
+	{
+		// TODO: 현재 퀵슬롯에 아이템이 없을 때, 아이템 메쉬는 NONE으로 처리하기
+		return;
+	}
 
 	switch (ItemData->ItemType)
 	{
