@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Player/STPlayerBase.h"
-#include "Component/STInventoryComponent.h"
-#include "Component/STAttackTraceComponent.h"
 #include "STLocalPlayer.generated.h"
 
 UENUM(BlueprintType)
@@ -45,6 +43,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
 
+	// 아이템 장착 관련
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void HoldItem();
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void DropItem();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,7 +67,11 @@ public:
 
 	// Inventory Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	TObjectPtr<USTInventoryComponent> InventoryComp;
+	TObjectPtr<class USTInventoryComponent> InventoryComp;
+
+	// QuickSlot Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "QuickSlot")
+	TObjectPtr<class USTQuickSlotComponent> QuickSlotComp;
 
 	// Store Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Store")
@@ -70,7 +79,7 @@ public:
 
 	// Attack Trace Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
-	TObjectPtr<USTAttackTraceComponent> AttackTraceComp;
+	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
 
 private:

@@ -6,6 +6,8 @@
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
+#include "Component/STAttackTraceComponent.h"
+#include "Item/STItemDataAssetBase.h"
 #include "Game/NetworkGameInstance.h"
 #include "StrangeShowdown.h"
 
@@ -27,6 +29,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 
+	// QuickSlot Component
+	QuickSlotComp = CreateDefaultSubobject<USTQuickSlotComponent>(TEXT("QuickSlotComp"));
+
 	// Store Component
 	StoreComp = CreateDefaultSubobject<USTStoreComponent>(TEXT("StoreComp"));
 
@@ -42,6 +47,16 @@ ASTLocalPlayer::ASTLocalPlayer()
 void ASTLocalPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Set Weapon and Hammer Data
+	if(1 < QuickSlotComp->QuickSlots.Num())
+	{
+		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
+		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+
+		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
+		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+	}
 }
 
 void ASTLocalPlayer::Tick(float DeltaTime)
@@ -126,8 +141,6 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 		AddedInventoryIndex
 	);
 
-	// 만약 퀵슬롯에 추가한 아이템이 이미 있다면 퀵슬롯의 count도 증가
-	USTQuickSlotComponent* QuickSlotComp = InventoryComp->GetOwner()->FindComponentByClass<USTQuickSlotComponent>();
 	if (bAdded && QuickSlotComp)
 	{
 		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
@@ -149,6 +162,66 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	OutAddedInventoryIndex = AddedInventoryIndex;
 
 	PickupItem->Destroy();
+}
+
+void ASTLocalPlayer::HoldItem()
+{
+	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
+	if (!ItemData) return;
+
+	switch (ItemData->ItemType)
+	{
+	case EItemType::Pistol:
+		RightHandSkeletalMesh->SetSimulatePhysics(false);
+		RightHandSkeletalMesh->SetEnableGravity(false);
+		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RightHandSkeletalMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(*ItemData->ItemName.ToString()));
+		RightHandSkeletalMesh->SetSkeletalMesh(ItemData->ItemSkeletalMesh);
+
+		RightHandStaticMesh->SetStaticMesh(nullptr);
+		break;
+
+	case EItemType::Hammer:
+	case EItemType::Helmet:
+	case EItemType::Meat:
+	case EItemType::Whiskey:
+	case EItemType::EnhancePower:
+		RightHandStaticMesh->SetSimulatePhysics(false);
+		RightHandStaticMesh->SetEnableGravity(false);
+		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RightHandStaticMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(*ItemData->ItemName.ToString()));
+		RightHandStaticMesh->SetStaticMesh(ItemData->ItemStaticMesh);
+
+		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
+		break;
+	}
+}
+
+void ASTLocalPlayer::DropItem()
+{
+	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
+	if (!ItemData) return;
+
+	switch (ItemData->ItemType)
+	{
+	case EItemType::Pistol:
+		RightHandSkeletalMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		RightHandSkeletalMesh->SetSimulatePhysics(true);
+		RightHandSkeletalMesh->SetEnableGravity(true);
+		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+
+	case EItemType::Hammer:
+	case EItemType::Helmet:
+	case EItemType::Meat:
+	case EItemType::Whiskey:
+	case EItemType::EnhancePower:
+		RightHandStaticMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		RightHandStaticMesh->SetSimulatePhysics(true);
+		RightHandStaticMesh->SetEnableGravity(true);
+		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+	}
 }
 
 void ASTLocalPlayer::ChangeToIdle()

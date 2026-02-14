@@ -47,6 +47,9 @@ public:
 	UFUNCTION()
 	void AddToQuickSlot_FromEvent(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
+	class USTItemDataAssetBase* GetCurrentSelectedQuickSlotItemData() const;
+
 public:
 	// MouseDropToQuickSlot 이벤트 디스패처
 	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")

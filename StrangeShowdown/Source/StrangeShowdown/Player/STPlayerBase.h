@@ -75,6 +75,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag"))
 	uint8 PlayerStateFlag;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TObjectPtr<class USTItemDataAssetBase> HoldingItemData;
+
 public:
 	// Character Name
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
@@ -91,7 +94,7 @@ public:
 	uint8 bIsLookingUp : 1;
 
 protected:
-	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½
+	// ¿À¸¥¼Õ ¾ÆÀÌÅÛ ¸Þ½¬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UStaticMeshComponent> RightHandStaticMesh;
 

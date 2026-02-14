@@ -131,3 +131,8 @@ void USTQuickSlotComponent::AddToQuickSlot_FromEvent(int32 InventoryItemIndex, U
 {
 	AddToQuickSlot(BeforeInventorySystem, InventoryItemIndex, QuickSlotIndex);
 }
+
+USTItemDataAssetBase* USTQuickSlotComponent::GetCurrentSelectedQuickSlotItemData() const
+{
+	return QuickSlots[CurrentSelectQuickSlotIndex].ItemData.Get();
+}
