@@ -7,9 +7,17 @@
 #include "STItemUseEffect.h"
 #include "STItemDataAssetBase.generated.h"
 
-/**
- * 
- */
+UENUM()
+enum class EItemType : uint16
+{
+	Pistol				UMETA(DisplayName = "Pistol"),
+	Hammer				UMETA(DisplayName = "Hammer"),
+	Helmet				UMETA(DisplayName = "Helmet"),
+	Meat				UMETA(DisplayName = "Meat"),
+	Whiskey				UMETA(DisplayName = "Whiskey"),
+	EnhancePower		UMETA(DisplayName = "EnhancePower"),
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class STRANGESHOWDOWN_API USTItemDataAssetBase : public UPrimaryDataAsset
 {
@@ -22,6 +30,10 @@ public:
 	// 아이템 고유 ID (인벤토리/저장용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 ItemID;
+
+	// 아이템 타입
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	EItemType ItemType;
 
 	// UI 표시용 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
@@ -37,7 +49,10 @@ public:
 
 	// 픽업용 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
-	UStaticMesh* PickupMesh;
+	UStaticMesh* ItemStaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|World")
+	USkeletalMesh* ItemSkeletalMesh;
 
 	// 메쉬 위치
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|World")
