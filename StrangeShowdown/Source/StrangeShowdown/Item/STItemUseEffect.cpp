@@ -8,7 +8,7 @@
 
 bool USTItemUseEffect::CanUse(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (ItemData->StaminaCost > User->StatComp->Stamina)
+	if (ItemData->StaminaCost > User->StatComp->CurrentStamina)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot use item due to insufficient stamina."));
 		return false;

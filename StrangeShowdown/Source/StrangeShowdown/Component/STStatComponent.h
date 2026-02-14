@@ -46,7 +46,7 @@ public:
 	void AddAction(int32 ActionAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddMaxAction(int32 ActionAmount);
+	void AddUseAbleAction(int32 ActionAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void AddPrize(int32 PrizeAmount);
@@ -57,7 +57,7 @@ public:
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	float Hp;
+	float CurrentHp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	float MaxHp = 15;
@@ -75,16 +75,19 @@ public:
 	float MoveSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	float Stamina;
+	float CurrentStamina;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	float MaxStamina = 5;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	int32 Action;
+	int32 CurrentAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	int32 MaxAction = 1;
+	int32 UseAbleAction = 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 MaxAction = 6;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	int32 Prize;

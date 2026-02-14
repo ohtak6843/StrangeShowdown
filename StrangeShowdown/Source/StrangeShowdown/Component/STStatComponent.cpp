@@ -34,17 +34,17 @@ void USTStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void USTStatComponent::AddHp(int32 HealAmount)
 {
-	Hp += HealAmount;
+	CurrentHp += HealAmount;
 
-	if (Hp <= 0)
+	if (CurrentHp <= 0)
 	{
-		Hp = 0;
+		CurrentHp = 0;
 		bAlive = false;
 	}
 
-	if(Hp > MaxHp)
+	if(CurrentHp > MaxHp)
 	{
-		Hp = MaxHp;
+		CurrentHp = MaxHp;
 	}
 }
 
@@ -70,22 +70,22 @@ void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
 
 void USTStatComponent::AddStamina(int32 StaminaAmount)
 {
-	Stamina += StaminaAmount;
+	CurrentStamina += StaminaAmount;
 
-	if (Stamina > MaxStamina)
+	if (CurrentStamina > MaxStamina)
 	{
-		Stamina = MaxStamina;
+		CurrentStamina = MaxStamina;
 	}
 }
 
 void USTStatComponent::AddAction(int32 ActionAmount)
 {
-	Action += ActionAmount;
+	CurrentAction += ActionAmount;
 }
 
-void USTStatComponent::AddMaxAction(int32 ActionAmount)
+void USTStatComponent::AddUseAbleAction(int32 ActionAmount)
 {
-	MaxAction += ActionAmount;
+	UseAbleAction += ActionAmount;
 }
 
 void USTStatComponent::AddPrize(int32 PrizeAmount)
