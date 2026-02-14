@@ -83,16 +83,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
 	FString PlayerNickName = TEXT("NoName");
 
-	// Character State
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
-	uint8 bIsArmedPistol : 1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
-	uint8 bIsAiming : 1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
-	uint8 bIsLookingUp : 1;
-
 protected:
 	// 오른손 아이템 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
