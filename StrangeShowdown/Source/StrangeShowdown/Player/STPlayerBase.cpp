@@ -12,6 +12,13 @@ ASTPlayerBase::ASTPlayerBase()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	// Character Mesh
+	RightHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightItemMesh"));
+	RightHandStaticMesh->SetupAttachment(GetMesh());
+
+	RightHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightWeaponMesh"));
+	RightHandSkeletalMesh->SetupAttachment(GetMesh());
+
 	// Character Movement
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 500.f, 0.f);

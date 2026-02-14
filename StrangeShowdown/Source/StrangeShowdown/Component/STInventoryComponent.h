@@ -13,7 +13,7 @@ struct FInventorySlot
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USTItemDataAssetBase* ItemData = nullptr;
+	TObjectPtr<class USTItemDataAssetBase> ItemData = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Count = 0;

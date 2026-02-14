@@ -89,4 +89,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Meta = (AllowPrivateAccess = "true"))
 	uint8 bIsLookingUp : 1;
+
+protected:
+	// ������ ������ �޽�
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UStaticMeshComponent> RightHandStaticMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
 };

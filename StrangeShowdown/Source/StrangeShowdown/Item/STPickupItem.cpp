@@ -46,7 +46,7 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 	if (Mesh && ItemData)
 	{
 		// Mesh 설정
-		Mesh->SetStaticMesh(ItemData->PickupMesh);
+		Mesh->SetStaticMesh(ItemData->ItemStaticMesh);
 		// DataAsset에 저장된 스케일 적용 (Mesh의 상대 스케일)
 		Mesh->SetRelativeScale3D(ItemData->MeshScale);
 		// 위치 조정 (루트에 대한 상대 위치)
