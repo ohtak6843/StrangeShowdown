@@ -10,7 +10,7 @@ constexpr float MAX_NETWORK_DELAY_MS{ 100.f }; // 최대 네트워크 딜레이
 #define COMMON_END		}
 
 COMMON_START
-enum class PlayerMeshType : uint8
+enum class PlayerType : uint8
 {
 	Badguy,
 	BuisinessMan,
@@ -44,10 +44,13 @@ enum class PacketType : uint16
 	CS_LOGIN,
 
 	// room
-	CS_CRTEATE_ROOM,
-	CS_JOIN_ROOM,
+	SC_GIVE_ROOM_LIST,
+	CS_GET_ROOM_LIST,
 
-	
+	CS_CRTEATE_ROOM,
+
+	SC_JOIN_ROOM,
+	CS_JOIN_ROOM,
 
 	// object
 	SC_SPAWN_OBJECT,
@@ -58,8 +61,19 @@ enum class PacketType : uint16
 	CS_MOVE_PLAYER
 };
 
-// todo: 나중에 packet size, type의 크기를 바꿔야 함.
+
 #pragma pack(push, 1)
+
+// 전송용 구조체
+
+// 방 정보
+struct RoomInfo
+{
+	uint32 roomID{};
+	uint8 currentPlayerCount{};
+};
+
+// 패킷 앞에 공통으로 붙는 헤더
 struct Header
 {
 	uint16		size{ sizeof(Header) };
@@ -70,9 +84,6 @@ struct Header
 		size{ size },
 		type{ type }
 	{}
-
-	uint16 GetSize() const { return size; }
-	PacketType GetPacketType() const { return type; }
 };
 
 
@@ -87,7 +98,7 @@ struct SCLogin : Header
 
 
 // No Param
-// 클라이언트 로그인 요청 패킷
+// 클라이언트 로그인 요청
 struct CSLogin : Header
 {
 	CSLogin() :
@@ -96,11 +107,39 @@ struct CSLogin : Header
 };
 
 // Param:
+//		uint16 roomCount
+// 서버 방 리스트 제공
+struct SCGiveRoomList : Header
+{
+	uint16 roomCount{};
+
+	SCGiveRoomList() = default;
+	SCGiveRoomList(const uint16 _roomCount) :
+		Header{ sizeof(SCGiveRoomList), PacketType::SC_GIVE_ROOM_LIST },
+		roomCount{ _roomCount }
+	{
+	}
+};
+
+// No Param
+// 클라이언트 방 리스트 제공 요청
+struct CSGetRoomList : Header
+{
+	CSGetRoomList() :
+		Header{ sizeof(CSGetRoomList), PacketType::CS_GET_ROOM_LIST }
+	{
+	}
+};
+
+
+
+
+// Param:
 //		Vec3f dir
-// 클라이언트 로그인 요청 패킷
+// 클라이언트 로그인 요청
 struct SCSpawnObject : Header
 {
-	unsigned long long objectID{};
+	uint64 objectID{};
 	Vec3f pos{};
 	Vec3f dir{};
 
@@ -120,13 +159,13 @@ struct SCSpawnObject : Header
 //		Vec3f dir
 struct SCMovePlayer : Header
 {
-	unsigned long long id{};
+	uint64 id{};
 	Vec3f pos{};
 	Vec3f dir{};
-	unsigned char state{};
+	uint8 state{};
 
 	SCMovePlayer() = default;
-	SCMovePlayer(const uint64 _id, const Vec3f& _pos, const Vec3f& _dir, const unsigned char _state) :
+	SCMovePlayer(const uint64 _id, const Vec3f& _pos, const Vec3f& _dir, const uint8 _state) :
 		Header{ sizeof(SCMovePlayer), PacketType::SC_MOVE_PLAYER },
 		id{ _id },
 		pos{ _pos },
@@ -144,10 +183,10 @@ struct CSMovePlayer : Header
 {
 	Vec3f pos{};
 	Vec3f dir{};
-	unsigned char state{};
+	uint8 state{};
 
 	CSMovePlayer() = default;
-	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir, const unsigned char _state) :
+	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir, const uint8 _state) :
 		Header{ sizeof(CSMovePlayer), PacketType::CS_MOVE_PLAYER },
 		pos{ _pos },
 		dir{ _dir },

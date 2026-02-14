@@ -19,8 +19,9 @@ public:
 	void HandlePacket(const TArray<uint8>& Data);
 
 private:
-	void HandleSpawnObject(const Common::SCSpawnObject& Pkt);
-	void HandleMoveObject(const Common::SCMovePlayer& Pkt);
+	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
+	void HandleMoveObject(const Common::SCMovePlayer& Packet);
+	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
 
 
 	// 핸들러 맵에 함수 등록

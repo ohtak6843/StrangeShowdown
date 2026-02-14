@@ -83,8 +83,11 @@ public:
 	// packet handle
 
 
-	void HandleSpawn(const Common::SCSpawnObject& SpawnPacket);
-	void HandleMove(const Common::SCMovePlayer& MovePacket);
+	void HandleSpawn(const Common::SCSpawnObject& Packet);
+	void HandleMove(const Common::SCMovePlayer& Packet);
+	
+	UFUNCTION(BlueprintCallable)
+	void TempFunc();
 
 	// util
 	void SendPacket(const TArray<uint8>& data);

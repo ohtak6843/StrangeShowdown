@@ -11,15 +11,22 @@ void PacketHandler::Init()
 	// 핸들러 등록
 	RegisterHandler<Common::CSLogin>(
 		Common::PacketType::CS_LOGIN,
-		[](SessionPtr session, const auto& pkt) {
-			HandleLogin(session, pkt);
+		[](SessionPtr session, const auto& packet) {
+			HandleLogin(session, packet);
 		}
 	);
 
 	RegisterHandler<Common::CSMovePlayer>(
 		Common::PacketType::CS_MOVE_PLAYER,
-		[](SessionPtr session, const auto& pkt) {
-			HandleMovePlayer(session, pkt);
+		[](SessionPtr session, const auto& packet) {
+			HandleMovePlayer(session, packet);
+		}
+	);
+
+	RegisterHandler<Common::CSGetRoomList>(
+		Common::PacketType::CS_GET_ROOM_LIST,
+		[](SessionPtr session, const auto& packet) {
+			HandleGetRoomList(session, packet);
 		}
 	);
 }
@@ -32,7 +39,7 @@ void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
 	}
 
 	Common::Header& header{ *reinterpret_cast<Common::Header*>(const_cast<int8*>(buffer.data())) };
-	auto type{ header.GetPacketType() };
+	auto type{ header.type };
 	auto iter{ _handlerMap.find(type) };
 	if (_handlerMap.end() != iter)
 	{
@@ -98,4 +105,18 @@ void PacketHandler::HandleLogin(SessionPtr session, const Common::CSLogin& packe
 		};
 		session->DoSend(other_spawn_packet);
 	}
+}
+
+void PacketHandler::HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet)
+{
+	auto room_list{ GET_SINGLE(RoomManager)->GetRoomList() };
+
+	Common::SCGiveRoomList room_list_packet{
+		static_cast<uint16>(room_list.size())
+	};
+	room_list_packet.size += static_cast<uint16>(sizeof(Common::RoomInfo) * room_list.size());
+
+	// sendbuffer에 패킷과 방 리스트를 직접 직렬화해서 보냄.
+	auto buffer{ Serializer::Serialize(room_list_packet, room_list) };
+	session->DoSend(buffer);
 }

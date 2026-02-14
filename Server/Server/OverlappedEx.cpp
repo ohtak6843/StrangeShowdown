@@ -36,7 +36,7 @@ void OverlappedEx::PrepareSend(const std::vector<char>& packet)
 	Clear();
 	_dataBuffer.assign_range(packet);
 	Common::Header& header{ *reinterpret_cast<Common::Header*>(_dataBuffer.data()) };
-	_wsabuf.len = header.GetSize();
+	_wsabuf.len = header.size;
 	_wsabuf.buf = _dataBuffer.data();
 	_operation = IOOperation::SEND;
 }

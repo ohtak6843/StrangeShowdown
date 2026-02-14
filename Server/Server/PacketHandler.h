@@ -11,9 +11,6 @@ public:
 	static void HandlePacket(SessionPtr session, const RecvBuffer& data);
 
 private:
-    static void HandleMovePlayer(SessionPtr session, const Common::CSMovePlayer& packet);
-	static void HandleLogin(SessionPtr session, const Common::CSLogin& packet);
-
 	template <typename T>
 	static void RegisterHandler(Common::PacketType type, std::function<void(SessionPtr, const T&)> logic_func)
 	{
@@ -22,6 +19,10 @@ private:
 			logic_func(session, Pkt);
 			});
 	}
+
+	static void HandleMovePlayer(SessionPtr session, const Common::CSMovePlayer& packet);
+	static void HandleLogin(SessionPtr session, const Common::CSLogin& packet);
+	static void HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet);
 
 
 	using HandlerFunc = std::function<void(SessionPtr, const RecvBuffer&)>;

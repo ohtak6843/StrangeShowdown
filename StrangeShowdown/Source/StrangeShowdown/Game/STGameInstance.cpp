@@ -147,14 +147,14 @@ void USTGameInstance::HandleRecvPackets()
 #endif
 }
 
-void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& SpawnPacket)
+void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
 
 	// transform
 	FTransform transform{ FTransform::Identity };
 
 	// todo: 수정 필요
-	transform.SetLocation(FVector(SpawnPacket.pos.x, SpawnPacket.pos.y, SpawnPacket.pos.z));
+	transform.SetLocation(FVector(Packet.pos.x, Packet.pos.y, Packet.pos.z));
 	transform.SetRotation(FQuat::Identity);
 	// 
 	FActorSpawnParameters SpawnParams;
@@ -173,21 +173,30 @@ void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& SpawnPacket)
 	) };
 
 	// playerid 넣기
-	PlayerMap.Add(SpawnPacket.objectID, player);
+	PlayerMap.Add(Packet.objectID, player);
 
 }
 
-void USTGameInstance::HandleMove(const Common::SCMovePlayer& MovePacket)
+void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (ASTFieldPlayer * *player_ptr{ PlayerMap.Find(MovePacket.id) })
+	if (ASTFieldPlayer * *player_ptr{ PlayerMap.Find(Packet.id) })
 	{
 		ASTFieldPlayer* player{ *player_ptr };
 
-		FVector location{ MovePacket.pos.x, MovePacket.pos.y, MovePacket.pos.z };
-		FRotator rotation{ MovePacket.dir.x, MovePacket.dir.y, MovePacket.dir.z };
+		FVector location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
+		FRotator rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
 		player->Move(location, rotation);
-		player->PlayerStateFlag = MovePacket.state;
+		player->PlayerStateFlag = Packet.state;
 	}
+}
+
+
+void USTGameInstance::TempFunc()
+{
+	Common::CSGetRoomList LoginPacket{};
+	auto Packet{ STSerializer::Serialize(LoginPacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("TempFunc Called."));
 }
 
 void USTGameInstance::SendPacket(const TArray<uint8>& data)

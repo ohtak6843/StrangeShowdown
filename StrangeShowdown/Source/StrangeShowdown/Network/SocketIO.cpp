@@ -63,7 +63,7 @@ void RecvWorker::DoRecv()
 
 	Common::Header& header{ *reinterpret_cast<Common::Header*>(buffer.GetData()) };
 
-	uint32 remain_size{ header.GetSize() - header_size};
+	uint32 remain_size{ header.size - header_size};
 
 	if (remain_size > 0)
 	{
@@ -169,7 +169,7 @@ void SendWorker::DoSend()
 	Common::Header& header{ *reinterpret_cast<Common::Header*>(buffer.GetData()) };
 
 	int32 total{};
-	int32 size{ static_cast<int32>(header.GetSize()) };
+	int32 size{ static_cast<int32>(header.size) };
 
 	// 원하는 크기만큼 수신될 때까지 반복
 	while (total < size)

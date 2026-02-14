@@ -28,13 +28,20 @@ public:
 		return _players;
 	}
 
+	void SetRoomID(const uint32 roomID)
+	{
+		_roomID = roomID;
+	}
+
 private:
-	// atomic 변수 필요 (job Queue 한 스레드 보장
+	// Job Quueue
 	std::atomic<bool> _busy{ false };
 	concurrency::concurrent_queue<Job> _jobQueue;
 
 	// 현재 방에 있는 플레이어 수
 	std::unordered_map<uint64, std::shared_ptr<Player>> _players{};
 
+	// 현재 방 번호
+	uint32 _roomID{};
 };
 

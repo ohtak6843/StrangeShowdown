@@ -125,7 +125,7 @@ void Session::ReassemblePacket()
 
 		// 패킷 크기
 		Common::Header& header{ *reinterpret_cast<Common::Header*>(_recvBuffer.data()) };
-		uint32 packet_size{ header.GetSize() };
+		uint32 packet_size{ header.size };
 
 		// 패킷 처리 가능 여부 확인
 		if (0 == packet_size && packet_size > _currentDataSize)

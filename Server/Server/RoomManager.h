@@ -27,6 +27,10 @@ public:
 		return _rooms[0];
 	}
 
+
+	// todo: 현재 thread unsafe!!!!
+	std::vector<Common::RoomInfo> GetRoomList();
+
 private:
 	// lock 필요할듯..
 	
