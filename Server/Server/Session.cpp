@@ -5,15 +5,23 @@
 #include "PacketHandler.h"
 #include "RoomManager.h"
 #include "Job.h"
+#include "ObjectManager.h"
 
-Session::Session(const SOCKET client_socket, const uint64 id)
-	: _clientSocket{ client_socket }
-	, _sessionID{ id }
+
+Session::Session()
 {
 }
 
-Session::~Session()
+void Session::Init(const SOCKET client_socket, const uint64 id)
 {
+	_clientSocket = client_socket;
+	_sessionID = id;
+
+	for (int i{}; i < 10; ++i)
+	{
+		_sendOverlappedExArray[i] = new OverlappedEx;
+		_sendOverlappedExQueue.push(i);
+	}
 }
 
 void Session::DoRecv()
@@ -46,6 +54,7 @@ void Session::DoRecv()
 		int error{ WSAGetLastError() };
 		if (WSA_IO_PENDING != error)
 		{
+			printf("recv failed with error: %d\n", error);
 			ReleaseRef(); 
 		}
 	}
@@ -79,11 +88,17 @@ void Session::DoSend(const std::vector<char>& data)
 
 	IncreaseRef();
 
-	// todo:
-	// 일단 임시로 new delete 사용 -> Memory manager
-	auto overlapped_ex{ new OverlappedEx() };
+	
+	// todo: thread unsafe
+	while (true == _sendOverlappedExQueue.empty())
+	{
+		std::this_thread::yield();
+	}
+	auto index{ _sendOverlappedExQueue.front() };
+	_sendOverlappedExQueue.pop();
 
-	overlapped_ex->PrepareSend(data);
+	auto* overlapped_ex{ _sendOverlappedExArray[index] };
+	overlapped_ex->PrepareSend(data, index);
 
 	auto ret{ WSASend(
 		_clientSocket,
@@ -101,15 +116,17 @@ void Session::DoSend(const std::vector<char>& data)
 		int error{ WSAGetLastError() };
 		if (WSA_IO_PENDING != error)
 		{
-			// 예외 처리
-			delete overlapped_ex;
+			printf("send failed with error: %d\n", error);
+			ReleaseSend(overlapped_ex);
 			ReleaseRef();
 		}
 	}
 }
 
-void Session::OnSendCompleted()
+void Session::OnSendCompleted(OverlappedEx* overlapped_ex)
 {
+	ReleaseSend(overlapped_ex);
+
 	ReleaseRef();
 }
 
@@ -130,6 +147,14 @@ void Session::ReassemblePacket()
 		// 패킷 처리 가능 여부 확인
 		if (0 == packet_size && packet_size > _currentDataSize)
 		{
+			break;
+		}
+
+		// 패킷 오류 검사
+		if (packet_size < sizeof(Common::Header) || packet_size > MAX_PACKET_SIZE)
+		{
+			std::println("Invalid packet size: {}. Disconnecting session {}.", packet_size, _sessionID);
+			Disconnect();
 			break;
 		}
 
@@ -159,6 +184,13 @@ void Session::ReassemblePacket()
 	}
 }
 
+void Session::ReleaseSend(OverlappedEx* over_ex)
+{
+	// todo: thread unsafe
+	over_ex->Reset();
+	_sendOverlappedExQueue.push(over_ex->GetSendIndex());
+}
+
 void Session::ReleaseRef()
 {
 	if (0 == --_referenceCount) {
@@ -181,7 +213,6 @@ void Session::Start()
 	// Start 세션 시작
 	IncreaseRef();
 
-	// Recv OverlappedEx 지정
 	_overlappedEx.SetSession(shared_from_this());
 
 	// recv 시작

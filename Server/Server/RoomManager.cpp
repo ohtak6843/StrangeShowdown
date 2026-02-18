@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "RoomManager.h"
+#include "ObjectManager.h"
 
 void RoomManager::Init()
 {
@@ -37,14 +38,14 @@ void RoomManager::CreateRoom()
 	// 나중에 방 입장 코드도 필요
 
 	auto room_id{ _roomCounter++ };
-	_rooms[room_id] = std::make_shared<Room>();
+	_rooms[room_id] = GET_SINGLE(ObjectManager)->Pop<Room>();
 	_rooms[room_id]->SetRoomID(room_id);
 }
 
 std::vector<Common::RoomInfo> RoomManager::GetRoomList()
 {
 	std::vector<Common::RoomInfo> room_list;
-	for(auto& [room_id, room] : _rooms)
+	for (auto& [room_id, room] : _rooms)
 	{
 		room_list.emplace_back(
 			room_id,

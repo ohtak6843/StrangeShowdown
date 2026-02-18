@@ -10,38 +10,39 @@ enum class IOOperation
 	SEND
 };
 
-class alignas(64) OverlappedEx
+class OverlappedEx
 {
 public:
 	OverlappedEx();
 
 	// method
 	void Clear();
+	void Reset();
 
 	void PrepareRecv();
-	void PrepareSend(const std::vector<char>& packet);
+	void PrepareSend(const std::vector<char>& packet, const int index);
 	void PrepareAccept();
-
 
 	// getter and setter
 	IOOperation GetOperation() const { return _operation; }
 	WSAOVERLAPPED& GetOverlapped() { return _overlapped; }
 	WSABUF& GetWsabuf() { return _wsabuf; }
+	int GetSendIndex() const { return _sendIndex; }
 
 	void SetSession(const std::shared_ptr<Session>& session) { _session = session; }
 
 private:
-	// wsaoverlapped
-	WSAOVERLAPPED			_overlapped{};
-
 	// 추가로 데이터를 관리할 주체(Session 또는 Packet)의 포인터를 들고 있으면 좋음
-	std::weak_ptr<Session>	_session{};
+	WSAOVERLAPPED	_overlapped{};
 
 	// IO 연산 구분
 	IOOperation				_operation{};
 
 	// TODO: 나중에 vector화
 	WSABUF		_wsabuf{};
+
+	std::weak_ptr<Session>	_session{};
+	int _sendIndex{ -1 };
 
 	// for send
 	std::vector<char>		_dataBuffer{};

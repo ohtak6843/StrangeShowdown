@@ -10,10 +10,17 @@ OverlappedEx::OverlappedEx()
 
 void OverlappedEx::Clear()
 {
-	ZeroMemory(&_overlapped, sizeof(_overlapped));
+	ZeroMemory(&_overlapped, sizeof(WSAOVERLAPPED));
 	_wsabuf.buf = nullptr;
 	_wsabuf.len = 0ul;
 	_operation = IOOperation::NONE;
+}
+
+void OverlappedEx::Reset()
+{
+	Clear();
+	_session.reset();
+	_dataBuffer.clear();
 }
 
 void OverlappedEx::PrepareRecv()
@@ -31,9 +38,10 @@ void OverlappedEx::PrepareRecv()
 	_operation = IOOperation::RECV;
 }
 
-void OverlappedEx::PrepareSend(const std::vector<char>& packet)
+void OverlappedEx::PrepareSend(const std::vector<char>& packet, const int index)
 {
 	Clear();
+	_sendIndex = index;
 	_dataBuffer.assign_range(packet);
 	Common::Header& header{ *reinterpret_cast<Common::Header*>(_dataBuffer.data()) };
 	_wsabuf.len = header.size;

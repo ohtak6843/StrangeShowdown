@@ -4,6 +4,7 @@
 #include "Session.h"
 #include "RoomManager.h"
 #include "protocol.h"
+#include "ObjectManager.h"
 
 
 bool IOCP::Init()
@@ -118,9 +119,6 @@ void IOCP::WorkerThread()
 			INFINITE)
 		};
 
-		// raw pointer 사용 시 주의
-		OverlappedEx* curr_over_ex{ reinterpret_cast<OverlappedEx*>(over) };
-
 		if (FALSE == ret)
 		{
 			// 시스템 오류
@@ -138,6 +136,8 @@ void IOCP::WorkerThread()
 			}
 			continue;
 		}
+
+		OverlappedEx* curr_over_ex{ reinterpret_cast<OverlappedEx*>(over) };
 
 		// 완료된 작업의 OverlappedEx 정보를 읽는다.
 		// 어떤 operation으로 완료되었는지 확인. 
@@ -169,10 +169,7 @@ void IOCP::WorkerThread()
 		case IOOperation::SEND:
 		{
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
-			session->OnSendCompleted();
-
-			// todo: 이 delete를 OnSendCompleted에서 메모리 풀 반납.
-			delete curr_over_ex;
+			session->OnSendCompleted(curr_over_ex);
 		}
 		break;
 
@@ -219,7 +216,8 @@ void IOCP::OnAcceptCompleted()
 	auto id{ _sessionCnt++ };
 
 	// 새로운 세션 생성
-	SessionPtr new_client{ std::make_shared<Session>(_acceptSocket, id) };
+	auto new_client{ GET_SINGLE(ObjectManager)->Pop<Session>() };
+	new_client->Init(_acceptSocket, id);
 
 	// IOCP 객체에 받아들인 클라이언트의 소켓을 연결.
 	// 이때, key는 세션 포인터로 전달
@@ -243,7 +241,7 @@ void IOCP::OnAcceptCompleted()
 	// todo: 플레이어 생성 시점을 여기가 아니라 방 입장시로 변경
 	new_client->SetSessionID(id);
 
-	auto player{ std::make_shared<Player>() };
+	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
 	player->SetOwnerSession(new_client);
 	GET_SINGLE(RoomManager)->AddPlayer(id, player);
 

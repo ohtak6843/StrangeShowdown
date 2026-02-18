@@ -2,6 +2,7 @@
 #include "IOCP.h"
 #include "PacketHandler.h"
 #include "RoomManager.h"
+#include "ObjectManager.h"
 
 
 int main()
@@ -9,6 +10,7 @@ int main()
 	// GET_SINGLE(Game)->Init();
 	PacketHandler::Init();
 	GET_SINGLE(RoomManager)->Init();
+	GET_SINGLE(ObjectManager)->Init();
 	auto ret{ GET_SINGLE(IOCP)->Init() };
 	if (false == ret)
 	{
