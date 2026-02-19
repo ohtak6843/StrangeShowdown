@@ -24,6 +24,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MiniMap")
+	class USceneCaptureComponent2D* MiniMapCapture;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	double zPosition = 2000.0f;
 };

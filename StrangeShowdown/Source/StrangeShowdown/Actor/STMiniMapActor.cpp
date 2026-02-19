@@ -2,6 +2,10 @@
 
 
 #include "Actor/STMiniMapActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Item/STPickupItem.h"
 
 // Sets default values
 ASTMiniMapActor::ASTMiniMapActor()
@@ -9,13 +13,46 @@ ASTMiniMapActor::ASTMiniMapActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
+	MiniMapCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCapture"));
+	MiniMapCapture->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void ASTMiniMapActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	MiniMapCapture->ShowFlags.SetLighting(false);
+	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
+	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
+	MiniMapCapture->ShowFlags.SetTranslucency(false);
+	MiniMapCapture->ShowFlags.SetPostProcessing(false);
+
+	TArray<AActor*> AllActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		AActor::StaticClass(),
+		AllActors);
+
+	for (AActor* Actor : AllActors)
+	{
+		TArray<UWidgetComponent*> Widgets;
+		Actor->GetComponents<UWidgetComponent>(Widgets);
+
+		for (UWidgetComponent* WidgetComp : Widgets)
+		{
+			MiniMapCapture->HiddenComponents.Add(WidgetComp);
+		}
+	}
+
+	TArray<AActor*> ItemActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTPickupItem::StaticClass(),
+		ItemActors);
+
 }
 
 // Called every frame
