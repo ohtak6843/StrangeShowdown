@@ -17,6 +17,9 @@ class STRANGESHOWDOWN_API USTMiniMapWidget : public UUserWidget
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+	void UpdateItemIcon(class ASTPickupItem* Item, const FVector2D& MiniMapPos);
+	void HideItemIcon(class ASTPickupItem* Item);
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* PlayerTexture;

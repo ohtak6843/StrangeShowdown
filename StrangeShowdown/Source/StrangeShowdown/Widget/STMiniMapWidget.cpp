@@ -28,3 +28,13 @@ void USTMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 	PlayerTexture->SetRenderTransformAngle(TextureYaw);
 }
+
+void USTMiniMapWidget::UpdateItemIcon(ASTPickupItem* Item, const FVector2D& MiniMapPos)
+{
+
+}
+
+void USTMiniMapWidget::HideItemIcon(ASTPickupItem* Item)
+{
+
+}

@@ -23,9 +23,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void CollectItems();
+
+	FVector2D WorldToMiniMap(const FVector& WorldLocation) const;
+
+	void UpdateItemOnMiniMap(float DeltaTime);
+	void UpdateMiniMapRotation(float DeltaTime);
+
+	void HiddenWidgetComponent();
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MiniMap")
 	class USceneCaptureComponent2D* MiniMapCapture;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<class ASTPickupItem*> MiniMapItems;
+
+	// 위젯 컴포넌트가 HUD에 있으므로 나중에 연결을 하던가 해야 함
+	// STMiniMapWidget에 있는 함수 2개도 완성해야 함
+	UPROPERTY(BlueprintReadOnly)
+	class USTMiniMapWidget* MiniMapWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	double zPosition = 2000.0f;
