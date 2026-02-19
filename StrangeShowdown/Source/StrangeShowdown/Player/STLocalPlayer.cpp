@@ -169,7 +169,8 @@ void ASTLocalPlayer::HoldItem()
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
 	if (!ItemData)
 	{
-		// TODO: 현재 퀵슬롯에 아이템이 없을 때, 아이템 메쉬는 NONE으로 처리하기
+		RightHandStaticMesh->SetStaticMesh(nullptr);
+		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
 		return;
 	}
 

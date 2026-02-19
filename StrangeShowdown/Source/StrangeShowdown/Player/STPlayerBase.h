@@ -72,7 +72,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	EPlayerMeshType PlayerMeshType;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag"))
 	uint8 PlayerStateFlag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
