@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Controller/STPlayerController.h"
 #include "Widget/STMiniMapWidget.h"
 #include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
@@ -44,6 +45,15 @@ void ASTMiniMapActor::BeginPlay()
 		&ASTMiniMapActor::CollectItems,
 		0.5f,
 		false);
+
+	// HUD 연결 타이머 설정(딜레이)
+	FTimerHandle TimerHandle2;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle2,
+		this,
+		&ASTMiniMapActor::BringHUD,
+		0.5f,
+		false);
 }
 
 // Called every frame
@@ -72,6 +82,24 @@ void ASTMiniMapActor::CollectItems()
 	}
 }
 
+void ASTMiniMapActor::BringHUD()
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		ASTPlayerController* STPC = Cast<ASTPlayerController>(PC);
+		if (STPC)
+		{
+			MiniMapWidget = STPC->HUDWidget->GetMiniMapWidget();
+			if (!MiniMapWidget)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
+				return;
+			}
+		}
+	}
+}
+
 FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 {
 	FVector2D Delta(
@@ -91,42 +119,55 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 
 void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 {
-	// 아이템 위치 업데이트
+	if (!MiniMapWidget) return;
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC) return;
+	APawn* PlayerPawn = PC->GetPawn();
+	if (!PlayerPawn) return;
+
+	FVector PlayerLocation = PlayerPawn->GetActorLocation();
+	float ControlYaw = PC->GetControlRotation().Yaw;  // 카메라 회전값
+	float HalfWidth = MiniMapCapture->OrthoWidth * 0.5f;
+	const float MapSize = 300.f;
+	const float HalfIcon = 8.f;
+
 	for (ASTPickupItem* Item : MiniMapItems)
 	{
 		if (!Item) continue;
 
 		FVector ItemLocation = Item->GetActorLocation();
 
-		FVector2D Delta(
-			ItemLocation.X - GetActorLocation().X,
-			ItemLocation.Y - GetActorLocation().Y);
+		FVector2D Relative(
+			ItemLocation.X - PlayerLocation.X,
+			ItemLocation.Y - PlayerLocation.Y);
 
-		float HalfWidth = MiniMapCapture->OrthoWidth * 0.5f;
+		// 카메라 ControlYaw 역회전 적용
+		float Rad = FMath::DegreesToRadians(-ControlYaw);
+		float Cos = FMath::Cos(Rad);
+		float Sin = FMath::Sin(Rad);
+
+		FVector2D Rotated(
+			Relative.X * Cos - Relative.Y * Sin,
+			Relative.X * Sin + Relative.Y * Cos);
 
 		bool bInside =
-			FMath::Abs(Delta.X) < HalfWidth &&
-			FMath::Abs(Delta.Y) < HalfWidth;
+			FMath::Abs(Rotated.X) < HalfWidth &&
+			FMath::Abs(Rotated.Y) < HalfWidth;
 
-		// 미니맵 안에 아이템이 있는지 확인
 		if (bInside)
 		{
-			FVector2D MiniMapPos = WorldToMiniMap(ItemLocation);
+			FVector2D MiniMapPos;
+			MiniMapPos.X = (Rotated.Y / HalfWidth) * (MapSize * 0.5f) + (MapSize * 0.5f);
+			MiniMapPos.Y = (-Rotated.X / HalfWidth) * (MapSize * 0.5f) + (MapSize * 0.5f);
 
-			// 위젯에 전달
+			MiniMapPos.X = FMath::Clamp(MiniMapPos.X, HalfIcon, MapSize - HalfIcon);
+			MiniMapPos.Y = FMath::Clamp(MiniMapPos.Y, HalfIcon, MapSize - HalfIcon);
+
 			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
-
-			// 로그를 찍어 아이템이 업데이트되는지 확인
-			UE_LOG(LogTemp, Log, TEXT("Updating item %s on mini-map at position (%f, %f)"),
-				*Item->GetName(), MiniMapPos.X, MiniMapPos.Y);
 		}
-		// 미니맵 밖에 아이템이 있으면 아이콘 숨기기
 		else
 		{
 			MiniMapWidget->HideItemIcon(Item);
-
-			UE_LOG(LogTemp, Log, TEXT("Hiding item %s from mini-map because it's outside the view"),
-				*Item->GetName());
 		}
 	}
 }

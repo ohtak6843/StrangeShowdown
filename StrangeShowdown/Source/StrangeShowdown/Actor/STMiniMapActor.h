@@ -23,7 +23,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// 아이템이 새로 생기면 호출해줘야 함
 	void CollectItems();
+	void BringHUD();
 
 	FVector2D WorldToMiniMap(const FVector& WorldLocation) const;
 
@@ -39,8 +41,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<class ASTPickupItem*> MiniMapItems;
 
-	// 위젯 컴포넌트가 HUD에 있으므로 나중에 연결을 하던가 해야 함
-	// STMiniMapWidget에 있는 함수 2개도 완성해야 함
 	UPROPERTY(BlueprintReadOnly)
 	class USTMiniMapWidget* MiniMapWidget;
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Widget/STMiniMapItemIconWidget.h"
 #include "STMiniMapWidget.generated.h"
 
 /**
@@ -23,4 +24,14 @@ public:
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* PlayerTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TMap<ASTPickupItem*, UUserWidget*> ItemIconMap;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TSubclassOf<USTMiniMapItemIconWidget> ItemIconClass;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* ItemLayer;
+
 };
