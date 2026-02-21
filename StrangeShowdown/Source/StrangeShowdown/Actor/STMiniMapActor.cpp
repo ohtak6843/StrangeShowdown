@@ -100,21 +100,24 @@ void ASTMiniMapActor::BringHUD()
 	}
 }
 
-FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& WorldLocation) const
+FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
-	FVector2D Delta(
-		WorldLocation.X - GetActorLocation().X,
-		WorldLocation.Y - GetActorLocation().Y);
+	FVector2D Relative(
+		ItemLocation.X - PlayerLocation.X,
+		ItemLocation.Y - PlayerLocation.Y);
 
-	float MapYaw = GetActorRotation().Yaw;
-	Delta = Delta.GetRotated(-MapYaw);
+	// 플레이어 회전에 따라 상대 위치 회전
+	Relative = Relative.GetRotated(-PlayerYaw);
 
-	float HalfWidth = MiniMapCapture->OrthoWidth * 0.5f;
-	float WidgetSize = 512.f;
+	// 스케일 조정
+	float Scale = 0.05f;
+	Relative *= Scale;
+	
+	// 위젯 중심 맞추기
+	float WidgetSize = 200.f;
+	Relative += FVector2D(WidgetSize * 0.5f, WidgetSize * 0.5f);
 
-	float Scale = WidgetSize / MiniMapCapture->OrthoWidth;
-
-	return Delta * Scale;
+	return Relative;
 }
 
 void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
@@ -125,50 +128,18 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 	APawn* PlayerPawn = PC->GetPawn();
 	if (!PlayerPawn) return;
 
-	FVector PlayerLocation = PlayerPawn->GetActorLocation();
-	float ControlYaw = PC->GetControlRotation().Yaw;  // 카메라 회전값
-	float HalfWidth = MiniMapCapture->OrthoWidth * 0.5f;
-	const float MapSize = 300.f;
-	const float HalfIcon = 8.f;
-
 	for (ASTPickupItem* Item : MiniMapItems)
 	{
 		if (!Item) continue;
+		FVector2D MiniMapPos = WorldToMiniMap(Item->GetActorLocation(), PlayerPawn->GetActorLocation(), PC->GetControlRotation().Yaw);
 
-		FVector ItemLocation = Item->GetActorLocation();
+		MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
 
-		FVector2D Relative(
-			ItemLocation.X - PlayerLocation.X,
-			ItemLocation.Y - PlayerLocation.Y);
-
-		// 카메라 ControlYaw 역회전 적용
-		float Rad = FMath::DegreesToRadians(-ControlYaw);
-		float Cos = FMath::Cos(Rad);
-		float Sin = FMath::Sin(Rad);
-
-		FVector2D Rotated(
-			Relative.X * Cos - Relative.Y * Sin,
-			Relative.X * Sin + Relative.Y * Cos);
-
-		bool bInside =
-			FMath::Abs(Rotated.X) < HalfWidth &&
-			FMath::Abs(Rotated.Y) < HalfWidth;
-
-		if (bInside)
-		{
-			FVector2D MiniMapPos;
-			MiniMapPos.X = (Rotated.Y / HalfWidth) * (MapSize * 0.5f) + (MapSize * 0.5f);
-			MiniMapPos.Y = (-Rotated.X / HalfWidth) * (MapSize * 0.5f) + (MapSize * 0.5f);
-
-			MiniMapPos.X = FMath::Clamp(MiniMapPos.X, HalfIcon, MapSize - HalfIcon);
-			MiniMapPos.Y = FMath::Clamp(MiniMapPos.Y, HalfIcon, MapSize - HalfIcon);
-
-			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
-		}
-		else
-		{
-			MiniMapWidget->HideItemIcon(Item);
-		}
+		// MiniMapPos Log
+		UE_LOG(LogTemp, Log, TEXT("Item: %s, World Location: %s, MiniMap Position: %s"),
+			*Item->GetName(),
+			*Item->GetActorLocation().ToString(),
+			*MiniMapPos.ToString());
 	}
 }
 
