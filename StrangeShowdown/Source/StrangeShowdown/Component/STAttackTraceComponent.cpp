@@ -1,6 +1,6 @@
 #include "Component/STAttackTraceComponent.h"
-#include "Player/STFieldPlayer.h"
-#include "Player/STLocalPlayer.h"
+#include "Character/Player/STFieldPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"

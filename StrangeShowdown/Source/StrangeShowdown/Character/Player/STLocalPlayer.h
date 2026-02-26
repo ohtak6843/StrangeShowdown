@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Player/STPlayerBase.h"
+#include "Character/Player/STPlayerBase.h"
 #include "STLocalPlayer.generated.h"
 
 UENUM(BlueprintType)

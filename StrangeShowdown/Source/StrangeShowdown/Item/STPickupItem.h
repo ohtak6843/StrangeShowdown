@@ -7,7 +7,7 @@
 #include "Item/STItemDataAssetBase.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Player/STLocalPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "STPickupItem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnter);

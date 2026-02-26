@@ -2,7 +2,7 @@
 
 
 #include "Item/STItemUseEffect.h"
-#include "Player/STLocalPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "Item/STItemDataAssetBase.h"
 #include "STItemUseEffect.h"
 

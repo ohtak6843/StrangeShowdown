@@ -4,7 +4,7 @@
 #include "Widget/STChatManagerWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
-#include "Player/STPlayerBase.h"
+#include "Character/Player/STPlayerBase.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 

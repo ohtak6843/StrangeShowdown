@@ -4,7 +4,7 @@
 #include "Animation/STAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Player/STPlayerBase.h"
+#include "Character/Player/STPlayerBase.h"
 
 USTAnimInstance::USTAnimInstance()
 {

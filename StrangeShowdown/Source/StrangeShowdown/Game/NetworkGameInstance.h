@@ -7,8 +7,8 @@
 
 #include "Containers/Map.h"
 #include "StrangeShowdown.h"
-#include "Player/STPlayerBase.h"
-#include "Player/STFieldPlayer.h"
+#include "Character/Player/STPlayerBase.h"
+#include "Character/Player/STFieldPlayer.h"
 
 #include "NetworkGameInstance.generated.h"
 

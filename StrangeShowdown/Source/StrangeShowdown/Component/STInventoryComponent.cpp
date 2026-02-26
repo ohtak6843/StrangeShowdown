@@ -1,6 +1,6 @@
 #include "Component/STInventoryComponent.h"
 #include "Item/STItemDataAssetBase.h"
-#include "Player/STLocalPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "STQuickSlotComponent.h"
 
 USTInventoryComponent::USTInventoryComponent()

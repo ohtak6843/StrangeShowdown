@@ -1,5 +1,5 @@
 #include "Component/STStoreComponent.h"
-#include "Player/STLocalPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "Component/STStatComponent.h"
 #include "Component/STInventoryComponent.h"
 #include "Item/STItemDataAssetBase.h"
