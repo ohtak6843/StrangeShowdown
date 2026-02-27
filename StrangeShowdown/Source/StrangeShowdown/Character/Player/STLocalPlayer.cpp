@@ -8,7 +8,7 @@
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
 #include "Item/STItemDataAssetBase.h"
-#include "Game/NetworkGameInstance.h"
+#include "Game/STGameInstance.h"
 #include "StrangeShowdown.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -266,7 +266,7 @@ void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 
 		TArray<uint8> SendBuffer;
 		auto rotation{ GetActorRotation() };
-		packet::CSMovePlayer move_packet{
+		Common::CSMovePlayer move_packet{
 			Vec3f{
 				static_cast<float>(GetActorLocation().X),
 				static_cast<float>(GetActorLocation().Y),
@@ -276,10 +276,12 @@ void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 				static_cast<float>(rotation.Pitch),
 				static_cast<float>(rotation.Yaw),
 				static_cast<float>(rotation.Roll)
-			}
+			},
+			PlayerStateFlag
 		};
+
 		SendBuffer.AddUninitialized(move_packet.size);
 		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
-		Cast<UNetworkGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
+		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
 	}
 }

@@ -9,6 +9,7 @@
 
 #include "Network/SocketIO.h"
 #include "Network/STSerializer.h"
+#include "Network/STPacketHandler.h"
 
 void UNetworkGameInstance::ConnectToGameServer()
 {
@@ -31,25 +32,30 @@ void UNetworkGameInstance::ConnectToGameServer()
 	bool Connected{ Socket->Connect(*InternetAddr) };
 
 	// Check Connection
-	if (Connected)
-	{	
-		SocketIOInstance = MakeShared<SocketIO>(Socket);
-		SocketIOInstance->Init();
-		SocketIOInstance->Start();
-
-		// login packet 전송
-		packet::CSLogin LoginPacket{};
-		auto Packet{ STSerializer::Serialize(LoginPacket) };
-		SocketIOInstance->PushSendPacket(Packet);
-
-		UE_LOG(LogTemp, Log, TEXT("Success to connect to Server"));
-	}
-	else
+	if (false == Connected)
 	{
 		// fail message
 		UE_LOG(LogTemp, Log, TEXT("Failed to connect to server"));
+		return;
 	}
+
+	// Handler Init
+	PacketHandler = MakeShared<STPacketHandler>();
+
+	// SocketIO Init
+	SocketIOInstance = MakeShared<SocketIO>(Socket);
+	SocketIOInstance->Init();
+	SocketIOInstance->Start();
+
+	// login packet 전송
+	Common::CSLogin LoginPacket{};
+	auto Packet{ STSerializer::Serialize(LoginPacket) };
+	SendPacket(Packet);
+
+	UE_LOG(LogTemp, Log, TEXT("Success to connect to Server"));
 }
+	
+
 
 void UNetworkGameInstance::DisconnectFromGameServer()
 {
@@ -78,30 +84,11 @@ void UNetworkGameInstance::HandleRecvPackets()
 			break;
 		}
 		
-		// todo: packet 처리를 핸들러로
-		auto Type{ static_cast<packet::Type>(Packet[1]) };
-		switch (Type)
-		{
-		case packet::Type::SC_SPAWN_OBJECT:
-		{
-			auto SpawnPacket{ STSerializer::Deserialize<packet::SCSpawnObject>(Packet) };
-			HandleSpawn(SpawnPacket);
-			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
-		}
-
-		case packet::Type::SC_MOVE_OBJECT:
-		{
-			auto MovePacket{ STSerializer::Deserialize<packet::SCMoveObject>(Packet) };
-			HandleMove(MovePacket);
-			// ClientPacketHandler::HandlePacket(ThisPtr, Packet.GetData(), Packet.Num());
-		}
-		default:
-			break;
-		}
+		PacketHandler->HandlePacket(Packet);
 	}
 }
 
-void UNetworkGameInstance::HandleSpawn(const packet::SCSpawnObject& SpawnPacket)
+void UNetworkGameInstance::HandleSpawn(const Common::SCSpawnObject& SpawnPacket)
 {
 
 	// transform
@@ -131,15 +118,16 @@ void UNetworkGameInstance::HandleSpawn(const packet::SCSpawnObject& SpawnPacket)
 
 }
 
-void UNetworkGameInstance::HandleMove(const packet::SCMoveObject& MovePacket)
+void UNetworkGameInstance::HandleMove(const Common::SCMovePlayer& MovePacket)
 {
-	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.objectID) })
+	if (ASTFieldPlayer** player_ptr{ PlayerMap.Find(MovePacket.id) })
 	{
 		ASTFieldPlayer* player{ *player_ptr };
 
 		FVector location{ MovePacket.pos.x, MovePacket.pos.y, MovePacket.pos.z };
 		FRotator rotation{ MovePacket.dir.x, MovePacket.dir.y, MovePacket.dir.z };
 		player->Move(location, rotation);
+		player->PlayerStateFlag = MovePacket.state;
 	}
 }
 

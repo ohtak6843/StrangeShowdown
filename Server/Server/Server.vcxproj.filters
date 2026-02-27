@@ -39,9 +39,6 @@
     <ClCompile Include="Job.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryManager.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="OverlappedEx.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -53,6 +50,12 @@
     </ClCompile>
     <ClCompile Include="RoomManager.cpp">
       <Filter>Game\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Serializer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,9 +83,6 @@
     <ClInclude Include="Job.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryManager.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="define.h">
       <Filter>pch</Filter>
     </ClInclude>
@@ -97,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="RoomManager.h">
       <Filter>Game\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

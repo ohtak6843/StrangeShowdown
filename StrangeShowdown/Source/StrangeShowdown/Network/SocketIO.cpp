@@ -51,7 +51,7 @@ void RecvWorker::Destroy()
 void RecvWorker::DoRecv()
 {
 	TArray<uint8> buffer;
-	uint32 header_size{ sizeof(packet::Header) };
+	uint32 header_size{ sizeof(Common::Header) };
 	buffer.AddZeroed(header_size);
 
 	// 헤더 recv
@@ -61,7 +61,9 @@ void RecvWorker::DoRecv()
 		return;
 	}
 
-	uint32 remain_size{ buffer[0] - header_size };
+	Common::Header& header{ *reinterpret_cast<Common::Header*>(buffer.GetData()) };
+
+	uint32 remain_size{ header.size - header_size};
 
 	if (remain_size > 0)
 	{
@@ -164,8 +166,10 @@ void SendWorker::DoSend()
 		return;
 	}
 
+	Common::Header& header{ *reinterpret_cast<Common::Header*>(buffer.GetData()) };
+
 	int32 total{};
-	int32 size{ static_cast<int32>(buffer[0]) };
+	int32 size{ static_cast<int32>(header.size) };
 
 	// 원하는 크기만큼 수신될 때까지 반복
 	while (total < size)

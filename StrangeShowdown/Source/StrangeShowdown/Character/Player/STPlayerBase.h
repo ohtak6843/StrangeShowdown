@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Component/STStatComponent.h"
+#include "StrangeShowdown.h"
 #include "STPlayerBase.generated.h"
 
 UENUM(BlueprintType)
@@ -22,20 +23,22 @@ enum class EPlayerMeshType : uint8
 	WorkingGirl		UMETA(DisplayName = "WorkingGirl")
 };
 
+
 UENUM(meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EPlayerStateFlag : uint8
 {
-	None			= 0				UMETA(DisplayName = "None"),
-	Idle			= 1 << 0		UMETA(DisplayName = "Idle"),
-	Jumping			= 1 << 1		UMETA(DisplayName = "Jumping"),
-	HoldItem		= 1 << 2		UMETA(DisplayName = "HoldItem"),
-	ArmedPistol		= 1 << 3		UMETA(DisplayName = "ArmedPistol"),
-	ArmedHammer		= 1 << 4		UMETA(DisplayName = "ArmedHammer"),
-	Aiming			= 1 << 5		UMETA(DisplayName = "Aiming"),
-	LookingUp		= 1 << 6		UMETA(DisplayName = "LookingUp"),
-	Dead			= 1 << 7		UMETA(DisplayName = "Dead"),
+	None = Common::PlayerState::None			UMETA(DisplayName = "None"),
+	Idle = Common::PlayerState::Idle			UMETA(DisplayName = "Idle"),
+	Jumping = Common::PlayerState::Jumping		UMETA(DisplayName = "Jumping"),
+	HoldItem = Common::PlayerState::HoldItem	UMETA(DisplayName = "HoldItem"),
+	ArmedPistol = Common::PlayerState::ArmedPistol	UMETA(DisplayName = "ArmedPistol"),
+	ArmedHammer = Common::PlayerState::ArmedHammer	UMETA(DisplayName = "ArmedHammer"),
+	Aiming = Common::PlayerState::Aiming		UMETA(DisplayName = "Aiming"),
+	LookingUp = Common::PlayerState::LookingUp	UMETA(DisplayName = "LookingUp"),
+	Dead = Common::PlayerState::Dead			UMETA(DisplayName = "Dead"),
 };
 ENUM_CLASS_FLAGS(EPlayerStateFlag)
+
 
 UCLASS()
 class STRANGESHOWDOWN_API ASTPlayerBase : public ACharacter

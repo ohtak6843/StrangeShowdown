@@ -3,14 +3,34 @@
 #include "OverlappedEx.h"
 #include "IOCP.h"
 #include "PacketHandler.h"
+#include "RoomManager.h"
+#include "Job.h"
+#include "ObjectManager.h"
 
-Session::Session(const SOCKET client_socket, const uint64 id)
-	: _clientSocket{ client_socket }
-	, _sessionID{ id }
-{}
+
+Session::Session()
+{
+}
+
+void Session::Init(const SOCKET client_socket, const uint64 id)
+{
+	_clientSocket = client_socket;
+	_sessionID = id;
+
+	for (int i{}; i < 10; ++i)
+	{
+		_sendOverlappedExArray[i] = new OverlappedEx;
+		_sendOverlappedExQueue.push(i);
+	}
+}
 
 void Session::DoRecv()
 {
+	if (_ioState == IOState::DISCONNECT)
+	{
+		return;
+	}
+
 	// Recv IO 시작
 	IncreaseRef();
 
@@ -29,12 +49,12 @@ void Session::DoRecv()
 		0)
 	};
 
-	// todo: 예외 처리
 	if (SOCKET_ERROR == ret)
 	{
 		int error{ WSAGetLastError() };
 		if (WSA_IO_PENDING != error)
 		{
+			printf("recv failed with error: %d\n", error);
 			ReleaseRef(); 
 		}
 	}
@@ -42,13 +62,12 @@ void Session::DoRecv()
 
 void Session::OnRecvCompleted(const uint32 recieved_bytes)
 {
-	// todo: disconnect
+	// 클라이언트 종료 처리는 OnRecv 호출 전 처리.
 	if (0 == recieved_bytes)
 	{
-		ReleaseRef();
+		Disconnect();
 		return;
 	}
-
 	// 패킷 재조립 및 처리
 	_currentDataSize += recieved_bytes;
 	ReassemblePacket();
@@ -62,19 +81,24 @@ void Session::OnRecvCompleted(const uint32 recieved_bytes)
 
 void Session::DoSend(const std::vector<char>& data)
 {
+	if (_ioState == IOState::DISCONNECT)
+	{
+		return;
+	}
+
 	IncreaseRef();
 
-	// todo:
-	// 일단 임시로 new delete 사용, 임시로 login packet 전송
-	// 나중에 shared ptr reference count 해결할 방도가 생각나면 
-	auto overlapped_ex{ new OverlappedEx() };
-	//packet::SCLogin packet;
-	// TODO: 직렬화 해주는 클래스 만들기
-	// auto buffer{ packet.Serialize() };
-	//std::vector<char> buffer(packet.size);
-	//std::memcpy(buffer.data(), &packet, packet.size);
+	
+	// todo: thread unsafe
+	while (true == _sendOverlappedExQueue.empty())
+	{
+		std::this_thread::yield();
+	}
+	auto index{ _sendOverlappedExQueue.front() };
+	_sendOverlappedExQueue.pop();
 
-	overlapped_ex->PrepareSend(data);
+	auto* overlapped_ex{ _sendOverlappedExArray[index] };
+	overlapped_ex->PrepareSend(data, index);
 
 	auto ret{ WSASend(
 		_clientSocket,
@@ -92,15 +116,17 @@ void Session::DoSend(const std::vector<char>& data)
 		int error{ WSAGetLastError() };
 		if (WSA_IO_PENDING != error)
 		{
-			// 예외 처리
-			delete overlapped_ex;
+			printf("send failed with error: %d\n", error);
+			ReleaseSend(overlapped_ex);
 			ReleaseRef();
 		}
 	}
 }
 
-void Session::OnSendCompleted()
+void Session::OnSendCompleted(OverlappedEx* overlapped_ex)
 {
+	ReleaseSend(overlapped_ex);
+
 	ReleaseRef();
 }
 
@@ -115,19 +141,36 @@ void Session::ReassemblePacket()
 		}
 
 		// 패킷 크기
-		uint32 packet_size{ static_cast<uint8>(_recvBuffer[0]) };
+		Common::Header& header{ *reinterpret_cast<Common::Header*>(_recvBuffer.data()) };
+		uint32 packet_size{ header.size };
 
 		// 패킷 처리 가능 여부 확인
-		if (0u == packet_size && packet_size > _currentDataSize)
+		if (0 == packet_size && packet_size > _currentDataSize)
 		{
 			break;
 		}
 
+		// 패킷 오류 검사
+		if (packet_size < sizeof(Common::Header) || packet_size > MAX_PACKET_SIZE)
+		{
+			std::println("Invalid packet size: {}. Disconnecting session {}.", packet_size, _sessionID);
+			Disconnect();
+			break;
+		}
+
 		// todo:
-		// 나중엔 room별 job 큐에 넣어야 함.
-		// 임시로 패킷 처리를 여기서
-		PacketHandler::HandlePacket(shared_from_this(), _recvBuffer.data(), packet_size);
-	
+		// 현재 플레이어가 소속된 방이 있으면 방 작업 큐에 넣고
+		// 아니면 바로 실행
+
+		// 이 핸들패킷은 싱글스레드가 보장
+		auto room{ GET_SINGLE(RoomManager)->GetRoom(_sessionID) };
+		Job job{ [this]() { PacketHandler::HandlePacket(shared_from_this(), _recvBuffer); } };
+		room->PushJob(job);
+
+		// 이 핸들패킷은 멀티스레드.
+		// 패킷핸들러를 바로 실행
+
+
 		// 버퍼 당기기
 		_currentDataSize -= packet_size;
 		if (_currentDataSize > 0)
@@ -141,10 +184,25 @@ void Session::ReassemblePacket()
 	}
 }
 
+void Session::ReleaseSend(OverlappedEx* over_ex)
+{
+	// todo: thread unsafe
+	over_ex->Reset();
+	_sendOverlappedExQueue.push(over_ex->GetSendIndex());
+}
+
 void Session::ReleaseRef()
 {
-	if (0 == --_refCnt) {
+	if (0 == --_referenceCount) {
 		GET_SINGLE(IOCP)->DeleteSession(_sessionID);
+
+		if (INVALID_SOCKET != _clientSocket)
+		{
+			closesocket(_clientSocket);
+		}
+
+		GET_SINGLE(RoomManager)->RemovePlayer(_sessionID);
+		std::println("Session {} ended.", _sessionID);
 	}
 }
 
@@ -155,12 +213,17 @@ void Session::Start()
 	// Start 세션 시작
 	IncreaseRef();
 
-	// Recv OverlappedEx 지정
 	_overlappedEx.SetSession(shared_from_this());
 
 	// recv 시작
 	DoRecv();
 	
 	// Start 참조 해제
+	ReleaseRef();
+}
+
+void Session::Disconnect()
+{
+	_ioState = IOState::DISCONNECT;
 	ReleaseRef();
 }

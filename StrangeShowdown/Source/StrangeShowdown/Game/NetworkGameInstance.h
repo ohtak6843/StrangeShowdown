@@ -13,6 +13,7 @@
 #include "NetworkGameInstance.generated.h"
 
 class SocketIO;
+class STPacketHandler;
 
 /**
  * @brief: 서버와의 네트워크 연결을 담당하는 GameInstance
@@ -33,8 +34,8 @@ public:
 	void HandleRecvPackets();
 
 
-	void HandleSpawn(const packet::SCSpawnObject& SpawnPacket);
-	void HandleMove(const packet::SCMoveObject& MovePacket);
+	void HandleSpawn(const Common::SCSpawnObject& SpawnPacket);
+	void HandleMove(const Common::SCMovePlayer& MovePacket);
 
 	void SendPacket(const TArray<uint8>& data);
 
@@ -44,7 +45,7 @@ public:
 public:
 	FSocket* Socket{};
 	TSharedPtr<SocketIO> SocketIOInstance{};
-
+	TSharedPtr<STPacketHandler> PacketHandler{};
 
 	// 어떤 블프 클래스인지 알아야 함.
 	UPROPERTY(EditAnywhere, Category = "SpawnData")

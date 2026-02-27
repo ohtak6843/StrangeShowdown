@@ -64,7 +64,7 @@ private:
 /**
  * Socket I/O 통신
  * TODO:
- * 나중에 NetworkGameInstance에서 하던 것을 SocketIO로 옮길 예정
+ * 나중에 USTGameInstance에서 하던 것을 SocketIO로 옮길 예정
  */
 class STRANGESHOWDOWN_API SocketIO : public TSharedFromThis<SocketIO>
 {

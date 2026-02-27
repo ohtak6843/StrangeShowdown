@@ -5,7 +5,17 @@
 #include "CoreMinimal.h"
 #include "Game/STRoomInfoObject.h"
 #include "Engine/GameInstance.h"
+
+#include "Containers/Map.h"
+#include "StrangeShowdown.h"
+#include "Player/STPlayerBase.h"
+#include "Player/STFieldPlayer.h"
+
+
 #include "STGameInstance.generated.h"
+
+class SocketIO;
+class STPacketHandler;
 
 /**
  * 
@@ -18,6 +28,7 @@ class STRANGESHOWDOWN_API USTGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+	// client
 public:
 	// 방 목록이 업데이트되었음을 알리는 델리게이트
 	UPROPERTY(BlueprintAssignable)
@@ -46,9 +57,50 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float SFXVolume = 1.0f;
 
+
 public:
 	virtual void Init() override;
+	virtual void Shutdown() override;
 
 	// 새로운 방을 추가
 	void AddRoom(USTRoomInfoObject* NewRoom);
+
+
+	// network
+public:
+	// blueprint
+
+	UFUNCTION(BlueprintCallable)
+	void ConnectToGameServer();
+
+	UFUNCTION(BlueprintCallable)
+	void DisconnectFromGameServer();
+
+	UFUNCTION(BlueprintCallable)
+	void HandleRecvPackets();
+
+	// c++ method
+	// packet handle
+
+
+	void HandleSpawn(const Common::SCSpawnObject& Packet);
+	void HandleMove(const Common::SCMovePlayer& Packet);
+	
+	UFUNCTION(BlueprintCallable)
+	void TempFunc();
+
+	// util
+	void SendPacket(const TArray<uint8>& data);
+
+public:
+	// blueprint 다른 플레이어의 타입 지정
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
+
+private:
+	FSocket* Socket{};
+	TSharedPtr<SocketIO> SocketIOInstance{};
+	TSharedPtr<STPacketHandler> PacketHandler{};
+	TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+
 };

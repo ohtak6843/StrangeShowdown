@@ -3,6 +3,8 @@
 #include "OverlappedEx.h"
 #include "Session.h"
 #include "RoomManager.h"
+#include "protocol.h"
+#include "ObjectManager.h"
 
 
 bool IOCP::Init()
@@ -68,6 +70,8 @@ void IOCP::Start()
 	{
 		_workers.emplace_back([this]() { WorkerThread(); });
 	}
+
+	std::println("IOCP Started with {} threads.", thread_number);
 }
 
 void IOCP::DeleteSession(const uint64 session_id)
@@ -76,6 +80,16 @@ void IOCP::DeleteSession(const uint64 session_id)
 	_sessionHash.erase(session_id);
 }
 
+
+void IOCP::Disconnect(const uint64 session_id)
+{
+	auto session{ reinterpret_cast<Session*>(session_id) };
+	if (nullptr == session)
+	{
+		return;
+	}
+	session->Disconnect();
+}
 
 void IOCP::WorkerThread()
 {
@@ -89,8 +103,6 @@ void IOCP::WorkerThread()
 	// 
 	// send
 	// -> MemoryManager에 사용한 Send OverlappedEx 반환하기
-
-
 
 	while (true)
 	{
@@ -107,15 +119,25 @@ void IOCP::WorkerThread()
 			INFINITE)
 		};
 
-		// raw pointer 사용 시 주의
-		OverlappedEx* curr_over_ex{ reinterpret_cast<OverlappedEx*>(over) };
-
 		if (FALSE == ret)
 		{
-			// TODO:
-			// Disconnect(key);
+			// 시스템 오류
+			if (nullptr == over)
+			{
+				// 서버 종료
+				auto error{ GetLastError() };
+				std::println("Fatal Error : {}. Destory Worker.", error);
+				break;				
+			}
+			// 클라이언트 강제 종료
+			else
+			{
+				Disconnect(ul_session);
+			}
 			continue;
 		}
+
+		OverlappedEx* curr_over_ex{ reinterpret_cast<OverlappedEx*>(over) };
 
 		// 완료된 작업의 OverlappedEx 정보를 읽는다.
 		// 어떤 operation으로 완료되었는지 확인. 
@@ -131,38 +153,28 @@ void IOCP::WorkerThread()
 
 		case IOOperation::RECV:
 		{
+			// 클라이언트 정상 종료
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
 			session->OnRecvCompleted(io_size);
+
+			// 세션에 소속한 방 잡큐에 작업이 있을 경우 실행
+			auto room{ GET_SINGLE(RoomManager)->GetRoom(session->GetSessionID()) };
+			if (nullptr != room)
+			{
+				room->Update();
+			}
 		}
 		break;
 
 		case IOOperation::SEND:
 		{
 			Session* session{ reinterpret_cast<Session*>(ul_session) };
-			session->OnSendCompleted();
-
-			// todo: 이 delete를 OnSendCompleted에서 메모리 풀 반납.
-			delete curr_over_ex;
+			session->OnSendCompleted(curr_over_ex);
 		}
 		break;
 
 		}
 	}
-
-	
-	//// 여기를 여러 스레드에서 동시에 방을 업데이트 해주도록 변경해야 한다.
-	//while (true) {
-	//	// 패킷 반영
-	//	while (not _packetQueue.empty())
-	//	{
-	//		auto& packet{ _packetQueue.front() };
-	//		ProcessPacket(packet.first, packet.second.data());
-	//		_packetQueue.pop();
-	//	}
-	//	// 업데이트 
-	//	// GET_SINGLE(Game)->Update();
-	//}
-
 }
 
 void IOCP::DoAccept()
@@ -204,8 +216,8 @@ void IOCP::OnAcceptCompleted()
 	auto id{ _sessionCnt++ };
 
 	// 새로운 세션 생성
-	std::shared_ptr<Session>
-		new_client{ std::make_shared<Session>(_acceptSocket, id) };
+	auto new_client{ GET_SINGLE(ObjectManager)->Pop<Session>() };
+	new_client->Init(_acceptSocket, id);
 
 	// IOCP 객체에 받아들인 클라이언트의 소켓을 연결.
 	// 이때, key는 세션 포인터로 전달
@@ -215,39 +227,27 @@ void IOCP::OnAcceptCompleted()
 		reinterpret_cast<ULONG_PTR>(new_client.get()),
 		0)
 	};
-
-	// TODO:
-	// 예외 처리		
-	if (ret == NULL) {
-		//Disconnect(key);
-		//break;
+	
+	if (NULL == ret) {
+		auto error{ GetLastError() };
+		std::println("accept failed with error: {}", error);
+		return;
 	}
 
 	// sessionHash에 클라이언트 정보 저장
 	_sessionHash[id] = new_client;
 
 	// 추가 정보 저장
-	// todo: 나중에 새로운 객체 생성 시점을 job을 통해 생성하도록 변경
-	// 누가 이 객체를 소유해야 하는가?
+	// todo: 플레이어 생성 시점을 여기가 아니라 방 입장시로 변경
 	new_client->SetSessionID(id);
-	GET_SINGLE(RoomManager)->AddPlayer(id, std::make_shared<Player>());
+
+	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
+	player->SetOwnerSession(new_client);
+	GET_SINGLE(RoomManager)->AddPlayer(id, player);
 
 	// 세션 시작
 	new_client->Start();
 }
-
-// TODO:
-// sessionhash 개선 이후 손보기
-//void IOCP::Disconnect(const int client_id)
-//{
-//	auto client{ _sessionHash.at(client_id).load() };
-//	if (nullptr == client) {
-//		return;
-//	}
-//	client->IOState = IOState::DISCONNECT;
-//	closesocket(client->ClientSocket);
-//}
-
 
 
 IOCP::~IOCP()
