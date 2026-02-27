@@ -13,5 +13,14 @@ UCLASS()
 class STRANGESHOWDOWN_API USTSheriffAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	USTSheriffAnimInstance();
+
+protected:
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+private:
 	
 };

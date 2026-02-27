@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Sheriff/STSheriffBase.h"
-#include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+//#include "InputActionValue.h"
 #include "STLocalSheriff.generated.h"
 
 /**
@@ -19,14 +18,21 @@ class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase
 public:
 	ASTLocalSheriff();
 
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
+	virtual void BeginPlay() override;
+
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<USpringArmComponent> SpringArmComp;
+	TObjectPtr<class USpringArmComponent> SpringArmComp;
 
 	// Camera Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<UCameraComponent> CameraComp;
+	TObjectPtr<class UCameraComponent> CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
 private:
 	
