@@ -231,8 +231,8 @@ void ASTLocalPlayer::DropItem()
 
 void ASTLocalPlayer::ChangeToIdle()
 {
-	RemoveState(EPlayerStateFlag::Aiming);
-	RemoveState(EPlayerStateFlag::LookingUp);
+	RemoveState(EPlayerState::Aiming);
+	RemoveState(EPlayerState::LookingUp);
 	bUseControllerRotationYaw = false;
 
 	SetCameraPose(ECameraPose::Idle);
@@ -240,8 +240,8 @@ void ASTLocalPlayer::ChangeToIdle()
 
 void ASTLocalPlayer::ChangeToAiming()
 {
-	AddState(EPlayerStateFlag::Aiming);
-	RemoveState(EPlayerStateFlag::LookingUp);
+	AddState(EPlayerState::Aiming);
+	RemoveState(EPlayerState::LookingUp);
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::Aiming);
@@ -249,8 +249,8 @@ void ASTLocalPlayer::ChangeToAiming()
 
 void ASTLocalPlayer::ChangeToLookingUp()
 {
-	AddState(EPlayerStateFlag::LookingUp);
-	RemoveState(EPlayerStateFlag::Aiming);
+	AddState(EPlayerState::LookingUp);
+	RemoveState(EPlayerState::Aiming);
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::LookingUp);

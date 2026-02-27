@@ -41,9 +41,9 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	TObjectPtr<ASTPlayerBase> Player = Cast<ASTPlayerBase>(Owner);
 	if (Player)
 	{
-		bIsArmedPistol = Player->HasAnyState(EPlayerStateFlag::ArmedPistol);
-		bIsAiming = Player->HasAnyState(EPlayerStateFlag::Aiming);
-		bIsLookingUp = Player->HasAnyState(EPlayerStateFlag::LookingUp);
+		bIsArmedPistol = Player->HasAnyState(EPlayerState::ArmedPistol);
+		bIsAiming = Player->HasAnyState(EPlayerState::Aiming);
+		bIsLookingUp = Player->HasAnyState(EPlayerState::LookingUp);
 
 		Pitch = Player->GetBaseAimRotation().Pitch;
 	}

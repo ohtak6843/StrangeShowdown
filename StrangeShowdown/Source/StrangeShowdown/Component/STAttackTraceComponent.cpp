@@ -39,7 +39,7 @@ void USTAttackTraceComponent::TickComponent(
 	if(Cast<ASTLocalPlayer>(GetOwner()))
 	{
 		ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(GetOwner());
-		if (!(LocalPlayer->HasAnyState(EPlayerStateFlag::Aiming)))
+		if (!(LocalPlayer->HasAnyState(EPlayerState::Aiming)))
 		{
 			SetTracingTarget(nullptr);
 			return;

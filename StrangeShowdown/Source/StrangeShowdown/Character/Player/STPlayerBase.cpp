@@ -41,7 +41,7 @@ ASTPlayerBase::ASTPlayerBase()
 	StatComp->bAlive = true;
 
 	// Character State
-	AddState(EPlayerStateFlag::ArmedPistol);
+	AddState(EPlayerState::ArmedPistol);
 }
 
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

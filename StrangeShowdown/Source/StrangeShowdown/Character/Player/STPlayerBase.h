@@ -7,37 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Component/STStatComponent.h"
-#include "StrangeShowdown.h"
+#include "Types/PlayerTypes.h"
 #include "STPlayerBase.generated.h"
-
-UENUM(BlueprintType)
-enum class EPlayerMeshType : uint8
-{
-	Badguy			UMETA(DisplayName = "Badguy"),
-	BuisinessMan	UMETA(DisplayName = "BuisinessMan"),
-	Cowboy			UMETA(DisplayName = "Cowboy"),
-	Cowgirl			UMETA(DisplayName = "Cowgirl"),
-	Gunman			UMETA(DisplayName = "Gunman"),
-	Sheriff			UMETA(DisplayName = "Sheriff"),
-	Woman			UMETA(DisplayName = "Woman"),
-	WorkingGirl		UMETA(DisplayName = "WorkingGirl")
-};
-
-
-UENUM(meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EPlayerStateFlag : uint8
-{
-	None = Common::PlayerState::None			UMETA(DisplayName = "None"),
-	Idle = Common::PlayerState::Idle			UMETA(DisplayName = "Idle"),
-	Jumping = Common::PlayerState::Jumping		UMETA(DisplayName = "Jumping"),
-	HoldItem = Common::PlayerState::HoldItem	UMETA(DisplayName = "HoldItem"),
-	ArmedPistol = Common::PlayerState::ArmedPistol	UMETA(DisplayName = "ArmedPistol"),
-	ArmedHammer = Common::PlayerState::ArmedHammer	UMETA(DisplayName = "ArmedHammer"),
-	Aiming = Common::PlayerState::Aiming		UMETA(DisplayName = "Aiming"),
-	LookingUp = Common::PlayerState::LookingUp	UMETA(DisplayName = "LookingUp"),
-	Dead = Common::PlayerState::Dead			UMETA(DisplayName = "Dead"),
-};
-ENUM_CLASS_FLAGS(EPlayerStateFlag)
 
 
 UCLASS()
@@ -49,16 +20,16 @@ public:
 	// Sets default values for this character's properties
 	ASTPlayerBase();
 
-	FORCEINLINE void AddState(EPlayerStateFlag NewState) { PlayerStateFlag |= static_cast<uint8>(NewState); }
-	FORCEINLINE void RemoveState(EPlayerStateFlag RemoveState) { PlayerStateFlag &= ~static_cast<uint8>(RemoveState); }
-	FORCEINLINE bool HasAnyState(EPlayerStateFlag CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) != 0; }
-	FORCEINLINE bool HasAllState(EPlayerStateFlag CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) == static_cast<uint8>(CheckState); }
+	FORCEINLINE void AddState(EPlayerState NewState) { PlayerStateFlag |= static_cast<uint8>(NewState); }
+	FORCEINLINE void RemoveState(EPlayerState RemoveState) { PlayerStateFlag &= ~static_cast<uint8>(RemoveState); }
+	FORCEINLINE bool HasAnyState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) != 0; }
+	FORCEINLINE bool HasAllState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) == static_cast<uint8>(CheckState); }
 
 	UFUNCTION(BlueprintPure)
-	bool HasAnyStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag")) int32 CheckState) const { return HasAnyState(static_cast<EPlayerStateFlag>(CheckState)); }
+	bool HasAnyStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 CheckState) const { return HasAnyState(static_cast<EPlayerState>(CheckState)); }
 
 	UFUNCTION(BlueprintPure)
-	bool HasAllStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag")) int32 CheckState) const { return HasAllState(static_cast<EPlayerStateFlag>(CheckState)); }
+	bool HasAllStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 CheckState) const { return HasAllState(static_cast<EPlayerState>(CheckState)); }
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -75,7 +46,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	EPlayerMeshType PlayerMeshType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerStateFlag"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerState"))
 	uint8 PlayerStateFlag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
