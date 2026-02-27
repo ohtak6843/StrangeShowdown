@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/AnimInstance.h"
+#include "Animation/STAnimInstance.h"
 #include "STSheriffAnimInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API USTSheriffAnimInstance : public UAnimInstance
+class STRANGESHOWDOWN_API USTSheriffAnimInstance : public USTAnimInstance
 {
 	GENERATED_BODY()
 

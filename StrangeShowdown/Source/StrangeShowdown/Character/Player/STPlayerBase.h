@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "Character/STCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Component/STStatComponent.h"
@@ -12,7 +12,7 @@
 
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTPlayerBase : public ACharacter
+class STRANGESHOWDOWN_API ASTPlayerBase : public ASTCharacter
 {
 	GENERATED_BODY()
 
