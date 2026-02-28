@@ -18,9 +18,24 @@ class STRANGESHOWDOWN_API ASTSheriffBase : public ASTCharacter
 public:
 	ASTSheriffBase();
 
+	FORCEINLINE void AddState(ESheriffState NewState) { SheriffStateFlag |= static_cast<uint8>(NewState); }
+	FORCEINLINE void RemoveState(ESheriffState RemoveState) { SheriffStateFlag &= ~static_cast<uint8>(RemoveState); }
+	FORCEINLINE bool HasAnyState(ESheriffState CheckState) const { return (SheriffStateFlag & static_cast<uint8>(CheckState)) != 0; }
+	FORCEINLINE bool HasAllState(ESheriffState CheckState) const { return (SheriffStateFlag & static_cast<uint8>(CheckState)) == static_cast<uint8>(CheckState); }
+	FORCEINLINE bool SetState(ESheriffState NewState) { SheriffStateFlag = static_cast<uint8>(NewState); return true; }
+
+	UFUNCTION(BlueprintPure)
+	bool HasAnyStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "ESheriffState")) int32 CheckState) const { return HasAnyState(static_cast<ESheriffState>(CheckState)); }
+
+	UFUNCTION(BlueprintPure)
+	bool HasAllStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "ESheriffState")) int32 CheckState) const { return HasAllState(static_cast<ESheriffState>(CheckState)); }
+
+	UFUNCTION(BlueprintPure)
+	bool SetStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "ESheriffState")) int32 NewState) { return SetState(static_cast<ESheriffState>(NewState)); }
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "ESheriffState"))
-	uint8 SheriffState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, meta = (Bitmask, BitmaskEnum = "ESheriffState"))
+	uint8 SheriffStateFlag;
 
 private:
 	

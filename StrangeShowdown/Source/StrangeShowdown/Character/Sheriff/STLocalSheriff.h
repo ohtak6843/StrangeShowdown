@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Sheriff/STSheriffBase.h"
-//#include "InputActionValue.h"
+#include "InputActionValue.h"
 #include "STLocalSheriff.generated.h"
 
 /**
@@ -35,6 +35,21 @@ protected:
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
 private:
-	
-	
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	void PistolAim(const FInputActionValue& Value);
+	void PistolFire(const FInputActionValue& Value);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ShoulderMoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ShoulderLookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PistolAimAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PistolFireAction;
+
 };

@@ -2,6 +2,9 @@
 
 
 #include "Animation/STSheriffAnimInstance.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Character/Sheriff/STSheriffBase.h"
 
 USTSheriffAnimInstance::USTSheriffAnimInstance()
 {
@@ -15,4 +18,16 @@ void USTSheriffAnimInstance::NativeInitializeAnimation()
 void USTSheriffAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	if (Movement)
+	{
+		Direction = CalculateDirection(Velocity, Owner->GetActorRotation());
+	}
+
+	ASTSheriffBase* Sheriff = Cast<ASTSheriffBase>(Owner);
+	if (Sheriff)
+	{
+		bIsAiming = Sheriff->HasAnyState(ESheriffState::Aiming);
+		Pitch = Sheriff->GetBaseAimRotation().Pitch;
+	}
 }
