@@ -42,6 +42,7 @@ enum class ESheriffState : uint8
 	None		= 0				UMETA(DisplayName = "None"),
 	Idle		= 1 << 0		UMETA(DisplayName = "Idle"),
 	Jumping		= 1 << 1		UMETA(DisplayName = "Jumping"),
-	Dead		= 1 << 2		UMETA(DisplayName = "Dead"),
+	Aiming		= 1 << 2		UMETA(DisplayName = "Aiming"),
+	Dead		= 1 << 3		UMETA(DisplayName = "Dead"),
 };
 ENUM_CLASS_FLAGS(ESheriffState)

@@ -56,7 +56,6 @@ protected:
 
 	virtual void Tick(float DeltaTime) override;
 
-public:
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;

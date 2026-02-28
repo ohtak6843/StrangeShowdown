@@ -24,12 +24,16 @@ public:
 	FORCEINLINE void RemoveState(EPlayerState RemoveState) { PlayerStateFlag &= ~static_cast<uint8>(RemoveState); }
 	FORCEINLINE bool HasAnyState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) != 0; }
 	FORCEINLINE bool HasAllState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) == static_cast<uint8>(CheckState); }
+	FORCEINLINE bool SetState(EPlayerState NewState) { PlayerStateFlag = static_cast<uint8>(NewState); return true; }
 
 	UFUNCTION(BlueprintPure)
 	bool HasAnyStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 CheckState) const { return HasAnyState(static_cast<EPlayerState>(CheckState)); }
 
 	UFUNCTION(BlueprintPure)
 	bool HasAllStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 CheckState) const { return HasAllState(static_cast<EPlayerState>(CheckState)); }
+
+	UFUNCTION(BlueprintPure)
+	bool SetStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 NewState) { return SetState(static_cast<EPlayerState>(NewState)); }
 
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

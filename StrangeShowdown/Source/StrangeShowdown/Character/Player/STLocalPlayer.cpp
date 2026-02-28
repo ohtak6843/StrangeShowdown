@@ -44,43 +44,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
 }
 
-void ASTLocalPlayer::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// Set Weapon and Hammer Data
-	if(1 < QuickSlotComp->QuickSlots.Num())
-	{
-		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
-		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
-
-		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
-		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
-	}
-}
-
-void ASTLocalPlayer::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// Camera Pose Blending
-	PoseElapsedTime += DeltaTime;
-	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
-
-	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
-
-	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
-
-	FVector Rel = CameraComp->GetRelativeLocation();
-	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
-	CameraComp->SetRelativeLocation(Rel);
-
-	// Send Move Packet to Server
-#if NETWORK_ENABLED
-	SendMovePacket(DeltaTime);
-#endif
-}
-
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 {
 	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
@@ -227,6 +190,43 @@ void ASTLocalPlayer::DropItem()
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
+}
+
+void ASTLocalPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Set Weapon and Hammer Data
+	if (1 < QuickSlotComp->QuickSlots.Num())
+	{
+		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
+		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+
+		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
+		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+	}
+}
+
+void ASTLocalPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
+
+	// Send Move Packet to Server
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
 }
 
 void ASTLocalPlayer::ChangeToIdle()
