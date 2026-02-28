@@ -45,6 +45,15 @@ void ASTBigMapActor::BeginPlay()
 		&ASTBigMapActor::CollectItems,
 		0.5f,
 		false);
+
+	// HUD 연결 타이머 설정(딜레이)
+	FTimerHandle TimerHandle2;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle2,
+		this,
+		&ASTBigMapActor::BringHUD,
+		0.5f,
+		false);
 }
 
 // Called every frame
@@ -73,6 +82,25 @@ void ASTBigMapActor::CollectItems()
 	}
 }
 
+void ASTBigMapActor::BringHUD()
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		ASTPlayerController* STPC = Cast<ASTPlayerController>(PC);
+		if (STPC)
+		{
+			HUDWidget = STPC->HUDWidget;
+			MiniMapWidget = HUDWidget->GetBigMapWidget();
+			if (!MiniMapWidget)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to get BigMapWidget from HUD"));
+				return;
+			}
+		}
+	}
+}
+
 FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
 	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
@@ -86,13 +114,13 @@ FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVec
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	const float WidgetSize = 800.f;
+	const float WidgetSize = HUDWidget->BigMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
-	const float Scale = WidgetSize / OrthoWidth * 0.5f;
+	const float Scale = WidgetSize / OrthoWidth;
 	Relative *= Scale;
 
-	const float HalfSize = WidgetSize * 0.25f;
+	const float HalfSize = WidgetSize * 0.5f;
 	Relative += FVector2D(HalfSize, HalfSize);
 
 	return Relative;

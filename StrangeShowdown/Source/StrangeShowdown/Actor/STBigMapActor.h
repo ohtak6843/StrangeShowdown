@@ -25,6 +25,7 @@ public:
 
 	// 아이템이 새로 생기면 호출해줘야 함
 	void CollectItems();
+	void BringHUD();
 
 	// 미니맵 좌표로 변환
 	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;
@@ -47,4 +48,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	double zPosition = 2000.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	class USTHUD* HUDWidget;
 };

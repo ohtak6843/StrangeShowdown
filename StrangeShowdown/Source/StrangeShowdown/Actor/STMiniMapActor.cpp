@@ -114,14 +114,13 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().X;
+	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
-	const float Scale = WidgetSize / OrthoWidth * 0.5f;
+	const float Scale = WidgetSize / OrthoWidth;
 	Relative *= Scale;
 
-	// 미니맵 중앙으로 오프셋(원래는 0.5이지만 이상하게 위젯 크기가 600, 300으로 잡혀서 1/4)
-	const float HalfSize = WidgetSize * 0.25f;
+	const float HalfSize = WidgetSize * 0.5f;
 	Relative += FVector2D(HalfSize, HalfSize);
 
 	return Relative;
