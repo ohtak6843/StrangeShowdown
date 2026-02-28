@@ -100,22 +100,25 @@ void ASTMiniMapActor::BringHUD()
 	}
 }
 
-FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
+FVector2D ASTMiniMapActor::WorldToMiniMap(
+	const FVector& ItemLocation,
+	const FVector& PlayerLocation,
+	float PlayerYaw) const
 {
 	FVector2D Relative(
-		ItemLocation.X - PlayerLocation.X,
-		ItemLocation.Y - PlayerLocation.Y);
+		ItemLocation.X - PlayerLocation.Y,
+		ItemLocation.Y + PlayerLocation.X);
 
-	// 플레이어 회전에 따라 상대 위치 회전
-	Relative = Relative.GetRotated(-PlayerYaw);
+	float CurrentYaw = GetActorRotation().Yaw;
+	Relative = Relative.GetRotated(-CurrentYaw);
 
-	// 스케일 조정
-	float Scale = 0.05f;
+	const float Scale = 0.05f;
 	Relative *= Scale;
-	
-	// 위젯 중심 맞추기
-	float WidgetSize = 200.f;
-	Relative += FVector2D(WidgetSize * 0.5f, WidgetSize * 0.5f);
+
+	Relative = FVector2D(-Relative.Y, Relative.X);
+
+	const float HalfSize = 150.f;
+	Relative += FVector2D(HalfSize, HalfSize);
 
 	return Relative;
 }
@@ -123,23 +126,40 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
+
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
+
 	APawn* PlayerPawn = PC->GetPawn();
 	if (!PlayerPawn) return;
+
+	float CurrentYaw = GetActorRotation().Yaw;
 
 	for (ASTPickupItem* Item : MiniMapItems)
 	{
 		if (!Item) continue;
-		FVector2D MiniMapPos = WorldToMiniMap(Item->GetActorLocation(), PlayerPawn->GetActorLocation(), PC->GetControlRotation().Yaw);
 
-		MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
+		FVector2D MiniMapPos =
+			WorldToMiniMap(
+				Item->GetActorLocation(),
+				PlayerPawn->GetActorLocation(),
+				CurrentYaw);
 
-		// MiniMapPos Log
-		UE_LOG(LogTemp, Log, TEXT("Item: %s, World Location: %s, MiniMap Position: %s"),
-			*Item->GetName(),
-			*Item->GetActorLocation().ToString(),
-			*MiniMapPos.ToString());
+		// TODO: 아이템 아이콘이 플레이어 아이콘과 겹치는 문제 해결 필요(현재는 임시로 오프셋 적용)
+		MiniMapPos += FVector2D(-55.f, -20.f);
+
+		// 이것도 수정 필요
+		if (MiniMapPos.X < -45.f || MiniMapPos.X > 230.f || MiniMapPos.Y < -10.f || MiniMapPos.Y > 270.f)
+		{
+			MiniMapWidget->HideItemIcon(Item);
+		}
+		else
+		{
+			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
+		}
+
+		// 아이템 위치 로그
+		UE_LOG(LogTemp, Log, TEXT("Item: %s, MiniMapPos: %s"), *Item->GetName(), *MiniMapPos.ToString());
 	}
 }
 
