@@ -17,14 +17,12 @@ class STRANGESHOWDOWN_API USTAnimInstance : public UAnimInstance
 public:
 	USTAnimInstance();
 
+	void SetAnimationValue(const float GroundSpeed_, const float Pitch_, const float Direction_);
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-public:
-	void SetAnimationValue(const float GroundSpeed_, const float Pitch_, const float Direction_);
-
-protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class ACharacter> Owner;
 
@@ -33,9 +31,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	FVector Velocity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	float Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float GroundSpeed;
@@ -54,17 +49,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshold;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsArmedPistol : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsAiming : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsLookingUp : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	float Pitch;
-
 };

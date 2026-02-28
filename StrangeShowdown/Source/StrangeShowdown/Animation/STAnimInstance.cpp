@@ -4,7 +4,6 @@
 #include "Animation/STAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Character/Player/STPlayerBase.h"
 
 USTAnimInstance::USTAnimInstance()
 {
@@ -30,28 +29,17 @@ void USTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Movement)
 	{
 		Velocity = Movement->Velocity;
-		Direction = CalculateDirection(Velocity, Owner->GetActorRotation());
 		GroundSpeed = Velocity.Size2D();
 		bIsIdle = GroundSpeed < MovingThreshold;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshold);
-
-	}
-
-	TObjectPtr<ASTPlayerBase> Player = Cast<ASTPlayerBase>(Owner);
-	if (Player)
-	{
-		bIsArmedPistol = Player->HasAnyState(EPlayerState::ArmedPistol);
-		bIsAiming = Player->HasAnyState(EPlayerState::Aiming);
-		bIsLookingUp = Player->HasAnyState(EPlayerState::LookingUp);
-
-		Pitch = Player->GetBaseAimRotation().Pitch;
 	}
 }
 
 void USTAnimInstance::SetAnimationValue(const float GroundSpeed_, const float Pitch_, const float Direction_)
 {
 	GroundSpeed = GroundSpeed_;
-	Pitch = Pitch_;
-	Direction = Direction_;
+	// TODO: 가상함수 할지, 아니면 오버로딩 할지 고민
+	//Pitch = Pitch_;
+	//Direction = Direction_;
 }
