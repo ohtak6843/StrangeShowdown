@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -12,9 +12,9 @@
 #include "Item/STPickupItem.h"
 
 // Sets default values
-ASTMiniMapActor::ASTMiniMapActor()
+ASTBigMapActor::ASTBigMapActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -24,7 +24,7 @@ ASTMiniMapActor::ASTMiniMapActor()
 }
 
 // Called when the game starts or when spawned
-void ASTMiniMapActor::BeginPlay()
+void ASTBigMapActor::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -42,22 +42,13 @@ void ASTMiniMapActor::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
 		this,
-		&ASTMiniMapActor::CollectItems,
-		0.5f,
-		false);
-
-	// HUD 연결 타이머 설정(딜레이)
-	FTimerHandle TimerHandle2;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle2,
-		this,
-		&ASTMiniMapActor::BringHUD,
+		&ASTBigMapActor::CollectItems,
 		0.5f,
 		false);
 }
 
 // Called every frame
-void ASTMiniMapActor::Tick(float DeltaTime)
+void ASTBigMapActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -66,7 +57,7 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 	UpdateItemOnMiniMap(DeltaTime);
 }
 
-void ASTMiniMapActor::CollectItems()
+void ASTBigMapActor::CollectItems()
 {
 	MiniMapItems.Empty();
 
@@ -82,26 +73,7 @@ void ASTMiniMapActor::CollectItems()
 	}
 }
 
-void ASTMiniMapActor::BringHUD()
-{
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
-	{
-		ASTPlayerController* STPC = Cast<ASTPlayerController>(PC);
-		if (STPC)
-		{
-			HUDWidget = STPC->HUDWidget;
-			MiniMapWidget = HUDWidget->GetMiniMapWidget();
-			if (!MiniMapWidget)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
-				return;
-			}
-		}
-	}
-}
-
-FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
+FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
 	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
 	FVector2D Relative(
@@ -114,20 +86,19 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().X;
+	const float WidgetSize = 800.f;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
 	const float Scale = WidgetSize / OrthoWidth * 0.5f;
 	Relative *= Scale;
 
-	// 미니맵 중앙으로 오프셋(원래는 0.5이지만 이상하게 위젯 크기가 600, 300으로 잡혀서 1/4)
 	const float HalfSize = WidgetSize * 0.25f;
 	Relative += FVector2D(HalfSize, HalfSize);
 
 	return Relative;
 }
 
-void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
+void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
 
@@ -152,19 +123,11 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 		// TODO: 아이템 아이콘이 플레이어 아이콘과 겹치는 문제 해결 필요(현재는 임시로 오프셋 적용)
 		MiniMapPos += FVector2D(-55.f, -20.f);
 
-		// 이것도 수정 필요
-		if (MiniMapPos.X < -45.f || MiniMapPos.X > 230.f || MiniMapPos.Y < -10.f || MiniMapPos.Y > 270.f)
-		{
-			MiniMapWidget->HideItemIcon(Item);
-		}
-		else
-		{
-			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
-		}
+		MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
 	}
 }
 
-void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
+void ASTBigMapActor::UpdateMiniMapRotation(float DeltaTime)
 {
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
@@ -192,7 +155,7 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 	SetActorRotation(SmoothRot);
 }
 
-void ASTMiniMapActor::HiddenWidgetComponent()
+void ASTBigMapActor::HiddenWidgetComponent()
 {
 	TArray<AActor*> AllActors;
 	UGameplayStatics::GetAllActorsOfClass(
