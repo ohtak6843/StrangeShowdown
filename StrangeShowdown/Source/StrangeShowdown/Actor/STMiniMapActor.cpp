@@ -90,7 +90,8 @@ void ASTMiniMapActor::BringHUD()
 		ASTPlayerController* STPC = Cast<ASTPlayerController>(PC);
 		if (STPC)
 		{
-			MiniMapWidget = STPC->HUDWidget->GetMiniMapWidget();
+			HUDWidget = STPC->HUDWidget;
+			MiniMapWidget = HUDWidget->GetMiniMapWidget();
 			if (!MiniMapWidget)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
@@ -105,7 +106,7 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
 	FVector2D Relative(
 		ItemLocation.Y - PlayerLocation.Y,
-		ItemLocation.X + PlayerLocation.X);
+		ItemLocation.X - PlayerLocation.X);
 
 	Relative.Y *= -1.f;
 
@@ -113,13 +114,14 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	// 스케일(OrthoWidth가 6000이므로 6000/1280 = 4.6875, 약 0.05)
-	// TODO: 스케일을 고정값으로 하는 대신, 미니맵 크기에 따라 동적으로 계산하도록 수정 필요
-	const float Scale = 0.05f;
+	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().X;
+	const float OrthoWidth = MiniMapCapture->OrthoWidth;
+
+	const float Scale = WidgetSize / OrthoWidth * 0.5f;
 	Relative *= Scale;
 
-	// 미니맵 중앙으로 오프셋
-	const float HalfSize = 150.f;
+	// 미니맵 중앙으로 오프셋(원래는 0.5이지만 이상하게 위젯 크기가 600, 300으로 잡혀서 1/4)
+	const float HalfSize = WidgetSize * 0.25f;
 	Relative += FVector2D(HalfSize, HalfSize);
 
 	return Relative;

@@ -48,4 +48,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	double zPosition = 2000.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	class USTHUD* HUDWidget;
 };
