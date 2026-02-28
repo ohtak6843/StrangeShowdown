@@ -107,6 +107,8 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 		ItemLocation.Y - PlayerLocation.Y,
 		ItemLocation.X + PlayerLocation.X);
 
+	Relative.Y *= -1.f;
+
 	// 미니맵 회전 적용
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
