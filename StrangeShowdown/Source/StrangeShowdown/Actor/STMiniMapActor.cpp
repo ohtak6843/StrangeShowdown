@@ -100,23 +100,23 @@ void ASTMiniMapActor::BringHUD()
 	}
 }
 
-FVector2D ASTMiniMapActor::WorldToMiniMap(
-	const FVector& ItemLocation,
-	const FVector& PlayerLocation,
-	float PlayerYaw) const
+FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
+	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
 	FVector2D Relative(
-		ItemLocation.X - PlayerLocation.Y,
-		ItemLocation.Y + PlayerLocation.X);
+		ItemLocation.Y - PlayerLocation.Y,
+		ItemLocation.X + PlayerLocation.X);
 
+	// 미니맵 회전 적용
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
+	// 스케일(OrthoWidth가 6000이므로 6000/1280 = 4.6875, 약 0.05)
+	// TODO: 스케일을 고정값으로 하는 대신, 미니맵 크기에 따라 동적으로 계산하도록 수정 필요
 	const float Scale = 0.05f;
 	Relative *= Scale;
 
-	Relative = FVector2D(-Relative.Y, Relative.X);
-
+	// 미니맵 중앙으로 오프셋
 	const float HalfSize = 150.f;
 	Relative += FVector2D(HalfSize, HalfSize);
 
