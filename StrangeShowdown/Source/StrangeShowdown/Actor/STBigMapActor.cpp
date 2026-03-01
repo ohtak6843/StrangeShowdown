@@ -148,10 +148,19 @@ void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 				PlayerPawn->GetActorLocation(),
 				CurrentYaw);
 
-		// TODO: 아이템 아이콘이 플레이어 아이콘과 겹치는 문제 해결 필요(현재는 임시로 오프셋 적용)
+
+		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
 		MiniMapPos += FVector2D(-55.f, -20.f);
 
-		MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
+		// 이것도 수정 필요
+		if (MiniMapPos.X < -45.f || MiniMapPos.X > 730.f || MiniMapPos.Y < -10.f || MiniMapPos.Y > 770.f)
+		{
+			MiniMapWidget->HideItemIcon(Item);
+		}
+		else
+		{
+			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
+		}
 	}
 }
 
