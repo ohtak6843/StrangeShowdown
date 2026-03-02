@@ -41,28 +41,18 @@ void USTMiniMapWidget::UpdateItemIcon(ASTPickupItem* Item, const FVector2D& Mini
 
 	if (!FoundWidget)
 	{
-		// 아이콘 위젯 생성
 		IconWidget = CreateWidget<USTMiniMapItemIconWidget>(GetWorld(), ItemIconClass);
-
 		if (!IconWidget) return;
 
-		// 아이콘을 캔버스에 추가
 		ItemLayer->AddChild(IconWidget);
-
-		// 아이템과 아이콘 위젯을 맵에 저장
 		ItemIconMap.Add(Item, IconWidget);
 	}
 	else
 	{
-		// 이미 아이콘이 존재하면 위치 업데이트
 		IconWidget = *FoundWidget;
 	}
 
-	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(IconWidget->Slot))
-	{
-		// 아이콘 위치 설정
-		CanvasSlot->SetPosition(MiniMapPos);
-	}
+	IconWidget->SetRenderTranslation(MiniMapPos);
 }
 
 void USTMiniMapWidget::HideItemIcon(ASTPickupItem* Item)

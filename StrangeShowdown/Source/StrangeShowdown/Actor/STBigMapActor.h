@@ -4,22 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "STMiniMapActor.generated.h"
+#include "STBigMapActor.generated.h"
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTMiniMapActor : public AActor
+class STRANGESHOWDOWN_API ASTBigMapActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
-	ASTMiniMapActor();
+	ASTBigMapActor();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

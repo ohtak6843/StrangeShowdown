@@ -31,7 +31,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	USTMiniMapWidget* MiniMapWidget;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USTMiniMapWidget* BigMapWidget;
+
 public:
 	USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }
+	USTMiniMapWidget* GetBigMapWidget() const { return BigMapWidget; }
 
 };
