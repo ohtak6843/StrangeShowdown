@@ -57,9 +57,6 @@ public:
 	UFUNCTION()
 	void OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
-	// ChatLog를 기반으로 UI 갱신
-	void RefreshChatUI();
-
 	// ChatManager 포커스
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 	void SetChatInputFocus();
