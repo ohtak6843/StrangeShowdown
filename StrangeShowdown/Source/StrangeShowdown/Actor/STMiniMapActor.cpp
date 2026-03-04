@@ -31,7 +31,6 @@ void ASTMiniMapActor::BeginPlay()
 	MiniMapCapture->ShowFlags.SetLighting(false);
 	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
 	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
-	MiniMapCapture->ShowFlags.SetTranslucency(false);
 	MiniMapCapture->ShowFlags.SetPostProcessing(false);
 
 	// À§Á¬ ÄÄÆ÷³ÍÆ® ¼û±â±â

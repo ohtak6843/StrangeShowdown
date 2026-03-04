@@ -31,25 +31,15 @@ void ASTBigMapActor::BeginPlay()
 	MiniMapCapture->ShowFlags.SetLighting(false);
 	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
 	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
-	MiniMapCapture->ShowFlags.SetTranslucency(false);
 	MiniMapCapture->ShowFlags.SetPostProcessing(false);
 
 	// 위젯 컴포넌트 숨기기
 	HiddenWidgetComponent();
 
-	// 아이템 수집 타이머 설정(딜레이)
+	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
-		this,
-		&ASTBigMapActor::CollectItems,
-		0.5f,
-		false);
-
-	// HUD 연결 타이머 설정(딜레이)
-	FTimerHandle TimerHandle2;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle2,
 		this,
 		&ASTBigMapActor::BringHUD,
 		0.5f,
