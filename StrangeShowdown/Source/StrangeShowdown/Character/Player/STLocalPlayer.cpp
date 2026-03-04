@@ -205,6 +205,8 @@ void ASTLocalPlayer::BeginPlay()
 		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
 		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
 	}
+
+	HoldItem();
 }
 
 void ASTLocalPlayer::Tick(float DeltaTime)
