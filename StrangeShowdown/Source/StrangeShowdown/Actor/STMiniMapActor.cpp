@@ -37,19 +37,10 @@ void ASTMiniMapActor::BeginPlay()
 	// 위젯 컴포넌트 숨기기
 	HiddenWidgetComponent();
 
-	// 아이템 수집 타이머 설정(딜레이)
+	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
-		this,
-		&ASTMiniMapActor::CollectItems,
-		0.5f,
-		false);
-
-	// HUD 연결 타이머 설정(딜레이)
-	FTimerHandle TimerHandle2;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle2,
 		this,
 		&ASTMiniMapActor::BringHUD,
 		0.5f,
@@ -64,29 +55,6 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 	UpdateMiniMapRotation(DeltaTime);
 
 	UpdateItemOnMiniMap(DeltaTime);
-}
-
-void ASTMiniMapActor::CollectItems()
-{
-	MiniMapItems.Empty();
-
-	TArray<AActor*> ItemActors;
-	UGameplayStatics::GetAllActorsOfClass(
-		GetWorld(),
-		ASTPickupItem::StaticClass(),
-		ItemActors);
-
-	for (AActor* Actor : ItemActors)
-	{
-		ASTPickupItem* Item = Cast<ASTPickupItem>(Actor);
-		if (Item)
-		{
-			MiniMapItems.Add(Item);
-
-			// 파괴 이벤트 바인딩
-			Item->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnItemDestroyed);
-		}
-	}
 }
 
 void ASTMiniMapActor::BringHUD()
