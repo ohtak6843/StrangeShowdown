@@ -80,6 +80,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
+	TObjectPtr<class ASTBigMapActor> BigMapActor;
 
 private:
 	// Change Camera Settings with State

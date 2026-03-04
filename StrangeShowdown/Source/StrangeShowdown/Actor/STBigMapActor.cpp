@@ -78,7 +78,14 @@ void ASTBigMapActor::CollectItems()
 
 	for (AActor* Actor : ItemActors)
 	{
-		MiniMapItems.Add(Cast<ASTPickupItem>(Actor));
+		ASTPickupItem* Item = Cast<ASTPickupItem>(Actor);
+		if (Item)
+		{
+			MiniMapItems.Add(Item);
+
+			// 파괴 이벤트 바인딩
+			Item->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnItemDestroyed);
+		}
 	}
 }
 
@@ -98,6 +105,28 @@ void ASTBigMapActor::BringHUD()
 				return;
 			}
 		}
+	}
+}
+
+void ASTBigMapActor::RegisterItem(ASTPickupItem* NewItem)
+{
+	if (!NewItem) return;
+
+	MiniMapItems.AddUnique(NewItem);
+
+	NewItem->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnItemDestroyed);
+}
+
+void ASTBigMapActor::OnItemDestroyed(AActor* DestroyedActor)
+{
+	ASTPickupItem* Item = Cast<ASTPickupItem>(DestroyedActor);
+	if (!Item) return;
+
+	MiniMapItems.Remove(Item);
+
+	if (MiniMapWidget)
+	{
+		MiniMapWidget->HideItemIcon(Item);
 	}
 }
 
@@ -148,12 +177,18 @@ void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 				PlayerPawn->GetActorLocation(),
 				CurrentYaw);
 
-
 		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
-		MiniMapPos += FVector2D(-55.f, -20.f);
+		FVector2D Offset(-55.f, -20.f);
+		MiniMapPos += Offset;
 
-		// 이것도 수정 필요
-		if (MiniMapPos.X < -45.f || MiniMapPos.X > 730.f || MiniMapPos.Y < -10.f || MiniMapPos.Y > 770.f)
+		const float WidgetSize = HUDWidget->BigMapWidget->GetDesiredSize().Y;
+
+		const float MinX = Offset.X + 10.f;
+		const float MaxX = Offset.X + WidgetSize - 15.f;
+		const float MinY = Offset.Y + 10.f;
+		const float MaxY = Offset.Y + WidgetSize - 10.f;
+
+		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
 		{
 			MiniMapWidget->HideItemIcon(Item);
 		}
