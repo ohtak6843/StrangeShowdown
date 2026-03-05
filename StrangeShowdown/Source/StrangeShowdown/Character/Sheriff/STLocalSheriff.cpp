@@ -4,9 +4,14 @@
 #include "Character/Sheriff/STLocalSheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Component/STQuickSlotComponent.h"
+#include "Component/STAttackTraceComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 
 ASTLocalSheriff::ASTLocalSheriff()
 {
@@ -21,6 +26,76 @@ ASTLocalSheriff::ASTLocalSheriff()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
+	// QuickSlot Component
+	QuickSlotComp = CreateDefaultSubobject<USTQuickSlotComponent>(TEXT("QuickSlotComp"));
+
+	// Attack Trace Component
+	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
+
+	// MiniMap 검색
+	TArray<AActor*> WorldMiniMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTMiniMapActor::StaticClass(),
+		WorldMiniMapActors);
+
+	for (AActor* Actor : WorldMiniMapActors)
+	{
+		ASTMiniMapActor* MiniMap = Cast<ASTMiniMapActor>(Actor);
+		if (MiniMap)
+		{
+			MiniMapActor = MiniMap;
+			UE_LOG(LogTemp, Warning, TEXT("MiniMapActor found: %s"), *MiniMap->GetName());
+			break;
+		}
+	}
+
+	// BigMap 검색
+	TArray<AActor*> WorldBigMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTBigMapActor::StaticClass(),
+		WorldBigMapActors);
+
+	for (AActor* Actor : WorldBigMapActors)
+	{
+		ASTBigMapActor* BigMap = Cast<ASTBigMapActor>(Actor);
+		if (BigMap)
+		{
+			BigMapActor = BigMap;
+			UE_LOG(LogTemp, Warning, TEXT("BigMapActor found: %s"), *BigMap->GetName());
+			break;
+		}
+	}
+
+	InputMappingContextAdd();
+}
+
+void ASTLocalSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Move);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Look);
+	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolAim);
+	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolFire);
+}
+
+void ASTLocalSheriff::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+}
+
+void ASTLocalSheriff::InputMappingContextAdd()
+{
 	// Input Mapping Context
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_LocalSheriffInput.IMC_LocalSheriffInput"));
 	if (nullptr != InputMappingContextRef.Object)
@@ -51,29 +126,6 @@ ASTLocalSheriff::ASTLocalSheriff()
 	if (nullptr != InputActionPistolFireRef.Object)
 	{
 		PistolFireAction = InputActionPistolFireRef.Object;
-	}
-}
-
-void ASTLocalSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-
-	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Move);
-	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Look);
-	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolAim);
-	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolFire);
-}
-
-void ASTLocalSheriff::BeginPlay()
-{
-	Super::BeginPlay();
-
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 }
 

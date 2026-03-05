@@ -31,10 +31,27 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class UCameraComponent> CameraComp;
 
+	// Input Mapping Context
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
+	// QuickSlot Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "QuickSlot")
+	TObjectPtr<class USTQuickSlotComponent> QuickSlotComp;
+
+	// Attack Trace Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
+	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
+	TObjectPtr<class ASTBigMapActor> BigMapActor;
+
 private:
+	void InputMappingContextAdd();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);
