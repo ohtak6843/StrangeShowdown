@@ -5,6 +5,7 @@
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Character/STCharacter.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -38,6 +39,9 @@ void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const F
 			*Message);
 
 		MessageTextBlock->SetText(FText::FromString(FormattedMessage));
+
+		// 폰트 크기 조절
+		MessageTextBlock->SetFont(FSlateFontInfo(FPaths::ProjectContentDir() / TEXT("Fonts/F_StrangeShowdown.ttf"), 20));
 		
 		MessageTextBlock->SetAutoWrapText(true);
 		MessageTextBlock->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
@@ -75,7 +79,7 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 			APawn* Pawn = PC->GetPawn();
 			if (!Pawn) return;
 
-			ASTPlayerBase* Player = Cast<ASTPlayerBase>(Pawn);
+			ASTCharacter* Player = Cast<ASTCharacter>(Pawn);
 			if (!Player) return;
 
 			FString NickName = Player->PlayerNickName;

@@ -56,11 +56,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TObjectPtr<class USTItemDataAssetBase> HoldingItemData;
 
-public:
-	// Character Name
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
-	FString PlayerNickName = TEXT("NoName");
-
 protected:
 	// 오른손 아이템 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))

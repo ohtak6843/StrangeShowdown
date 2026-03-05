@@ -14,7 +14,6 @@ enum class EPlayerMeshType : uint8
 	Cowboy			UMETA(DisplayName = "Cowboy"),
 	Cowgirl			UMETA(DisplayName = "Cowgirl"),
 	Gunman			UMETA(DisplayName = "Gunman"),
-	Sheriff			UMETA(DisplayName = "Sheriff"),
 	Woman			UMETA(DisplayName = "Woman"),
 	WorkingGirl		UMETA(DisplayName = "WorkingGirl")
 };

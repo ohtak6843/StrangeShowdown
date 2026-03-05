@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/STCharacter.h"
 #include "Types/PlayerTypes.h"
+#include "Component/STStatComponent.h"
 #include "STSheriffBase.generated.h"
 
 /**
@@ -39,4 +40,8 @@ protected:
 
 private:
 	
+public:
+	// Stat Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+	TObjectPtr<USTStatComponent> StatComp;
 };
