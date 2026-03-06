@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "Character/Sheriff/STSheriffBase.h"
 #include "InputActionValue.h"
+#include "Types/PlayerTypes.h"
 #include "STLocalSheriff.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase
 {
@@ -18,10 +20,17 @@ class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase
 public:
 	ASTLocalSheriff();
 
+	void SetCameraPose(ECameraPose NewPose);
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyStateSettings(ECameraPose NewState);
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -50,12 +59,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
 	TObjectPtr<class ASTBigMapActor> BigMapActor;
 
+	// 블루프린트에서 호출할 Fire()
+	UFUNCTION(BlueprintImplementableEvent)
+	void Fire_BP();
+
 private:
+	void ChangeToIdle();
+	void ChangeToAiming();
+
 	void InputMappingContextAdd();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);
 	void PistolFire(const FInputActionValue& Value);
+
+	void Fire();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderMoveAction;
@@ -69,4 +87,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> PistolFireAction;
 
+	TMap<ECameraPose, FCameraPoseSetting> PoseSettings;
+
+	float PoseBlendTime = 0.2f;
+	float PoseElapsedTime = 0.f;
+
+	FCameraPoseSetting StartPose;
+	FCameraPoseSetting TargetPose;
 };

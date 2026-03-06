@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
+#include "Character/Player/STFieldPlayer.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -31,6 +32,11 @@ ASTLocalSheriff::ASTLocalSheriff()
 
 	// Attack Trace Component
 	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
+
+	// Camera Pose Settings
+	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
+	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
+	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
 
 	// MiniMap 검색
 	TArray<AActor*> WorldMiniMapActors;
@@ -92,6 +98,64 @@ void ASTLocalSheriff::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+}
+
+void ASTLocalSheriff::SetCameraPose(ECameraPose NewPose)
+{
+	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
+	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
+
+	TargetPose = PoseSettings[NewPose];
+
+	PoseElapsedTime = 0.f;
+}
+
+void ASTLocalSheriff::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+	case ECameraPose::Idle:
+		ChangeToIdle();
+		break;
+	case ECameraPose::Aiming:
+		ChangeToAiming();
+		break;
+	default:
+		break;
+	}
+}
+
+void ASTLocalSheriff::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
+}
+
+void ASTLocalSheriff::ChangeToIdle()
+{
+	RemoveState(ESheriffState::Aiming);
+	bUseControllerRotationYaw = false;
+
+	SetCameraPose(ECameraPose::Idle);
+}
+
+void ASTLocalSheriff::ChangeToAiming()
+{
+	AddState(ESheriffState::Aiming);
+	bUseControllerRotationYaw = true;
+
+	SetCameraPose(ECameraPose::Aiming);
 }
 
 void ASTLocalSheriff::InputMappingContextAdd()
@@ -157,11 +221,13 @@ void ASTLocalSheriff::PistolAim(const FInputActionValue& Value)
 	if (bIsAiming)
 	{
 		RemoveState(ESheriffState::Aiming);
+		ApplyStateSettings(ECameraPose::Idle);
 		bUseControllerRotationYaw = false;
 	}
 	else
 	{
 		AddState(ESheriffState::Aiming);
+		ApplyStateSettings(ECameraPose::Aiming);
 		bUseControllerRotationYaw = true;
 	}
 }
@@ -172,5 +238,25 @@ void ASTLocalSheriff::PistolFire(const FInputActionValue& Value)
 	if (bIsAiming)
 	{
 		// TODO: 파티클 출력
+		if (AttackTraceComp)
+		{
+			Fire();
+		}
+	}
+}
+
+void ASTLocalSheriff::Fire()
+{
+	if (AttackTraceComp)
+	{
+		UGameplayStatics::ApplyDamage(
+			AttackTraceComp->TracingFieldPlayer,
+			1.f,
+			GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+
+		Fire_BP();
 	}
 }

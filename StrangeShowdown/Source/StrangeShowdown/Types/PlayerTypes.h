@@ -5,6 +5,27 @@
 #include "StrangeShowdown.h"
 #include "PlayerTypes.generated.h"
 
+UENUM(BlueprintType)
+enum class ECameraPose : uint8
+{
+	Idle		UMETA(DisplayName = "Idle"),
+	Aiming		UMETA(DisplayName = "Aiming"),
+	LookingUp	UMETA(DisplayName = "LookingUp")
+};
+ENUM_CLASS_FLAGS(ECameraPose)
+
+USTRUCT(BlueprintType)
+struct FCameraPoseSetting
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SpringArmLength = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CameraY = 0.f;
+};
+
 
 UENUM(BlueprintType)
 enum class EPlayerMeshType : uint8

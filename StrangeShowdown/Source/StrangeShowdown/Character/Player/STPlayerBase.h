@@ -10,7 +10,6 @@
 #include "Types/PlayerTypes.h"
 #include "STPlayerBase.generated.h"
 
-
 UCLASS()
 class STRANGESHOWDOWN_API ASTPlayerBase : public ASTCharacter
 {
