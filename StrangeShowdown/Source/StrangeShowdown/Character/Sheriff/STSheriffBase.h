@@ -37,6 +37,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, meta = (Bitmask, BitmaskEnum = "ESheriffState"))
 	uint8 SheriffStateFlag;
 
-private:
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkeletalMeshComponent> PistolMesh;
 };

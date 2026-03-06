@@ -43,4 +43,13 @@ ASTSheriffBase::ASTSheriffBase()
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
+
+	// Set Pistol Mesh
+	PistolMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PistolMesh"));
+	PistolMesh->SetupAttachment(GetMesh(), TEXT("Pistol"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> PistolMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/Weapons/SK_Wep_Revolver_02.SK_Wep_Revolver_02'"));
+	if (PistolMeshRef.Object)
+	{
+		PistolMesh->SetSkeletalMesh(PistolMeshRef.Object);
+	}
 }
