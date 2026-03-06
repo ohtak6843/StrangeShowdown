@@ -247,16 +247,16 @@ void ASTLocalSheriff::PistolFire(const FInputActionValue& Value)
 
 void ASTLocalSheriff::Fire()
 {
-	if (AttackTraceComp)
-	{
-		UGameplayStatics::ApplyDamage(
-			AttackTraceComp->TracingFieldPlayer,
-			1.f,
-			GetController(),
-			this,
-			UDamageType::StaticClass()
-		);
+	if (!AttackTraceComp || !AttackTraceComp->TracingFieldPlayer)
+		return;
 
-		Fire_BP();
-	}
+	UGameplayStatics::ApplyDamage(
+		AttackTraceComp->TracingFieldPlayer,
+		1.f,
+		GetController(),
+		this,
+		UDamageType::StaticClass()
+	);
+
+	Fire_BP();
 }
