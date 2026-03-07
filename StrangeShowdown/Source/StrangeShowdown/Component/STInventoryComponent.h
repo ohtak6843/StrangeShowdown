@@ -11,9 +11,11 @@ struct FInventorySlot
 	GENERATED_BODY()
 
 public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class USTItemDataAssetBase> ItemData = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsInfinite = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Count = 0;

@@ -240,9 +240,11 @@ void ASTLocalPlayer::BeginPlay()
 	{
 		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
 		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+		QuickSlotComp->QuickSlots[0].bIsInfinite = true;
 
 		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
 		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+		QuickSlotComp->QuickSlots[1].bIsInfinite = true;
 	}
 
 	UpdateQuickslotForCpp();
