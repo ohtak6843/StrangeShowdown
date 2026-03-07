@@ -4,27 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Types/PlayerTypes.h"
 #include "STLocalPlayer.generated.h"
-
-UENUM(BlueprintType)
-enum class ECameraPose : uint8
-{
-	Idle		UMETA(DisplayName = "Idle"),
-	Aiming		UMETA(DisplayName = "Aiming"),
-	LookingUp	UMETA(DisplayName = "LookingUp")
-};
-
-USTRUCT(BlueprintType)
-struct FCameraPoseSetting
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SpringArmLength = 300.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CameraY = 0.f;
-};
 
 UCLASS()
 class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase
@@ -80,6 +61,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
+	TObjectPtr<class ASTBigMapActor> BigMapActor;
 
 private:
 	// Change Camera Settings with State

@@ -23,6 +23,10 @@ public:
 
 	// 패킷 송수신
 
+	// Character Name
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
+	FString PlayerNickName = TEXT("NoName");
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

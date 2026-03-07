@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/STCharacter.h"
 #include "Types/PlayerTypes.h"
+#include "Component/STStatComponent.h"
 #include "STSheriffBase.generated.h"
 
 /**
@@ -37,6 +38,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, meta = (Bitmask, BitmaskEnum = "ESheriffState"))
 	uint8 SheriffStateFlag;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USkeletalMeshComponent> PistolMesh;
+
+	// Stat Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
+	TObjectPtr<USTStatComponent> StatComp;
+private:
+	
 };

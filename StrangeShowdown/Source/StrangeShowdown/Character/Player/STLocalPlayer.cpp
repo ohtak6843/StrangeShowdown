@@ -9,6 +9,9 @@
 #include "Component/STAttackTraceComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Game/STGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 #include "StrangeShowdown.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -42,6 +45,42 @@ ASTLocalPlayer::ASTLocalPlayer()
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
+
+	// MiniMap 검색
+	TArray<AActor*> WorldMiniMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTMiniMapActor::StaticClass(),
+		WorldMiniMapActors);
+
+	for (AActor* Actor : WorldMiniMapActors)
+	{
+		ASTMiniMapActor* MiniMap = Cast<ASTMiniMapActor>(Actor);
+		if (MiniMap)
+		{
+			MiniMapActor = MiniMap;
+			UE_LOG(LogTemp, Warning, TEXT("MiniMapActor found: %s"), *MiniMap->GetName());
+			break;
+		}
+	}
+
+	// BigMap 검색
+	TArray<AActor*> WorldBigMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTBigMapActor::StaticClass(),
+		WorldBigMapActors);
+
+	for (AActor* Actor : WorldBigMapActors)
+	{
+		ASTBigMapActor* BigMap = Cast<ASTBigMapActor>(Actor);
+		if (BigMap)
+		{
+			BigMapActor = BigMap;
+			UE_LOG(LogTemp, Warning, TEXT("BigMapActor found: %s"), *BigMap->GetName());
+			break;
+		}
+	}
 }
 
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)

@@ -31,25 +31,15 @@ void ASTMiniMapActor::BeginPlay()
 	MiniMapCapture->ShowFlags.SetLighting(false);
 	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
 	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
-	MiniMapCapture->ShowFlags.SetTranslucency(false);
 	MiniMapCapture->ShowFlags.SetPostProcessing(false);
 
 	// 위젯 컴포넌트 숨기기
 	HiddenWidgetComponent();
 
-	// 아이템 수집 타이머 설정(딜레이)
+	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
-		this,
-		&ASTMiniMapActor::CollectItems,
-		0.5f,
-		false);
-
-	// HUD 연결 타이머 설정(딜레이)
-	FTimerHandle TimerHandle2;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle2,
 		this,
 		&ASTMiniMapActor::BringHUD,
 		0.5f,
@@ -64,22 +54,6 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 	UpdateMiniMapRotation(DeltaTime);
 
 	UpdateItemOnMiniMap(DeltaTime);
-}
-
-void ASTMiniMapActor::CollectItems()
-{
-	MiniMapItems.Empty();
-
-	TArray<AActor*> ItemActors;
-	UGameplayStatics::GetAllActorsOfClass(
-		GetWorld(),
-		ASTPickupItem::StaticClass(),
-		ItemActors);
-
-	for (AActor* Actor : ItemActors)
-	{
-		MiniMapItems.Add(Cast<ASTPickupItem>(Actor));
-	}
 }
 
 void ASTMiniMapActor::BringHUD()
@@ -98,6 +72,28 @@ void ASTMiniMapActor::BringHUD()
 				return;
 			}
 		}
+	}
+}
+
+void ASTMiniMapActor::RegisterItem(ASTPickupItem* NewItem)
+{
+	if (!NewItem) return;
+
+	MiniMapItems.AddUnique(NewItem);
+
+	NewItem->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnItemDestroyed);
+}
+
+void ASTMiniMapActor::OnItemDestroyed(AActor* DestroyedActor)
+{
+	ASTPickupItem* Item = Cast<ASTPickupItem>(DestroyedActor);
+	if (!Item) return;
+
+	MiniMapItems.Remove(Item);
+
+	if (MiniMapWidget)
+	{
+		MiniMapWidget->HideItemIcon(Item);
 	}
 }
 
@@ -149,10 +145,17 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 				CurrentYaw);
 
 		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
-		MiniMapPos += FVector2D(-55.f, -20.f);
+		FVector2D Offset(-55.f, -20.f);
+		MiniMapPos += Offset;
 
-		// 이것도 수정 필요
-		if (MiniMapPos.X < -45.f || MiniMapPos.X > 230.f || MiniMapPos.Y < -10.f || MiniMapPos.Y > 270.f)
+		const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
+
+		const float MinX = Offset.X + 10.f;
+		const float MaxX = Offset.X + WidgetSize - 15.f;
+		const float MinY = Offset.Y + 10.f;
+		const float MaxY = Offset.Y + WidgetSize - 10.f;
+
+		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
 		{
 			MiniMapWidget->HideItemIcon(Item);
 		}

@@ -33,5 +33,4 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* ItemLayer;
-
 };

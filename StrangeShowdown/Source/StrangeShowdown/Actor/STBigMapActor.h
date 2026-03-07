@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Item/STPickupItem.h"
 #include "STBigMapActor.generated.h"
 
 UCLASS()
@@ -23,9 +24,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// 아이템이 새로 생기면 호출해줘야 함
 	void CollectItems();
 	void BringHUD();
+	void RegisterItem(ASTPickupItem* NewItem);
+
+	// 아이템이 파괴될 때 호출
+	UFUNCTION()
+	void OnItemDestroyed(AActor* DestroyedActor);
 
 	// 미니맵 좌표로 변환
 	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;

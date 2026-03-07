@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Item/STPickupItem.h"
 #include "STMiniMapActor.generated.h"
 
 UCLASS()
@@ -11,21 +12,21 @@ class STRANGESHOWDOWN_API ASTMiniMapActor : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
+public:
 	ASTMiniMapActor();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+public:
 	virtual void Tick(float DeltaTime) override;
 
-	// 아이템이 새로 생기면 호출해줘야 함
-	void CollectItems();
 	void BringHUD();
+	void RegisterItem(ASTPickupItem* NewItem);
+
+	// 아이템이 파괴될 때 호출
+	UFUNCTION()
+	void OnItemDestroyed(AActor* DestroyedActor);
 
 	// 미니맵 좌표로 변환
 	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;

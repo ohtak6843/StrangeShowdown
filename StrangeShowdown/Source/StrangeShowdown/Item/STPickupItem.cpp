@@ -4,6 +4,8 @@
 #include "Item/STPickupItem.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 #include "Camera/PlayerCameraManager.h"
 
 // Sets default values
@@ -61,6 +63,29 @@ void ASTPickupItem::BeginPlay()
 
 	PickupCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTPickupItem::HandleBeginOverlap);
 	PickupCollision->OnComponentEndOverlap.AddDynamic(this, &ASTPickupItem::HandleEndOverlap);
+
+	// 미니맵 아이콘 설정
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+	// LOG
+	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - PlayerController: %s"), *PC->GetName());
+
+	ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn());
+
+	// LOG
+	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - LocalPlayer: %s"), LocalPlayer ? *LocalPlayer->GetName() : TEXT("nullptr"));
+
+	if (LocalPlayer && LocalPlayer->MiniMapActor)
+	{
+		LocalPlayer->MiniMapActor->RegisterItem(this);
+
+		// LOG
+		UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - Registered with MiniMapActor"));
+	}
+	if (LocalPlayer && LocalPlayer->BigMapActor)
+	{
+		LocalPlayer->BigMapActor->RegisterItem(this);
+	}
 }
 
 void ASTPickupItem::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
