@@ -10,7 +10,7 @@
 
 ASTSheriffController::ASTSheriffController()
 {
-	InputMappingContextAdd();
+	AddInputAction();
 }
 
 void ASTSheriffController::SetupInputComponent()
@@ -18,8 +18,7 @@ void ASTSheriffController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	
-	// InputMappingContext에 함수 이름을 적는다.
+
 	EnhancedInputComponent->BindAction(TabUIAction, ETriggerEvent::Triggered, this, &ASTSheriffController::ShowTabUI);
 	EnhancedInputComponent->BindAction(BigMapAction, ETriggerEvent::Triggered, this, &ASTSheriffController::ShowBigMap);
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTSheriffController::FocusChatManager);
@@ -28,12 +27,9 @@ void ASTSheriffController::SetupInputComponent()
 void ASTSheriffController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FInputModeGameOnly GameOnlyInputMode;
-	SetInputMode(GameOnlyInputMode);
 }
 
-void ASTSheriffController::InputMappingContextAdd()
+void ASTSheriffController::AddInputAction()
 {
 	// Input Actions
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionTabUIRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_TabUI.IA_TabUI'"));

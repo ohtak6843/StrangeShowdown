@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Controller/STBaseController.h"
 #include "Widget/STHUD.h"
 #include "STPlayerController.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTPlayerController : public APlayerController
+class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
 {
 	GENERATED_BODY()
 

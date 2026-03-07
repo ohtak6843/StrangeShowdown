@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Controller/STBaseController.h"
 #include "Widget/STHUD.h"
 #include "STSheriffController.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTSheriffController : public APlayerController
+class STRANGESHOWDOWN_API ASTSheriffController : public ASTBaseController
 {
 	GENERATED_BODY()
 
@@ -28,7 +28,7 @@ public:
 	TObjectPtr<USTHUD> HUDWidget;
 
 private:
-	void InputMappingContextAdd();
+	void AddInputAction();
 	void ShowTabUI();
 	void ShowBigMap();
 	void FocusChatManager();
