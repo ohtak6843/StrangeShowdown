@@ -44,6 +44,7 @@ protected:
 	// Stat Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<USTStatComponent> StatComp;
+
 private:
 	
 };

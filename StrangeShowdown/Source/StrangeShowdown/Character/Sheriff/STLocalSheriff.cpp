@@ -74,7 +74,7 @@ ASTLocalSheriff::ASTLocalSheriff()
 		}
 	}
 
-	InputMappingContextAdd();
+	AddInputMappingContext();
 }
 
 void ASTLocalSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -158,10 +158,10 @@ void ASTLocalSheriff::ChangeToAiming()
 	SetCameraPose(ECameraPose::Aiming);
 }
 
-void ASTLocalSheriff::InputMappingContextAdd()
+void ASTLocalSheriff::AddInputMappingContext()
 {
 	// Input Mapping Context
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_LocalSheriffInput.IMC_LocalSheriffInput"));
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_SheriffInput.IMC_SheriffInput"));
 	if (nullptr != InputMappingContextRef.Object)
 	{
 		DefaultMappingContext = InputMappingContextRef.Object;
@@ -236,27 +236,20 @@ void ASTLocalSheriff::PistolFire(const FInputActionValue& Value)
 {
 	bool bIsAiming = HasAnyState(ESheriffState::Aiming);
 	if (bIsAiming)
-	{
-		// TODO: 파티클 출력
-		if (AttackTraceComp)
-		{
-			Fire();
-		}
+	{		
+		if (!AttackTraceComp || !AttackTraceComp->TracingFieldPlayer)
+			return;
+
+		// TODO: MuzzleFlash, Sound, Recoild 등등 효과 추가
+
+		UGameplayStatics::ApplyDamage(
+			AttackTraceComp->TracingFieldPlayer,
+			1.f,
+			GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+
+		Fire_BP();
 	}
-}
-
-void ASTLocalSheriff::Fire()
-{
-	if (!AttackTraceComp || !AttackTraceComp->TracingFieldPlayer)
-		return;
-
-	UGameplayStatics::ApplyDamage(
-		AttackTraceComp->TracingFieldPlayer,
-		1.f,
-		GetController(),
-		this,
-		UDamageType::StaticClass()
-	);
-
-	Fire_BP();
 }

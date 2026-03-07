@@ -27,6 +27,16 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 블루프린트에서 호출할 Fire()
+	UFUNCTION(BlueprintImplementableEvent)
+	void Fire_BP();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
+	TObjectPtr<class ASTBigMapActor> BigMapActor;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -52,28 +62,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
-	TObjectPtr<class ASTBigMapActor> BigMapActor;
-
-	// 블루프린트에서 호출할 Fire()
-	UFUNCTION(BlueprintImplementableEvent)
-	void Fire_BP();
-
 private:
 	void ChangeToIdle();
 	void ChangeToAiming();
 
-	void InputMappingContextAdd();
+	void AddInputMappingContext();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);
 	void PistolFire(const FInputActionValue& Value);
-
-	void Fire();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderMoveAction;
