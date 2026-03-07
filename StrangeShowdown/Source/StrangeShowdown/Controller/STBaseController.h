@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Widget/STHUD.h"
 #include "STBaseController.generated.h"
 
 /**
@@ -16,6 +17,9 @@ class STRANGESHOWDOWN_API ASTBaseController : public APlayerController
 
 public:
 	ASTBaseController();
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	TObjectPtr<USTHUD> HUDWidget;
 
 protected:
 	virtual void BeginPlay() override;

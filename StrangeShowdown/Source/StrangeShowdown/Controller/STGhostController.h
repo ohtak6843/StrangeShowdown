@@ -4,19 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
-#include "Widget/STHUD.h"
-#include "STSheriffController.generated.h"
+#include "STGhostController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTSheriffController : public ASTBaseController
+class STRANGESHOWDOWN_API ASTGhostController : public ASTBaseController
 {
 	GENERATED_BODY()
-
+	
 public:
-	ASTSheriffController();
+	ASTGhostController();
 
 	virtual void SetupInputComponent() override;
 

@@ -18,6 +18,9 @@ public:
 	ASTGhostBase();
 
 protected:
+	// Stat Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
+	TObjectPtr<class USTStatComponent> StatComp;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))

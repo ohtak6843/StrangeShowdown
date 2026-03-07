@@ -3,6 +3,7 @@
 
 #include "Character/Ghost/STGhostBase.h"
 #include "Components/CapsuleComponent.h"
+#include "Component/STStatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ASTGhostBase::ASTGhostBase()
@@ -43,4 +44,17 @@ ASTGhostBase::ASTGhostBase()
 	{
 		StaticMesh->SetStaticMesh(CharacterMeshRef.Object);
 	}
+
+	// Stat Component
+	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
+	StatComp->CurrentHp = StatComp->MaxHp;
+	StatComp->Gold = 0;
+	StatComp->Kill = 0;
+	StatComp->Armor = 0;
+	StatComp->MoveSpeed = 500;
+	// Ghost는 스태미너가 없으므로 -1로 설정
+	StatComp->CurrentStamina = -1;
+	StatComp->CurrentAction = StatComp->UseAbleAction;
+	StatComp->Prize = 0;
+	StatComp->bAlive = true;
 }

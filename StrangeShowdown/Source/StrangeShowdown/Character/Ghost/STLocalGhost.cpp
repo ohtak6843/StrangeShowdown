@@ -7,6 +7,10 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
+#include "Component/STQuickSlotComponent.h"
 
 ASTLocalGhost::ASTLocalGhost()
 {
@@ -21,25 +25,46 @@ ASTLocalGhost::ASTLocalGhost()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
-	// Input Mapping Context
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_GhostInput.IMC_GhostInput"));
-	if (nullptr != InputMappingContextRef.Object)
+	// QuickSlot Component
+	QuickSlotComp = CreateDefaultSubobject<USTQuickSlotComponent>(TEXT("QuickSlotComp"));
+
+	// MiniMap 검색
+	TArray<AActor*> WorldMiniMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTMiniMapActor::StaticClass(),
+		WorldMiniMapActors);
+
+	for (AActor* Actor : WorldMiniMapActors)
 	{
-		DefaultMappingContext = InputMappingContextRef.Object;
+		ASTMiniMapActor* MiniMap = Cast<ASTMiniMapActor>(Actor);
+		if (MiniMap)
+		{
+			MiniMapActor = MiniMap;
+			UE_LOG(LogTemp, Warning, TEXT("MiniMapActor found: %s"), *MiniMap->GetName());
+			break;
+		}
 	}
 
-	// Input Actions
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
-	if (nullptr != InputActionShoulderMoveRef.Object)
+	// BigMap 검색
+	TArray<AActor*> WorldBigMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTBigMapActor::StaticClass(),
+		WorldBigMapActors);
+
+	for (AActor* Actor : WorldBigMapActors)
 	{
-		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
+		ASTBigMapActor* BigMap = Cast<ASTBigMapActor>(Actor);
+		if (BigMap)
+		{
+			BigMapActor = BigMap;
+			UE_LOG(LogTemp, Warning, TEXT("BigMapActor found: %s"), *BigMap->GetName());
+			break;
+		}
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
-	if (nullptr != InputActionShoulderLookRef.Object)
-	{
-		ShoulderLookAction = InputActionShoulderLookRef.Object;
-	}
+	AddInputMappingContext();
 }
 
 void ASTLocalGhost::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -60,6 +85,29 @@ void ASTLocalGhost::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+}
+
+void ASTLocalGhost::AddInputMappingContext()
+{
+	// Input Mapping Context
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_GhostInput.IMC_GhostInput"));
+	if (nullptr != InputMappingContextRef.Object)
+	{
+		DefaultMappingContext = InputMappingContextRef.Object;
+	}
+
+	// Input Actions
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
+	if (nullptr != InputActionShoulderMoveRef.Object)
+	{
+		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
+	if (nullptr != InputActionShoulderLookRef.Object)
+	{
+		ShoulderLookAction = InputActionShoulderLookRef.Object;
 	}
 }
 

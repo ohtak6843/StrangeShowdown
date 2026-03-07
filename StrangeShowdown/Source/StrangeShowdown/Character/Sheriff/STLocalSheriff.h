@@ -31,12 +31,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void Fire_BP();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
-	TObjectPtr<class ASTBigMapActor> BigMapActor;
-
 protected:
 	virtual void BeginPlay() override;
 

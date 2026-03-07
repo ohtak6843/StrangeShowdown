@@ -17,8 +17,4 @@ class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
 
 protected:
 	virtual void BeginPlay() override;
-
-public:
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	TObjectPtr<USTHUD> HUDWidget;
 };

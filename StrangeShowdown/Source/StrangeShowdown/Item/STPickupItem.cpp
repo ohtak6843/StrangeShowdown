@@ -70,7 +70,7 @@ void ASTPickupItem::BeginPlay()
 	// LOG
 	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - PlayerController: %s"), *PC->GetName());
 
-	ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn());
+	ASTCharacter* LocalPlayer = Cast<ASTCharacter>(PC->GetPawn());
 
 	// LOG
 	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - LocalPlayer: %s"), LocalPlayer ? *LocalPlayer->GetName() : TEXT("nullptr"));
