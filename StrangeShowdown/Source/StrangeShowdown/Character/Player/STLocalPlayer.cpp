@@ -245,6 +245,8 @@ void ASTLocalPlayer::BeginPlay()
 		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
 	}
 
+	UpdateQuickslotForCpp();
+
 	HoldItem();
 }
 

@@ -31,6 +31,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
 
+	// TODO: 임시로 블프에 함수 만들어놓은 것, 나중에 함수들 c++로 옮기면서 없애야 함
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateQuickslotForCpp();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
