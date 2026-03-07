@@ -22,16 +22,23 @@ private:
 	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
 	void HandleMoveObject(const Common::SCMovePlayer& Packet);
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
+	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
+	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+	void HandleLogin(const Common::SCLogin& Packet);
 
 
 	// 핸들러 맵에 함수 등록
 	template <typename T>
 	void RegisterHandler(Common::PacketType Type, TFunction<void(const T&)> LogicFunc)
 	{
-		HandlerMap.Add(Type, [LogicFunc](const TArray<uint8>& Data) {
-			T Pkt{ STSerializer::Deserialize<T>(Data) };
-			LogicFunc(Pkt);
-		});
+		HandlerMap.Add(
+			Type,
+			[LogicFunc](const TArray<uint8>& Data)
+			{
+				T Pkt{ STSerializer::Deserialize<T>(Data) };
+				LogicFunc(Pkt);
+			}
+		);
 	}
 	
 

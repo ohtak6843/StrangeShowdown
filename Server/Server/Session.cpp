@@ -163,9 +163,18 @@ void Session::ReassemblePacket()
 		// 아니면 바로 실행
 
 		// 이 핸들패킷은 싱글스레드가 보장
-		auto room{ GET_SINGLE(RoomManager)->GetRoom(_sessionID) };
-		Job job{ [this]() { PacketHandler::HandlePacket(shared_from_this(), _recvBuffer); } };
-		room->PushJob(job);
+		
+		
+		// todo: thread unsafe
+		if (nullptr == _room)
+		{
+			PacketHandler::HandlePacket(shared_from_this(), _recvBuffer);
+		}
+		else
+		{
+			Job job{ [this]() { PacketHandler::HandlePacket(shared_from_this(), _recvBuffer); } };
+			_room->PushJob(job);
+		}
 
 		// 이 핸들패킷은 멀티스레드.
 		// 패킷핸들러를 바로 실행

@@ -3,6 +3,8 @@
 #include "OverlappedEx.h"
 #include "Serializer.h"
 
+class Room;
+
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
@@ -51,12 +53,18 @@ public:
 
 
 	// getter and setter
+	void SetIOState(const IOState state) { _ioState = state; }
+	IOState GetIOState() const { return _ioState; }
 
 	int GetCurrentDataSize() const { return _currentDataSize; }
+
 	std::array<char, BUFFER_SIZE>& GetRecvBuffer() { return _recvBuffer; }
 
-	void SetSessionID(const uint64 id) { _sessionID = id; }
 	uint64 GetSessionID() const { return _sessionID; }
+
+	// todo: thread unsafe
+	std::shared_ptr<Room> GetRoom() const { return _room; }
+	void SetRoom(const std::shared_ptr<Room>& room) { _room = room; }
 
 	
 
@@ -70,33 +78,46 @@ private:
 
 private:
 
-	// network info
-	// pointer가 아닌 별도 id
+	// --
+	// network info:
+	// --
 	uint64			_sessionID{ 0 };
 	SOCKET			_clientSocket{ INVALID_SOCKET };
 	std::atomic<IOState>	_ioState{ IOState::CONNECT };
 
+
+	// --
+	// content info:
+	// --
+	std::shared_ptr<Room>	_room{ nullptr };
+
+
+	// --
 	// RECV:
+	// --
 	// Recv 전용 Overlapped 변수
 	OverlappedEx		_overlappedEx{};
 	// 패킷 재조립 버퍼
 	RecvBuffer			_recvBuffer{};
-	
 	// 남은 데이터 크기 
 	uint32				_currentDataSize{ 0 };
 
 
+	// --
 	// SEND:
+	// -- 
 	// Send 전용 OverlappedEx
 	// todo: thread unsafe
-	std::array<OverlappedEx*, 10>	_sendOverlappedExArray;
-	std::queue<int>					_sendOverlappedExQueue;
+	std::array<OverlappedEx*, 10>	_sendOverlappedExArray{};
+	std::queue<int>					_sendOverlappedExQueue{};
 
-	// reference count
+
+	// --
+	// reference count:
+	// --
 	// 세션을 raw pointer로 사용하기 위한 카운터
 	// IO 대기 중 shared_ptr로 만든 객체가 사라질 수 있어
 	// 이를 방지하기 위해 IO 작업중인 횟수를 저장한다.
 	std::atomic<int>	_referenceCount{ 0 };
 
-	// additional info
 };

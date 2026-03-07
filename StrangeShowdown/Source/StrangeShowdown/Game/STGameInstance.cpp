@@ -196,8 +196,22 @@ void USTGameInstance::TempFunc()
 	Common::CSGetRoomList LoginPacket{};
 	auto Packet{ STSerializer::Serialize(LoginPacket) };
 	SendPacket(Packet);
-	UE_LOG(LogTemp, Log, TEXT("TempFunc Called."));
 }
+
+void USTGameInstance::TempJoinRoom()
+{
+	Common::CSJoinRoom JoinPacket{ 0 };
+	auto Packet{ STSerializer::Serialize(JoinPacket) };
+	SendPacket(Packet);
+}
+
+void USTGameInstance::TempCreateRoom()
+{
+	Common::CSCreateRoom CreatePacket{};
+	auto Packet{ STSerializer::Serialize(CreatePacket) };
+	SendPacket(Packet);
+}
+
 
 void USTGameInstance::SendPacket(const TArray<uint8>& data)
 {

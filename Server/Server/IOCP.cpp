@@ -61,6 +61,7 @@ void IOCP::Start()
 	// accept 
 	DoAccept();
 
+	// todo
 	auto thread_number {
 		1
 		 // static_cast<int>(std::thread::hardware_concurrency())
@@ -79,7 +80,6 @@ void IOCP::DeleteSession(const uint64 session_id)
 	// 추후 검색이 필요할 경우 LOCK 필요.
 	_sessionHash.erase(session_id);
 }
-
 
 void IOCP::Disconnect(const uint64 session_id)
 {
@@ -158,7 +158,7 @@ void IOCP::WorkerThread()
 			session->OnRecvCompleted(io_size);
 
 			// 세션에 소속한 방 잡큐에 작업이 있을 경우 실행
-			auto room{ GET_SINGLE(RoomManager)->GetRoom(session->GetSessionID()) };
+			auto room{ session->GetRoom() };
 			if (nullptr != room)
 			{
 				room->Update();
@@ -213,6 +213,7 @@ void IOCP::OnAcceptCompleted()
 {
 	// 세션 맵에 저장 위한 ID
 	// accept는 한 스레드에서만 실행되므로 문제 없음.
+	// todo: 나중에 인덱스 초과 문제 있음.
 	auto id{ _sessionCnt++ };
 
 	// 새로운 세션 생성
@@ -228,7 +229,8 @@ void IOCP::OnAcceptCompleted()
 		0)
 	};
 	
-	if (NULL == ret) {
+	if (NULL == ret)
+	{
 		auto error{ GetLastError() };
 		std::println("accept failed with error: {}", error);
 		return;
@@ -236,14 +238,6 @@ void IOCP::OnAcceptCompleted()
 
 	// sessionHash에 클라이언트 정보 저장
 	_sessionHash[id] = new_client;
-
-	// 추가 정보 저장
-	// todo: 플레이어 생성 시점을 여기가 아니라 방 입장시로 변경
-	new_client->SetSessionID(id);
-
-	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
-	player->SetOwnerSession(new_client);
-	GET_SINGLE(RoomManager)->AddPlayer(id, player);
 
 	// 세션 시작
 	new_client->Start();

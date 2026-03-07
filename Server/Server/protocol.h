@@ -47,7 +47,8 @@ enum class PacketType : uint16
 	SC_GIVE_ROOM_LIST,
 	CS_GET_ROOM_LIST,
 
-	CS_CRTEATE_ROOM,
+	SC_CREATE_ROOM,
+	CS_CREATE_ROOM,
 
 	SC_JOIN_ROOM,
 	CS_JOIN_ROOM,
@@ -87,7 +88,6 @@ struct Header
 };
 
 
-// No Param
 // 서버 로그인 승인 패킷
 struct SCLogin : Header
 {
@@ -105,6 +105,7 @@ struct CSLogin : Header
 		Header{ sizeof(CSLogin), PacketType::CS_LOGIN }
 	{}
 };
+
 
 // Param:
 //		uint16 roomCount
@@ -131,6 +132,60 @@ struct CSGetRoomList : Header
 	}
 };
 
+
+// SCCreateRoom
+// Param:
+//	bool success
+// 서버 방 생성 여부
+struct SCCreateRoom : Header
+{
+	bool success{ false };
+	SCCreateRoom() = default;
+	SCCreateRoom(const bool _success) :
+		Header{ sizeof(SCCreateRoom), PacketType::SC_CREATE_ROOM },
+		success{ _success }
+	{
+	}
+};
+
+
+// CSCreateRoom
+// No Param
+// 클라이언트 방 생성 요청
+struct CSCreateRoom : Header
+{
+	CSCreateRoom() :
+		Header{ sizeof(CSCreateRoom), PacketType::CS_CREATE_ROOM }
+	{}
+};
+
+
+// SCJoinRoom
+// Param:
+// 
+// 서버 방 입장 승인
+struct SCJoinRoom : Header
+{
+	bool success{ false };
+	SCJoinRoom() = default;
+	SCJoinRoom(const bool _success) :
+		Header{ sizeof(SCJoinRoom), PacketType::SC_JOIN_ROOM },
+		success{ _success }
+	{
+	}
+};
+
+// CSJoinRoom
+struct CSJoinRoom : Header
+{
+	uint32 roomID{};
+	CSJoinRoom() = default;
+	CSJoinRoom(const uint32 _roomID) :
+		Header{ sizeof(CSJoinRoom), PacketType::CS_JOIN_ROOM },
+		roomID{ _roomID }
+	{
+	}
+};
 
 
 

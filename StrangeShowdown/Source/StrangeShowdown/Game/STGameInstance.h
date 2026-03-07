@@ -89,6 +89,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TempFunc();
 
+	UFUNCTION(BlueprintCallable)
+	void TempJoinRoom();
+
+	UFUNCTION(BlueprintCallable)
+	void TempCreateRoom();
+
+
 	// util
 	void SendPacket(const TArray<uint8>& data);
 

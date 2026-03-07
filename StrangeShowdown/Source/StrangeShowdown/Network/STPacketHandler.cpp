@@ -9,20 +9,50 @@ STPacketHandler::STPacketHandler()
 	GameInstance = Cast<USTGameInstance>(GWorld->GetGameInstance());
 
 	RegisterHandler<Common::SCSpawnObject>(
-		Common::PacketType::SC_SPAWN_OBJECT, [this](const auto& Packet) {
+		Common::PacketType::SC_SPAWN_OBJECT,
+		[this](const auto& Packet)
+		{
 			HandleSpawnObject(Packet);
 		}
 	);
 
 	RegisterHandler<Common::SCMovePlayer>(
-		Common::PacketType::SC_MOVE_PLAYER, [this](const auto& Packet) {
+		Common::PacketType::SC_MOVE_PLAYER,
+		[this](const auto& Packet)
+		{
 			HandleMoveObject(Packet);
 		}
 	);
 
 	RegisterHandler<Common::SCGiveRoomList>(
-		Common::PacketType::SC_GIVE_ROOM_LIST, [this](const auto& Packet) {
+		Common::PacketType::SC_GIVE_ROOM_LIST,
+		[this](const auto& Packet)
+		{
 			HandleGiveRoomList(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCCreateRoom>(
+		Common::PacketType::SC_CREATE_ROOM,
+		[this](const auto& Packet)
+		{
+			HandleCreateRoom(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCJoinRoom>(
+		Common::PacketType::SC_JOIN_ROOM,
+		[this](const auto& Packet)
+		{
+			HandleJoinRoom(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCLogin>(
+		Common::PacketType::SC_LOGIN,
+		[this](const auto& Packet)
+		{
+			HandleLogin(Packet);
 		}
 	);
 }
@@ -67,4 +97,31 @@ void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
 	}
 	// GameInstance->HandleGiveRoomList(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Room Get Success. count: %d"), Packet.roomCount);
+}
+
+void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Log, TEXT("Room Create Success: %s"), Packet.success ? TEXT("true") : TEXT("false"));
+}
+
+void STPacketHandler::HandleJoinRoom(const Common::SCJoinRoom& Packet)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Log, TEXT("Room Join Success. roomID: %s"), Packet.success ? TEXT("true") : TEXT("false"));
+}
+
+void STPacketHandler::HandleLogin(const Common::SCLogin& Packet)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Log, TEXT("Login Success"));
 }

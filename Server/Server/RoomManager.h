@@ -11,6 +11,7 @@ public:
 	void Init();
 
 	// todo: 현재 thread unsafe!!!!
+	// 현재는 임시로 
 	void AddPlayer(uint64 playerId, const std::shared_ptr<Player> player);
 
 	std::shared_ptr<Player> GetPlayer(uint64 playerId);
@@ -19,14 +20,11 @@ public:
 	void RemovePlayer(uint64 playerId);
 
 	// todo: 현재 thread unsafe!!!!
-	// todo: 임시로 0번 방을 반환.
-	// [session_id, room_id] map이 필요
-	void CreateRoom();
-	std::shared_ptr<Room> GetRoom(uint64 session_id)
-	{
-		return _rooms[0];
-	}
+	// @Param: room_id 방 번호 반환용 아웃 파라미터
+	// @Return: 방 제작 성공 여부
+	bool CreateRoom(OUT uint32& room_id);
 
+	void JoinRoom(SessionPtr session, uint32 room_id);
 
 	// todo: 현재 thread unsafe!!!!
 	std::vector<Common::RoomInfo> GetRoomList();
