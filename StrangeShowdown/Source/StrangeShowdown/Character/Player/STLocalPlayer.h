@@ -31,6 +31,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
 
+	TObjectPtr<UCameraComponent> GetCameraComp() { return CameraComp; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

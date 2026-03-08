@@ -47,6 +47,10 @@ ASTStorekeeper::ASTStorekeeper()
 	}
 }
 
+void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
+{
+	//InteractWidgetComponent->SetVisibility(true);
+}
 
 void ASTStorekeeper::BeginPlay()
 {

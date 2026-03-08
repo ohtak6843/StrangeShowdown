@@ -18,15 +18,26 @@ class STRANGESHOWDOWN_API ASTBaseController : public APlayerController
 public:
 	ASTBaseController();
 
+	virtual void SetupInputComponent() override;
+
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	TObjectPtr<USTHUD> HUDWidget;
+
+	
 
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	// 상호작용
-	virtual void Interact() {};
+	virtual void Interact();
+
+	bool IsInteracting = false;
 
 private:
-	
+	void AddInputAction();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> InteractAction;
 };
