@@ -7,6 +7,9 @@
 
 ASTStorekeeper::ASTStorekeeper()
 {
+	// Root
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
 	// Pawn
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -30,6 +33,19 @@ ASTStorekeeper::ASTStorekeeper()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
+	// Collision Component
+	InteractCollision = CreateDefaultSubobject<USphereComponent>(TEXT("InteractCollision"));
+	InteractCollision->SetupAttachment(RootComponent);
+	InteractCollision->InitSphereRadius(200.f);
+
+	// Widget Component
+	InteractWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
+	InteractWidgetComponent->SetupAttachment(RootComponent);
+	InteractWidgetComponent->InitWidget();
+	InteractWidgetComponent->SetVisibility(false);
+
+	InteractWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+
 	// Set Skeletal Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Sheriff_01.SK_Chr_Sheriff_01'"));
 	if (CharacterMeshRef.Object)
@@ -49,10 +65,71 @@ ASTStorekeeper::ASTStorekeeper()
 
 void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 {
-	//InteractWidgetComponent->SetVisibility(true);
+	// 로그
+	UE_LOG(LogTemp, Log, TEXT("StoreKeeper Interact"));
 }
 
 void ASTStorekeeper::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InteractCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTStorekeeper::HandleBeginOverlap);
+	InteractCollision->OnComponentEndOverlap.AddDynamic(this, &ASTStorekeeper::HandleEndOverlap);
+}
+
+void ASTStorekeeper::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 틱마다 회전
+	FRotator NewRotation = GetActorRotation();
+	NewRotation.Yaw += DeltaTime * 45.f; // 초당 45도 회전
+	SetActorRotation(NewRotation);
+
+	// 위젯이 카메라를 바라보도록 처리
+	if (InteractWidgetComponent)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+
+		// 플레이어 카메라 얻기
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC && PC->PlayerCameraManager)
+		{
+			PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+
+			// UI가 카메라를 바라보게
+			FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();
+			FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+			InteractWidgetComponent->SetWorldRotation(LookAtRotation);
+		}
+	}
+}
+
+void ASTStorekeeper::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (ASTCharacter* Player = Cast<ASTCharacter>(OtherActor))
+	{
+		OverlappedPlayer = Player;
+		OnPlayerEnter.Broadcast();
+
+		// 위젯 표시
+		if (InteractWidgetComponent)
+			InteractWidgetComponent->SetVisibility(true);
+	}
+}
+
+void ASTStorekeeper::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 BodyIndex)
+{
+	if (ASTCharacter* Player = Cast<ASTCharacter>(OtherActor))
+	{
+		OverlappedPlayer = nullptr;
+		OnPlayerExit.Broadcast();
+
+		// UI 숨기기
+		if (InteractWidgetComponent)
+			InteractWidgetComponent->SetVisibility(false);
+	}
 }

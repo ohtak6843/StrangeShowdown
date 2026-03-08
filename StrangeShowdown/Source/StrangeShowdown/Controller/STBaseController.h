@@ -33,8 +33,6 @@ protected:
 	// 상호작용
 	virtual void Interact();
 
-	bool IsInteracting = false;
-
 private:
 	void AddInputAction();
 

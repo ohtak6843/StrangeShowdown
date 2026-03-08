@@ -34,7 +34,10 @@ void ASTBaseController::BeginPlay()
 void ASTBaseController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void ASTBaseController::Interact()
+{
 	UWorld* World = GetWorld();
 	if (!World)
 		return;
@@ -44,7 +47,7 @@ void ASTBaseController::Tick(float DeltaTime)
 	GetPlayerViewPoint(CameraLocation, CameraRotation);
 
 	const FVector Start = CameraLocation;
-	const FVector End = Start + CameraRotation.Vector() * 3000.f;
+	const FVector End = Start + CameraRotation.Vector() * 2000.f;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetPawn());
@@ -67,22 +70,9 @@ void ASTBaseController::Tick(float DeltaTime)
 
 		if (HitActor && HitActor->Implements<UInteractable>())
 		{
+			// 해당 액터에 맞는 Interact 함수 호출
 			IInteractable::Execute_Interact(HitActor, GetPawn());
 		}
-
-		IsInteracting = true;
-	}
-	else
-	{
-		IsInteracting = false;
-	}
-}
-
-void ASTBaseController::Interact()
-{
-	if (IsInteracting)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Interacted with an interactable actor!"));
 	}
 }
 
