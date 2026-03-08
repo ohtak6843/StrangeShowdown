@@ -4,6 +4,7 @@
 #include "Character/NPC/STStorekeeper.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Prop/STCarriage.h"
 
 ASTStorekeeper::ASTStorekeeper()
 {
@@ -31,7 +32,7 @@ ASTStorekeeper::ASTStorekeeper()
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
 	// Set Skeletal Mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Sheriff_01.SK_Chr_Sheriff_01'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Business_Man_01.SK_Chr_Business_Man_01'"));
 	if (CharacterMeshRef.Object)
 	{
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
@@ -45,6 +46,13 @@ ASTStorekeeper::ASTStorekeeper()
 		GetMesh()->AnimationData.bSavedLooping = true;
 		GetMesh()->AnimationData.bSavedPlaying = true;
 	}
+
+	// Carriage
+	Carriage = CreateDefaultSubobject<UChildActorComponent>(TEXT("Carriage"));
+	Carriage->SetChildActorClass(ASTCarriage::StaticClass());
+	Carriage->SetupAttachment(GetMesh());
+	Carriage->SetRelativeLocationAndRotation(FVector(0.f, -120.f, 118.f), FRotator(0.f, 0.f, 0.f));
+	Carriage->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
 }
 
 

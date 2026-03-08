@@ -21,4 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	// Carriage
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UChildActorComponent> Carriage;
 };
