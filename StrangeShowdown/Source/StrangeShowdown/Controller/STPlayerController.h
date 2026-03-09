@@ -15,6 +15,10 @@ class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
+	void CreateStoreWidget();
+
 protected:
 	virtual void BeginPlay() override;
 

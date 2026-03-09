@@ -6,6 +6,7 @@
 #include "Component/STStoreComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Character/Player/STLocalPlayer.h"
+#include "Controller/STPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ASTStorekeeper::ASTStorekeeper()
@@ -79,7 +80,8 @@ void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 			StoreComp->StoreItemPool[i] = StoreItemPool[i];
 		}
 
-		Player->CreateStoreWidget();
+		ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController());
+		PC->CreateStoreWidget();
 	}
 }
 

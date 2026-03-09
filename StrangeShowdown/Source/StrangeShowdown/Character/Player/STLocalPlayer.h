@@ -31,9 +31,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
-	void CreateStoreWidget();
-
 	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
 
 	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
