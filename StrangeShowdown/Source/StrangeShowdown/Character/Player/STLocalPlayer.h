@@ -31,7 +31,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
 
-	TObjectPtr<UCameraComponent> GetCameraComp() { return CameraComp; }
+	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
+	void CreateStoreWidget();
+
+	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
+
+	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
 
 protected:
 	// Called when the game starts or when spawned

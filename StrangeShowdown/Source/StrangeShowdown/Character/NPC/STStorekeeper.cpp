@@ -3,13 +3,13 @@
 
 #include "Character/NPC/STStorekeeper.h"
 #include "Components/CapsuleComponent.h"
+#include "Component/STStoreComponent.h"
+#include "Item/STItemDataAssetBase.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ASTStorekeeper::ASTStorekeeper()
 {
-	// Root
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
 	// Pawn
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -40,7 +40,7 @@ ASTStorekeeper::ASTStorekeeper()
 
 	// Widget Component
 	InteractWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
-	InteractWidgetComponent->SetupAttachment(RootComponent);
+	InteractWidgetComponent->SetupAttachment(InteractCollision);
 	InteractWidgetComponent->InitWidget();
 	InteractWidgetComponent->SetVisibility(false);
 
@@ -65,8 +65,22 @@ ASTStorekeeper::ASTStorekeeper()
 
 void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 {
-	// 로그
-	UE_LOG(LogTemp, Log, TEXT("StoreKeeper Interact"));
+	// Storekeeper가 가지고 있는 아이템을
+	// 플레이어의 상점 컴포넌트 배열에 추가
+	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(Interactor))
+	{
+		if (!Player->GetStoreComp()) return;
+
+		USTStoreComponent* StoreComp = Player->GetStoreComp();
+		int32 Count = FMath::Min(StoreComp->SlotCount, StoreItemPool.Num());
+
+		for (int32 i = 0; i < Count; ++i)
+		{
+			StoreComp->StoreItemPool[i] = StoreItemPool[i];
+		}
+
+		Player->CreateStoreWidget();
+	}
 }
 
 void ASTStorekeeper::BeginPlay()
@@ -80,11 +94,6 @@ void ASTStorekeeper::BeginPlay()
 void ASTStorekeeper::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// 틱마다 회전
-	FRotator NewRotation = GetActorRotation();
-	NewRotation.Yaw += DeltaTime * 45.f; // 초당 45도 회전
-	SetActorRotation(NewRotation);
 
 	// 위젯이 카메라를 바라보도록 처리
 	if (InteractWidgetComponent)

@@ -26,6 +26,9 @@ public:
 
 	virtual void Interact_Implementation(APawn* Interactor) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
+	TArray<class USTItemDataAssetBase*> StoreItemPool;
+
 	// Interact UI À§Á¬
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI", Meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* InteractWidgetComponent;
