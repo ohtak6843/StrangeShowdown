@@ -76,6 +76,10 @@ void USTStatComponent::AddStamina(int32 StaminaAmount)
 	{
 		CurrentStamina = MaxStamina;
 	}
+	else if (CurrentStamina <= 0)
+	{
+		CurrentStamina = 0;
+	}
 }
 
 void USTStatComponent::AddAction(int32 ActionAmount)
