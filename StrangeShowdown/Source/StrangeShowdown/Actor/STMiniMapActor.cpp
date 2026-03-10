@@ -5,7 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "Controller/STPlayerController.h"
+#include "Controller/STBaseController.h"
 #include "Widget/STMiniMapWidget.h"
 #include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
@@ -61,7 +61,7 @@ void ASTMiniMapActor::BringHUD()
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (PC)
 	{
-		ASTPlayerController* STPC = Cast<ASTPlayerController>(PC);
+		ASTBaseController* STPC = Cast<ASTBaseController>(PC);
 		if (STPC)
 		{
 			HUDWidget = STPC->HUDWidget;

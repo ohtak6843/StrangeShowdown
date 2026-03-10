@@ -59,7 +59,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 		if (MiniMap)
 		{
 			MiniMapActor = MiniMap;
-			UE_LOG(LogTemp, Warning, TEXT("MiniMapActor found: %s"), *MiniMap->GetName());
 			break;
 		}
 	}
@@ -77,7 +76,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 		if (BigMap)
 		{
 			BigMapActor = BigMap;
-			UE_LOG(LogTemp, Warning, TEXT("BigMapActor found: %s"), *BigMap->GetName());
 			break;
 		}
 	}

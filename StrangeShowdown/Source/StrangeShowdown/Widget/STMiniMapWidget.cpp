@@ -26,10 +26,18 @@ void USTMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	float MeshYaw = Mesh->GetComponentRotation().Yaw;
 	float ControllerYaw = PC->GetControlRotation().Yaw;
 
-	float TextureYaw = MeshYaw - ControllerYaw;
-	TextureYaw += 90.f;
-
-	PlayerTexture->SetRenderTransformAngle(TextureYaw);
+	if (IsRotationAble)
+	{
+		float TextureYaw = MeshYaw - ControllerYaw;
+		TextureYaw += 90.f;
+		PlayerTexture->SetRenderTransformAngle(TextureYaw);
+	}
+	else
+	{
+		float TextureYaw = MeshYaw;
+		TextureYaw += 90.f;
+		PlayerTexture->SetRenderTransformAngle(TextureYaw);
+	}
 }
 
 void USTMiniMapWidget::UpdateItemIcon(ASTPickupItem* Item, const FVector2D& MiniMapPos)
@@ -65,4 +73,9 @@ void USTMiniMapWidget::HideItemIcon(ASTPickupItem* Item)
 	(*FoundWidget)->RemoveFromParent();
 
 	ItemIconMap.Remove(Item);
+}
+
+void USTMiniMapWidget::UpdatePlayerIcon(const FVector2D& MiniMapPos)
+{
+	PlayerTexture->SetRenderTranslation(MiniMapPos);
 }

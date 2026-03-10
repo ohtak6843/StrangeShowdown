@@ -35,7 +35,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
+	// QuickSlot Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "QuickSlot")
+	TObjectPtr<class USTQuickSlotComponent> QuickSlotComp;
+
 private:
+	void AddInputMappingContext();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 

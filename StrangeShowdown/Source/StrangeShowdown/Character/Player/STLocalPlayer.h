@@ -35,6 +35,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateQuickslotForCpp();
 
+	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
+
+	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,13 +68,6 @@ protected:
 	// Attack Trace Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
-	TObjectPtr<class ASTBigMapActor> BigMapActor;
 
 private:
 	// Change Camera Settings with State

@@ -24,7 +24,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void CollectItems();
 	void BringHUD();
 	void RegisterItem(ASTPickupItem* NewItem);
 
@@ -33,11 +32,13 @@ public:
 	void OnItemDestroyed(AActor* DestroyedActor);
 
 	// 미니맵 좌표로 변환
-	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;
+	FVector2D WorldToMiniMap(const FVector& WorldLocation) const;
 
 	// 미니맵 아이템 위치 업데이트
 	void UpdateItemOnMiniMap(float DeltaTime);
-	void UpdateMiniMapRotation(float DeltaTime);
+
+	// 플레이어 아이콘 위치 업데이트
+	void UpdatePlayerOnMiniMap(float DeltaTime);
 
 	void HiddenWidgetComponent();
 

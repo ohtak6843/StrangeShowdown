@@ -24,10 +24,10 @@ ASTPickupItem::ASTPickupItem()
 	SubMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMesh"));
 	SubMesh->SetupAttachment(Mesh);
 
-	// Initialize Collision Component
+	// Collision Component
 	PickupCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
 	PickupCollision->SetupAttachment(RootComponent);
-	PickupCollision->InitSphereRadius(50.f); // default
+	PickupCollision->InitSphereRadius(50.f);
 
 	// Widget Component
 	PickupWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
@@ -67,20 +67,11 @@ void ASTPickupItem::BeginPlay()
 	// 미니맵 아이콘 설정
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 
-	// LOG
-	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - PlayerController: %s"), *PC->GetName());
-
-	ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn());
-
-	// LOG
-	UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - LocalPlayer: %s"), LocalPlayer ? *LocalPlayer->GetName() : TEXT("nullptr"));
+	ASTCharacter* LocalPlayer = Cast<ASTCharacter>(PC->GetPawn());
 
 	if (LocalPlayer && LocalPlayer->MiniMapActor)
 	{
 		LocalPlayer->MiniMapActor->RegisterItem(this);
-
-		// LOG
-		UE_LOG(LogTemp, Log, TEXT("ASTPickupItem::BeginPlay - Registered with MiniMapActor"));
 	}
 	if (LocalPlayer && LocalPlayer->BigMapActor)
 	{
