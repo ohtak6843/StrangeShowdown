@@ -36,6 +36,8 @@ void ASTBigMapActor::BeginPlay()
 	// 위젯 컴포넌트 숨기기
 	HiddenWidgetComponent();
 
+	SetActorLocation(FVector(0, -3500.f, zPosition));
+
 	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -51,32 +53,9 @@ void ASTBigMapActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateMiniMapRotation(DeltaTime);
-
 	UpdateItemOnMiniMap(DeltaTime);
-}
 
-void ASTBigMapActor::CollectItems()
-{
-	MiniMapItems.Empty();
-
-	TArray<AActor*> ItemActors;
-	UGameplayStatics::GetAllActorsOfClass(
-		GetWorld(),
-		ASTPickupItem::StaticClass(),
-		ItemActors);
-
-	for (AActor* Actor : ItemActors)
-	{
-		ASTPickupItem* Item = Cast<ASTPickupItem>(Actor);
-		if (Item)
-		{
-			MiniMapItems.Add(Item);
-
-			// 파괴 이벤트 바인딩
-			Item->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnItemDestroyed);
-		}
-	}
+	UpdatePlayerOnMiniMap(DeltaTime);
 }
 
 void ASTBigMapActor::BringHUD()
@@ -96,6 +75,8 @@ void ASTBigMapActor::BringHUD()
 			}
 		}
 	}
+
+	MiniMapWidget->SetIsRotationAble(false);
 }
 
 void ASTBigMapActor::RegisterItem(ASTPickupItem* NewItem)
@@ -120,18 +101,15 @@ void ASTBigMapActor::OnItemDestroyed(AActor* DestroyedActor)
 	}
 }
 
-FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
+FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 {
-	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
+	FVector ActorLocation = GetActorLocation();
+
 	FVector2D Relative(
-		ItemLocation.Y - PlayerLocation.Y,
-		ItemLocation.X - PlayerLocation.X);
+		WorldLocation.Y - ActorLocation.Y,
+		WorldLocation.X - ActorLocation.X);
 
 	Relative.Y *= -1.f;
-
-	// 미니맵 회전 적용
-	float CurrentYaw = GetActorRotation().Yaw;
-	Relative = Relative.GetRotated(-CurrentYaw);
 
 	const float WidgetSize = HUDWidget->BigMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
@@ -162,10 +140,7 @@ void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 		if (!Item) continue;
 
 		FVector2D MiniMapPos =
-			WorldToMiniMap(
-				Item->GetActorLocation(),
-				PlayerPawn->GetActorLocation(),
-				CurrentYaw);
+			WorldToMiniMap(Item->GetActorLocation());
 
 		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
 		FVector2D Offset(-55.f, -20.f);
@@ -189,32 +164,24 @@ void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 	}
 }
 
-void ASTBigMapActor::UpdateMiniMapRotation(float DeltaTime)
+void ASTBigMapActor::UpdatePlayerOnMiniMap(float DeltaTime)
 {
+	if (!MiniMapWidget) return;
+
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
 
-	APawn* Pawn = PC->GetPawn();
-	if (!Pawn) return;
+	APawn* PlayerPawn = PC->GetPawn();
+	if (!PlayerPawn) return;
 
-	// 위치 따라가기
-	FVector NewLocation = Pawn->GetActorLocation() + FVector(0, 0, zPosition);
-	SetActorLocation(NewLocation);
+	FVector2D MiniMapPos =
+		WorldToMiniMap(PlayerPawn->GetActorLocation());
 
-	// 플레이어 마우스 회전 가져오기
-	float ControlYaw = PC->GetControlRotation().Yaw;
+	// 오프셋(-400, -400)
+	FVector2D Offset(-400.f, -400.f);
+	MiniMapPos += Offset;
 
-	// 미니맵은 반대로 회전
-	FRotator TargetRot(-90.f, ControlYaw, 0.f);
-
-	// RInterpTo
-	FRotator SmoothRot = FMath::RInterpTo(
-		GetActorRotation(),
-		TargetRot,
-		DeltaTime,
-		8.f);
-
-	SetActorRotation(SmoothRot);
+	MiniMapWidget->UpdatePlayerIcon(MiniMapPos);
 }
 
 void ASTBigMapActor::HiddenWidgetComponent()
