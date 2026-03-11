@@ -8,6 +8,8 @@
 class ASTLocalPlayer;
 class USTItemDataAssetBase;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStoreUpdated);
+
 USTRUCT(BlueprintType)
 struct FStoreSlot
 {
@@ -48,6 +50,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
 	int32 RerollCost = 5;
 
+	// UI 갱신 이벤트
+	UPROPERTY(BlueprintAssignable)
+	FOnStoreUpdated OnStoreUpdated;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void InitStore();
@@ -57,6 +63,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void BuyItem(int32 SlotIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "Store")
+	void RefreshStoreUI();
 
 	const TArray<USTItemDataAssetBase*>& GetStoreItems() const
 	{

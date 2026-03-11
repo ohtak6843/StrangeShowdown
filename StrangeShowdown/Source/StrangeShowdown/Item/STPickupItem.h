@@ -70,4 +70,7 @@ public:
 	// 아이템과 오버랩 중인 플레이어 저장
 	UPROPERTY()
 	ASTLocalPlayer* OverlappedPlayer = nullptr;
+
+	UPROPERTY()
+	APlayerCameraManager* CachedCameraManager = nullptr;
 };

@@ -55,3 +55,8 @@ void USTStoreComponent::BuyItem(int32 SlotIndex)
 
 	CurrentStorekeeper->BuyItem(SlotIndex);
 }
+
+void USTStoreComponent::RefreshStoreUI()
+{
+	OnStoreUpdated.Broadcast();
+}

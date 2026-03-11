@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 USTAttackTraceComponent::USTAttackTraceComponent()
 {
@@ -129,7 +130,7 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	if (!World)
 		return nullptr;
 
-	APlayerController* PC = World->GetFirstPlayerController();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC)
 		return nullptr;
 

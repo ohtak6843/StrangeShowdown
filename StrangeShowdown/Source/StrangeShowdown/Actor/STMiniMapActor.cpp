@@ -58,19 +58,15 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 
 void ASTMiniMapActor::BringHUD()
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
+	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (STPC)
 	{
-		ASTBaseController* STPC = Cast<ASTBaseController>(PC);
-		if (STPC)
+		HUDWidget = STPC->HUDWidget;
+		MiniMapWidget = HUDWidget->GetBigMapWidget();
+		if (!MiniMapWidget)
 		{
-			HUDWidget = STPC->HUDWidget;
-			MiniMapWidget = HUDWidget->GetMiniMapWidget();
-			if (!MiniMapWidget)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
-				return;
-			}
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
+			return;
 		}
 	}
 }
@@ -126,7 +122,7 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
 
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
 
 	APawn* PlayerPawn = PC->GetPawn();
@@ -168,7 +164,7 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 
 void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
 
 	APawn* Pawn = PC->GetPawn();

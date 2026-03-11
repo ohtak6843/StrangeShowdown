@@ -47,6 +47,12 @@ public:
 	UFUNCTION()
 	void BuyItem(int32 SlotIndex);
 
+	UFUNCTION(BlueprintCallable)
+	void UnregisterStore(USTStoreComponent* StoreComp);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateOpenedStores();
+
 	// 아이템과 오버랩 중인 플레이어 저장
 	UPROPERTY()
 	ASTCharacter* OverlappedPlayer = nullptr;
@@ -68,4 +74,11 @@ private:
 	// Carriage
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UChildActorComponent> Carriage;
+
+	UPROPERTY()
+	APlayerCameraManager* CachedCameraManager;
+
+	// 상점을 열고 있는 플레이어(의 상점 컴포넌트)
+	UPROPERTY()
+	TArray<USTStoreComponent*> OpenedStores;
 };

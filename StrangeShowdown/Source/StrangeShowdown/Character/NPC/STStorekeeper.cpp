@@ -9,6 +9,7 @@
 #include "Controller/STPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Prop/STCarriage.h"
+#include "Kismet/GameplayStatics.h"
 
 ASTStorekeeper::ASTStorekeeper()
 {
@@ -81,6 +82,13 @@ void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 		USTStoreComponent* StoreComp = Player->GetStoreComp();
 
 		StoreComp->CurrentStorekeeper = this;
+		StoreComp->InitStore();
+
+		// 플레이어(의 상점 컴포넌트) 등록
+		if (!OpenedStores.Contains(StoreComp))
+		{
+			OpenedStores.Add(StoreComp);
+		}
 
 		if (ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController()))
 		{
@@ -94,12 +102,39 @@ void ASTStorekeeper::BuyItem(int32 SlotIndex)
 	if (!StoreItemPool.IsValidIndex(SlotIndex))
 		return;
 
+	if (StoreItemPool[SlotIndex] == nullptr)
+		return;
+
 	StoreItemPool[SlotIndex] = nullptr;
+
+	UpdateOpenedStores();
+}
+
+void ASTStorekeeper::UnregisterStore(USTStoreComponent* StoreComp)
+{
+	OpenedStores.Remove(StoreComp);
+}
+
+void ASTStorekeeper::UpdateOpenedStores()
+{
+	for (USTStoreComponent* StoreComp : OpenedStores)
+	{
+		if (!StoreComp) continue;
+
+		StoreComp->InitStore();
+		StoreComp->RefreshStoreUI();
+	}
 }
 
 void ASTStorekeeper::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		CachedCameraManager = PC->PlayerCameraManager;
+	}
 
 	InteractCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTStorekeeper::HandleBeginOverlap);
 	InteractCollision->OnComponentEndOverlap.AddDynamic(this, &ASTStorekeeper::HandleEndOverlap);
@@ -109,24 +144,18 @@ void ASTStorekeeper::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 위젯이 카메라를 바라보도록 처리
-	if (InteractWidgetComponent)
-	{
-		FVector CameraLocation;
-		FRotator CameraRotation;
+	if (!InteractWidgetComponent) return;
+	if (!CachedCameraManager) return;
 
-		// 플레이어 카메라 얻기
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		if (PC && PC->PlayerCameraManager)
-		{
-			PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+	FVector CameraLocation;
+	FRotator CameraRotation;
 
-			// UI가 카메라를 바라보게
-			FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();
-			FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
-			InteractWidgetComponent->SetWorldRotation(LookAtRotation);
-		}
-	}
+	CachedCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+
+	FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();
+	FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+
+	InteractWidgetComponent->SetWorldRotation(LookAtRotation);
 }
 
 void ASTStorekeeper::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
