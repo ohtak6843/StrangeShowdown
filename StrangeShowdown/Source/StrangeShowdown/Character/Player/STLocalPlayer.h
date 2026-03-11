@@ -69,6 +69,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
+	bool IsSmashing = false;
+
 private:
 	// Change Camera Settings with State
 	void ChangeToIdle();

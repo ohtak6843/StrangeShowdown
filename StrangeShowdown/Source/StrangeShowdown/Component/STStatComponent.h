@@ -56,43 +56,43 @@ public:
 
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float CurrentHp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MaxHp = 15;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 Gold;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 Armor = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 Kill;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MoveSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float CurrentStamina;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MaxStamina = 5;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 CurrentAction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 UseAbleAction = 1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 MaxAction = 6;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 Prize;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bAlive;
 		
 };
