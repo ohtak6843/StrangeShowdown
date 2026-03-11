@@ -48,3 +48,10 @@ void USTStoreComponent::Reroll()
 	OwnerPlayer->StatComp->AddGold(-RerollCost);
 	InitStore();
 }
+
+void USTStoreComponent::BuyItem(int32 SlotIndex)
+{
+	if (!CurrentStorekeeper) return;
+
+	CurrentStorekeeper->BuyItem(SlotIndex);
+}

@@ -89,6 +89,14 @@ void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 	}
 }
 
+void ASTStorekeeper::BuyItem(int32 SlotIndex)
+{
+	if (!StoreItemPool.IsValidIndex(SlotIndex))
+		return;
+
+	StoreItemPool[SlotIndex] = nullptr;
+}
+
 void ASTStorekeeper::BeginPlay()
 {
 	Super::BeginPlay();

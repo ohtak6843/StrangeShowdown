@@ -44,6 +44,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterExit OnPlayerExit;
 
+	UFUNCTION()
+	void BuyItem(int32 SlotIndex);
+
 	// 아이템과 오버랩 중인 플레이어 저장
 	UPROPERTY()
 	ASTCharacter* OverlappedPlayer = nullptr;

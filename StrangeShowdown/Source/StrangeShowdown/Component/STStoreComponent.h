@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void Reroll();
 
+	UFUNCTION(BlueprintCallable, Category = "Store")
+	void BuyItem(int32 SlotIndex);
+
 	const TArray<USTItemDataAssetBase*>& GetStoreItems() const
 	{
 		return CurrentStorekeeper->StoreItemPool;
