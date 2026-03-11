@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Character/NPC/STStorekeeper.h"
 #include "STStoreComponent.generated.h"
 
 class ASTLocalPlayer;
@@ -36,7 +37,7 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
-	TArray<USTItemDataAssetBase*> StoreItemPool;
+	ASTStorekeeper* CurrentStorekeeper;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
 	TArray<FStoreSlot> Slots;
@@ -53,6 +54,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Store")
 	void Reroll();
+
+	const TArray<USTItemDataAssetBase*>& GetStoreItems() const
+	{
+		return CurrentStorekeeper->StoreItemPool;
+	}
 
 private:
 	ASTLocalPlayer* OwnerPlayer = nullptr;

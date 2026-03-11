@@ -74,22 +74,18 @@ ASTStorekeeper::ASTStorekeeper()
 
 void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 {
-	// Storekeeper가 가지고 있는 아이템을
-	// 플레이어의 상점 컴포넌트 배열에 추가
 	if (ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(Interactor))
 	{
 		if (!Player->GetStoreComp()) return;
 
 		USTStoreComponent* StoreComp = Player->GetStoreComp();
-		int32 Count = FMath::Min(StoreComp->SlotCount, StoreItemPool.Num());
 
-		for (int32 i = 0; i < Count; ++i)
+		StoreComp->CurrentStorekeeper = this;
+
+		if (ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController()))
 		{
-			StoreComp->StoreItemPool[i] = StoreItemPool[i];
+			PC->CreateStoreWidget();
 		}
-
-		ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController());
-		PC->CreateStoreWidget();
 	}
 }
 
