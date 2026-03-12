@@ -66,7 +66,10 @@ public:
 	int32 Gold;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 Armor = 0;
+	int32 CurrentArmor = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+	int32 MaxArmor = 30;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int32 Kill;

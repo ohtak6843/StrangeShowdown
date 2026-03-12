@@ -50,7 +50,7 @@ ASTGhostBase::ASTGhostBase()
 	StatComp->CurrentHp = StatComp->MaxHp;
 	StatComp->Gold = 0;
 	StatComp->Kill = 0;
-	StatComp->Armor = 0;
+	StatComp->CurrentArmor = 0;
 	StatComp->MoveSpeed = 500;
 	// Ghost는 스태미너가 없으므로 -1로 설정
 	StatComp->CurrentStamina = -1;
