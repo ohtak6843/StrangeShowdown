@@ -8,6 +8,7 @@
 #include "Common/TcpSocketBuilder.h"
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "SocketSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Network/SocketIO.h"
 #include "Network/STSerializer.h"
@@ -39,7 +40,20 @@ void USTGameInstance::Init()
 		UE_LOG(LogTemp, Log, TEXT("Loaded Fullscreen Mode: %d"), static_cast<int32>(FullscreenMode));
 		WindowMode = FullscreenMode;
 	}
+
+#if NETWORK_ENABLED
+	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
+		FTickerDelegate::CreateUObject(this, &USTGameInstance::GameInstanceTick)
+	);
+#endif // NETWORK_ENABLED
 }
+
+bool USTGameInstance::GameInstanceTick(float DeltaTime)
+{
+	HandleRecvPackets();
+	return true;
+}
+
 
 void USTGameInstance::Shutdown()
 {
@@ -191,18 +205,20 @@ void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 }
 
 
-void USTGameInstance::TempFunc()
+void USTGameInstance::TempGetRoomList()
 {
 	Common::CSGetRoomList LoginPacket{};
 	auto Packet{ STSerializer::Serialize(LoginPacket) };
 	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] ConnectServer called"));
 }
 
-void USTGameInstance::TempJoinRoom()
+void USTGameInstance::TempJoinRoom(uint32 RoomID)
 {
-	Common::CSJoinRoom JoinPacket{ 0 };
+	Common::CSJoinRoom JoinPacket{ RoomID };
 	auto Packet{ STSerializer::Serialize(JoinPacket) };
 	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] JoinRoom called: RoomID=%d"), RoomID);
 }
 
 void USTGameInstance::TempCreateRoom()
@@ -210,6 +226,13 @@ void USTGameInstance::TempCreateRoom()
 	Common::CSCreateRoom CreatePacket{};
 	auto Packet{ STSerializer::Serialize(CreatePacket) };
 	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] CreateRoom called"));
+}
+
+void USTGameInstance::TempChangeWorld()
+{
+	UGameplayStatics::OpenLevel(this, FName(TEXT("L_NetworkTestLevel")));
+	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] ChangeWorld called"));
 }
 
 

@@ -73,11 +73,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ConnectToGameServer();
 
-	UFUNCTION(BlueprintCallable)
 	void DisconnectFromGameServer();
 
-	UFUNCTION(BlueprintCallable)
 	void HandleRecvPackets();
+
+	bool GameInstanceTick(float DeltaTime);
 
 	// c++ method
 	// packet handle
@@ -86,14 +86,17 @@ public:
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	
-	UFUNCTION(BlueprintCallable)
-	void TempFunc();
+	UFUNCTION(Exec)
+	void TempGetRoomList();
 
-	UFUNCTION(BlueprintCallable)
-	void TempJoinRoom();
+	UFUNCTION(Exec)
+	void TempJoinRoom(uint32 RoomID);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Exec)
 	void TempCreateRoom();
+
+	UFUNCTION(Exec)
+	void TempChangeWorld();
 
 
 	// util
@@ -109,5 +112,8 @@ private:
 	TSharedPtr<SocketIO> SocketIOInstance{};
 	TSharedPtr<STPacketHandler> PacketHandler{};
 	TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+
+	// GameInstance ÀÚÃ¼ Ticker
+	FTSTicker::FDelegateHandle TickHandle{};
 
 };
