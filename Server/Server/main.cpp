@@ -9,7 +9,6 @@ int main()
 {
 	// GET_SINGLE(Game)->Init();
 	PacketHandler::Init();
-	GET_SINGLE(RoomManager)->Init();
 	GET_SINGLE(ObjectManager)->Init();
 	auto ret{ GET_SINGLE(IOCP)->Init() };
 	if (false == ret)

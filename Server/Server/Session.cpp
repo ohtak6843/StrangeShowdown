@@ -210,7 +210,11 @@ void Session::ReleaseRef()
 			closesocket(_clientSocket);
 		}
 
-		GET_SINGLE(RoomManager)->RemovePlayer(_sessionID);
+		if (nullptr != _room)
+		{
+			// todo:: thread unsafe
+			_room->RemovePlayer(_sessionID);
+		}
 		std::println("Session {} ended.", _sessionID);
 	}
 }

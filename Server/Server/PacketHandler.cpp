@@ -118,46 +118,6 @@ void PacketHandler::HandleLogin(SessionPtr session, const Common::CSLogin& packe
 	Common::SCLogin login_packet{};
 	session->DoSend(login_packet);
 }
-//
-//void PacketHandler::HandleLogin(SessionPtr session, const Common::CSLogin& packet)
-//{
-//	auto id{ session->GetSessionID() };
-//	auto player{ GET_SINGLE(RoomManager)->GetPlayer(id) };
-//	if (nullptr == player)
-//	{
-//		return;
-//	}
-//
-//	auto player_map{ GET_SINGLE(RoomManager)->GetRoom(id)->GetPlayers() };
-//	if (true == player_map.empty())
-//	{
-//		return;
-//	}
-//
-//	for (const auto& [other_id, other_player] : player_map)
-//	{
-//		if (other_id == id)
-//		{
-//			continue;
-//		}
-//
-//		// 다른 플레이어에게 내 위치 전달
-//		Common::SCSpawnObject move_object_packet{
-//			id,
-//			player->GetPosition(),
-//			player->GetDirection(),
-//		};
-//		other_player->GetOwnerSession()->DoSend(move_object_packet);
-//
-//		// 현재 클라이언트에 기존 플레이어 정보 전달
-//		Common::SCSpawnObject other_spawn_packet{
-//			other_id,
-//			other_player->GetPosition(),
-//			other_player->GetDirection()
-//		};
-//		session->DoSend(other_spawn_packet);
-//	}
-//}
 
 void PacketHandler::HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet)
 {

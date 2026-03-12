@@ -2,33 +2,7 @@
 #include "RoomManager.h"
 #include "ObjectManager.h"
 
-void RoomManager::Init()
-{
-}
 
-void RoomManager::AddPlayer(uint64 playerId, const std::shared_ptr<Player> player)
-{
-	// 메모리 메니저에서 꺼내오자
-	_players[playerId] = player;
-
-	// 추가로 일단 임시로 0번 방에 추가
-	_rooms[0]->AddPlayer(playerId, player);
-}
-
-std::shared_ptr<Player> RoomManager::GetPlayer(uint64 playerId)
-{
-	auto it = _players.find(playerId);
-	if (it != _players.end())
-	{
-		return it->second;
-	}
-	return nullptr;
-}
-void RoomManager::RemovePlayer(uint64 playerId)
-{
-	_players.erase(playerId);
-	_rooms[0]->RemovePlayer(playerId);
-}
 
 bool RoomManager::CreateRoom(OUT uint32& room_id)
 {
@@ -49,6 +23,7 @@ void RoomManager::JoinRoom(SessionPtr session, uint32 room_id)
 	const auto id{ session->GetSessionID() };
 	if (res == _rooms.end())
 	{
+		// 플레이어 입장 실패을 클라이언트에 알림
 		Common::SCJoinRoom join_packet{ false };
 		session->DoSend(join_packet);
 		return;
@@ -57,9 +32,7 @@ void RoomManager::JoinRoom(SessionPtr session, uint32 room_id)
 	auto room{ res->second };
 
 	// 플레이어 입장 성공을 클라이언트에 알림
-	
 	session->SetRoom(room);
-
 	Common::SCJoinRoom join_packet{ true };
 	session->DoSend(join_packet);
 	
@@ -68,6 +41,7 @@ void RoomManager::JoinRoom(SessionPtr session, uint32 room_id)
 	player->SetOwnerSession(session);
 	room->AddPlayer(id, player);
 	
+	// 패킷 처리
 	auto& player_map{ room->GetPlayers() };
 	for (const auto& [other_id, other_player] : player_map)
 	{
