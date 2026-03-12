@@ -19,12 +19,11 @@ void USTChatManagerWidget::NativeConstruct()
 	}
 }
 
-void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const FString& Message, FDateTime Time)
+void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const FString& Message)
 {
 	FChatMessage NewMessage;
 	NewMessage.SenderNickName = SenderNickName;
 	NewMessage.Message = Message;
-	NewMessage.Timestamp = FDateTime::UtcNow();
 
 	ChatLog.Add(NewMessage);
 
@@ -33,8 +32,7 @@ void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const F
 	UTextBlock* MessageTextBlock = NewObject<UTextBlock>(this);
 	if (MessageTextBlock)
 	{
-		FString FormattedMessage = FString::Printf(TEXT("[%s] %s: %s"),
-			*NewMessage.Timestamp.ToString(TEXT("%H:%M")),
+		FString FormattedMessage = FString::Printf(TEXT("%s: %s"),
 			*SenderNickName,
 			*Message);
 
@@ -85,7 +83,7 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 			FString NickName = Player->PlayerNickName;
 
 			// 임시로 FDateTime::Now() 사용
-			AddChatMessage(NickName, InputMessage, FDateTime::Now());
+			AddChatMessage(NickName, InputMessage);
 
 			ChatInputTextBox->SetText(FText::GetEmpty());
 		}
