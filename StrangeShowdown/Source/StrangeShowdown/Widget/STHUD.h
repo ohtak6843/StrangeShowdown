@@ -13,6 +13,14 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EHUDWidgetType : uint8
+{
+	Player,
+	Ghost,
+	Sheriff
+};
+
 UCLASS()
 class STRANGESHOWDOWN_API USTHUD : public UUserWidget
 {
@@ -38,4 +46,6 @@ public:
 	USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }
 	USTMiniMapWidget* GetBigMapWidget() const { return BigMapWidget; }
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	EHUDWidgetType HUDWidgetType = EHUDWidgetType::Player;
 };

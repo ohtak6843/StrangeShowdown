@@ -9,6 +9,9 @@
 #include "Component/STAttackTraceComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Game/STGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 #include "StrangeShowdown.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -42,6 +45,40 @@ ASTLocalPlayer::ASTLocalPlayer()
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
+
+	// MiniMap 검색
+	TArray<AActor*> WorldMiniMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTMiniMapActor::StaticClass(),
+		WorldMiniMapActors);
+
+	for (AActor* Actor : WorldMiniMapActors)
+	{
+		ASTMiniMapActor* MiniMap = Cast<ASTMiniMapActor>(Actor);
+		if (MiniMap)
+		{
+			MiniMapActor = MiniMap;
+			break;
+		}
+	}
+
+	// BigMap 검색
+	TArray<AActor*> WorldBigMapActors;
+	UGameplayStatics::GetAllActorsOfClass(
+		GetWorld(),
+		ASTBigMapActor::StaticClass(),
+		WorldBigMapActors);
+
+	for (AActor* Actor : WorldBigMapActors)
+	{
+		ASTBigMapActor* BigMap = Cast<ASTBigMapActor>(Actor);
+		if (BigMap)
+		{
+			BigMapActor = BigMap;
+			break;
+		}
+	}
 }
 
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
@@ -201,10 +238,16 @@ void ASTLocalPlayer::BeginPlay()
 	{
 		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
 		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+		QuickSlotComp->QuickSlots[0].bIsInfinite = true;
 
 		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
 		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+		QuickSlotComp->QuickSlots[1].bIsInfinite = true;
 	}
+
+	UpdateQuickslotForCpp();
+
+	HoldItem();
 }
 
 void ASTLocalPlayer::Tick(float DeltaTime)

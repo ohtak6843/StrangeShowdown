@@ -4,27 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Types/PlayerTypes.h"
 #include "STLocalPlayer.generated.h"
-
-UENUM(BlueprintType)
-enum class ECameraPose : uint8
-{
-	Idle		UMETA(DisplayName = "Idle"),
-	Aiming		UMETA(DisplayName = "Aiming"),
-	LookingUp	UMETA(DisplayName = "LookingUp")
-};
-
-USTRUCT(BlueprintType)
-struct FCameraPoseSetting
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SpringArmLength = 300.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CameraY = 0.f;
-};
 
 UCLASS()
 class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase
@@ -49,6 +30,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
+
+	// TODO: 임시로 블프에 함수 만들어놓은 것, 나중에 함수들 c++로 옮기면서 없애야 함
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateQuickslotForCpp();
+
+	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
+
+	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -80,6 +69,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
+	bool IsSmashing = false;
 
 private:
 	// Change Camera Settings with State

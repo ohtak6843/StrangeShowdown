@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Controller/STBaseController.h"
 #include "Widget/STHUD.h"
 #include "STPlayerController.generated.h"
 
@@ -11,14 +11,18 @@
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTPlayerController : public APlayerController
+class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
+	void CreateStoreWidget();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	TObjectPtr<USTHUD> HUDWidget;
+	virtual void Tick(float DeltaTime) override;
+
+	void Interact() override;
 };

@@ -1,9 +1,12 @@
 #include "Component/STAttackTraceComponent.h"
 #include "Character/Player/STFieldPlayer.h"
 #include "Character/Player/STLocalPlayer.h"
+#include "Character/Sheriff/STLocalSheriff.h"
+#include "Character/STCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 USTAttackTraceComponent::USTAttackTraceComponent()
 {
@@ -17,7 +20,8 @@ void USTAttackTraceComponent::BeginPlay()
 	OnTargetAcquired.AddDynamic(this, &USTAttackTraceComponent::HandleTargetAcquired);
 	OnTargetLost.AddDynamic(this, &USTAttackTraceComponent::HandleTargetLost);
 
-	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner());
+	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner(), TEXT("AttackTraceWidgetComponent"));
+	AttackTraceWidgetComponent->SetupAttachment(GetOwner()->GetRootComponent());
 	AttackTraceWidgetComponent->RegisterComponent();
 	AttackTraceWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -35,22 +39,41 @@ void USTAttackTraceComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// 줌 상태일때만 트레이스
-	if(Cast<ASTLocalPlayer>(GetOwner()))
+	AActor* Owner = GetOwner();
+	if (!Owner)
+		return;
+
+	if (ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(Owner))
 	{
-		ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(GetOwner());
-		if (!(LocalPlayer->HasAnyState(EPlayerState::Aiming)))
+		if (!LocalPlayer->HasAnyState(EPlayerState::Aiming))
 		{
 			SetTracingTarget(nullptr);
 			return;
 		}
 	}
+	else if (ASTLocalSheriff* LocalSheriff = Cast<ASTLocalSheriff>(Owner))
+	{
+		if (!LocalSheriff->HasAnyState(ESheriffState::Aiming))
+		{
+			SetTracingTarget(nullptr);
+			return;
+		}
+	}
+	else
+	{
+		SetTracingTarget(nullptr);
+		return;
+	}
+
 	ASTFieldPlayer* NewTarget = FindTargetInSight();
 	SetTracingTarget(NewTarget);
 }
 
 void USTAttackTraceComponent::HandleTargetAcquired(ASTFieldPlayer* NewTarget)
 {
+	if (!NewTarget || !AttackTraceWidgetComponent || !AttackTraceWidgetClass)
+		return;
+
 	if (!AttackTraceWidgetComponent || !AttackTraceWidgetClass)
 		return;
 
@@ -107,7 +130,7 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	if (!World)
 		return nullptr;
 
-	APlayerController* PC = World->GetFirstPlayerController();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC)
 		return nullptr;
 

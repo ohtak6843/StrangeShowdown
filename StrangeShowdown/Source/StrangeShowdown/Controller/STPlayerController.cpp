@@ -2,11 +2,20 @@
 
 
 #include "Controller/STPlayerController.h"
+#include "Actor/STInteractableActor.h"
+#include "DrawDebugHelpers.h"
 
 void ASTPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	FInputModeGameOnly GameOnlyInputMode;
-	SetInputMode(GameOnlyInputMode);
+void ASTPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ASTPlayerController::Interact()
+{
+	Super::Interact();
 }

@@ -23,9 +23,6 @@ struct FChatMessage
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Message;
-
-	UPROPERTY(BlueprintReadWrite)
-	FDateTime Timestamp;
 };
 
 UCLASS()
@@ -51,14 +48,11 @@ public:
 
 	// 메시지 추가(UI 갱신)
 	UFUNCTION(BlueprintCallable, Category = "Chat")
-	void AddChatMessage(const FString& SenderNickName, const FString& Message, FDateTime Time);
+	void AddChatMessage(const FString& SenderNickName, const FString& Message);
 
 	// Enter 눌렀을 때 입력 처리, 입력 텍스트를 FChatMessage로 변환하여 ChatLog에 추가
 	UFUNCTION()
 	void OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod);
-
-	// ChatLog를 기반으로 UI 갱신
-	void RefreshChatUI();
 
 	// ChatManager 포커스
 	UFUNCTION(BlueprintCallable, Category = "Chat")

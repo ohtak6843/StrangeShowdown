@@ -24,10 +24,6 @@
 			]
 		},
 		{
-			"Name": "ChaosEditor",
-			"Enabled": false
-		},
-		{
 			"Name": "GeometryCollectionPlugin",
 			"Enabled": true
 		}

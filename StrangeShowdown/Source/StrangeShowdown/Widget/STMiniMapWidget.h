@@ -21,6 +21,11 @@ public:
 	void UpdateItemIcon(class ASTPickupItem* Item, const FVector2D& MiniMapPos);
 	void HideItemIcon(class ASTPickupItem* Item);
 
+	// BigMap¿ë ÇÔ¼ö
+	void UpdatePlayerIcon(const FVector2D& MiniMapPos);
+
+	void SetIsRotationAble(bool RotationAble) { IsRotationAble = RotationAble; }
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* PlayerTexture;
@@ -34,4 +39,6 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* ItemLayer;
 
+private:
+	bool IsRotationAble = true;
 };

@@ -5,6 +5,7 @@
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Character/STCharacter.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -18,14 +19,48 @@ void USTChatManagerWidget::NativeConstruct()
 	}
 }
 
-void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const FString& Message, FDateTime Time)
+void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const FString& Message)
 {
 	FChatMessage NewMessage;
 	NewMessage.SenderNickName = SenderNickName;
 	NewMessage.Message = Message;
-	NewMessage.Timestamp = Time;
+
 	ChatLog.Add(NewMessage);
-	RefreshChatUI();
+
+	if (!ChatScrollBox) return;
+
+	UTextBlock* MessageTextBlock = NewObject<UTextBlock>(this);
+	if (MessageTextBlock)
+	{
+		FString FormattedMessage = FString::Printf(TEXT("%s: %s"),
+			*SenderNickName,
+			*Message);
+
+		MessageTextBlock->SetText(FText::FromString(FormattedMessage));
+
+		// 폰트 크기 조절
+		MessageTextBlock->SetFont(FSlateFontInfo(FPaths::ProjectContentDir() / TEXT("Fonts/F_StrangeShowdown.ttf"), 20));
+		
+		MessageTextBlock->SetAutoWrapText(true);
+		MessageTextBlock->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
+		ChatScrollBox->AddChild(MessageTextBlock);
+
+		// 레이아웃 강제 계산
+		ChatScrollBox->ForceLayoutPrepass();
+
+		// 정확한 폭 가져오기
+		float ScrollWidth = ChatScrollBox->GetCachedGeometry().GetLocalSize().X;
+		MessageTextBlock->SetWrapTextAt(ScrollWidth - 20.f);
+		
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+			{
+				if (ChatScrollBox)
+				{
+					ChatScrollBox->ScrollToEnd();
+				}
+			}, 0.01f, false);
+	}
 }
 
 void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod)
@@ -42,13 +77,13 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 			APawn* Pawn = PC->GetPawn();
 			if (!Pawn) return;
 
-			ASTPlayerBase* Player = Cast<ASTPlayerBase>(Pawn);
+			ASTCharacter* Player = Cast<ASTCharacter>(Pawn);
 			if (!Player) return;
 
 			FString NickName = Player->PlayerNickName;
 
 			// 임시로 FDateTime::Now() 사용
-			AddChatMessage(NickName, InputMessage, FDateTime::Now());
+			AddChatMessage(NickName, InputMessage);
 
 			ChatInputTextBox->SetText(FText::GetEmpty());
 		}
@@ -63,38 +98,6 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 			PC->FlushPressedKeys();
 		}
 	}
-}
-
-void USTChatManagerWidget::RefreshChatUI()
-{
-	if (!ChatScrollBox) return;
-
-	ChatScrollBox->ClearChildren();
-
-	for (const FChatMessage& ChatMessage : ChatLog)
-	{
-		UTextBlock* MessageTextBlock = NewObject<UTextBlock>(ChatScrollBox);
-		if (MessageTextBlock)
-		{
-			FString FormattedMessage = FString::Printf(TEXT("[%s] %s: %s"),
-				*ChatMessage.Timestamp.ToString(TEXT("%H:%M")),
-				*ChatMessage.SenderNickName,
-				*ChatMessage.Message);
-
-			MessageTextBlock->SetText(FText::FromString(FormattedMessage));
-			MessageTextBlock->SetAutoWrapText(true);
-			ChatScrollBox->AddChild(MessageTextBlock);
-		}
-	}
-
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
-		{
-			if (ChatScrollBox)
-			{
-				ChatScrollBox->ScrollToEnd();
-			}
-		}, 0.01f, false);
 }
 
 void USTChatManagerWidget::SetChatInputFocus()

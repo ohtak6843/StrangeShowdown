@@ -16,22 +16,27 @@ void USTStoreComponent::BeginPlay()
 	OwnerPlayer = Cast<ASTLocalPlayer>(GetOwner());
 
 	Slots.SetNum(SlotCount);
-	StoreItemPool.SetNum(SlotCount);
 }
 
 void USTStoreComponent::InitStore()
 {
-	if (StoreItemPool.Num() == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("StoreItemPool is empty"));
-		return;
-	}
+	if (!CurrentStorekeeper) return;
 
-	for (int32 i = 0; i < Slots.Num(); i++)
+	const TArray<USTItemDataAssetBase*>& Items = CurrentStorekeeper->StoreItemPool;
+
+	for (int32 i = 0; i < Slots.Num(); ++i)
 	{
-		Slots[i].ItemData = StoreItemPool[0];
 		Slots[i].SlotIndex = i;
 		Slots[i].bSold = false;
+
+		if (Items.IsValidIndex(i))
+		{
+			Slots[i].ItemData = Items[i];
+		}
+		else
+		{
+			Slots[i].ItemData = nullptr;
+		}
 	}
 }
 
@@ -42,4 +47,16 @@ void USTStoreComponent::Reroll()
 
 	OwnerPlayer->StatComp->AddGold(-RerollCost);
 	InitStore();
+}
+
+void USTStoreComponent::BuyItem(int32 SlotIndex)
+{
+	if (!CurrentStorekeeper) return;
+
+	CurrentStorekeeper->BuyItem(SlotIndex);
+}
+
+void USTStoreComponent::RefreshStoreUI()
+{
+	OnStoreUpdated.Broadcast();
 }

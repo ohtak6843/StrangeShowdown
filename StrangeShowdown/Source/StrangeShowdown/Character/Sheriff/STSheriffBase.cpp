@@ -4,6 +4,7 @@
 #include "Character/Sheriff/STSheriffBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Component/STStatComponent.h"
 
 ASTSheriffBase::ASTSheriffBase()
 {
@@ -43,4 +44,26 @@ ASTSheriffBase::ASTSheriffBase()
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
+
+	// Set Pistol Mesh
+	PistolMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PistolMesh"));
+	PistolMesh->SetupAttachment(GetMesh(), TEXT("Pistol"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> PistolMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/Weapons/SK_Wep_Revolver_02.SK_Wep_Revolver_02'"));
+	if (PistolMeshRef.Object)
+	{
+		PistolMesh->SetSkeletalMesh(PistolMeshRef.Object);
+	}
+
+	// Stat Component
+	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
+	StatComp->CurrentHp = StatComp->MaxHp;
+	StatComp->Gold = 0;
+	StatComp->Kill = 0;
+	StatComp->CurrentArmor = 0;
+	StatComp->MoveSpeed = 500;
+	// Sheriff는 스태미너가 없으므로 -1로 설정
+	StatComp->CurrentStamina = -1;
+	StatComp->CurrentAction = StatComp->UseAbleAction;
+	StatComp->Prize = 0;
+	StatComp->bAlive = true;
 }

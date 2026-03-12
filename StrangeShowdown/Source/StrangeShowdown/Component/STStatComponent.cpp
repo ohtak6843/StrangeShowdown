@@ -60,7 +60,7 @@ void USTStatComponent::AddKill(int32 KillAmount)
 
 void USTStatComponent::AddArmor(int32 ArmorAmount)
 {
-	Armor += ArmorAmount;
+	CurrentArmor += ArmorAmount;
 }
 
 void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
@@ -75,6 +75,10 @@ void USTStatComponent::AddStamina(int32 StaminaAmount)
 	if (CurrentStamina > MaxStamina)
 	{
 		CurrentStamina = MaxStamina;
+	}
+	else if (CurrentStamina <= 0)
+	{
+		CurrentStamina = 0;
 	}
 }
 

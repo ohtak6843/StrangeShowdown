@@ -23,6 +23,16 @@ public:
 
 	// 패킷 송수신
 
+	// Character Name
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
+	FString PlayerNickName = TEXT("NoName");
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
+	TObjectPtr<class ASTBigMapActor> BigMapActor;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

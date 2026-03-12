@@ -4,6 +4,7 @@
 #include "Character/Player/STFieldPlayer.h"
 #include "Animation/STAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ASTFieldPlayer::ASTFieldPlayer()
 {
@@ -17,36 +18,40 @@ void ASTFieldPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 위젯이 카메라를 바라보도록 처리
-	if (StatWidgetComponent)
+	if (StatWidgetComponent && CachedCameraManager)
 	{
 		FVector CameraLocation;
 		FRotator CameraRotation;
 
-		// 플레이어 카메라 얻기
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		if (PC && PC->PlayerCameraManager)
-		{
-			PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+		CachedCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
 
-			// UI가 카메라를 바라보게
-			FVector Direction = CameraLocation - StatWidgetComponent->GetComponentLocation();
-			FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
-			StatWidgetComponent->SetWorldRotation(LookAtRotation);
-		}
+		FVector Direction = CameraLocation - StatWidgetComponent->GetComponentLocation();
+		FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+		StatWidgetComponent->SetWorldRotation(LookAtRotation);
 	}
 
-	// 이동 보간
 #if NETWORK_ENABLED
 
 	FVector CurrentLocation{ GetActorLocation() };
 	FVector NewLocation{ FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, MoveSpeed) };
 	SetActorLocation(NewLocation);
-	
+
 	FRotator CurrentRotation{ GetActorRotation() };
 	FRotator NewRotation{ FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed) };
 	SetActorRotation(NewRotation);
+
 #endif
+}
+
+void ASTFieldPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		CachedCameraManager = PC->PlayerCameraManager;
+	}
 }
 
 void ASTFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
