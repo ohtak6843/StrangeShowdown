@@ -79,28 +79,51 @@ public:
 
 	bool GameInstanceTick(float DeltaTime);
 
-	// c++ method
+	// --
 	// packet handle
-
-
+	// --
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
+	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
+	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
+	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+
+	// blueprint 명령어
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void GetRoomList();
+
 	
-	UFUNCTION(Exec)
-	void TempGetRoomList();
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void JoinRoom(int64 RoomID);
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void CreateRoom();
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void ChangeWorld();
+
+
+	// Exec 명령어
 
 	UFUNCTION(Exec)
-	void TempJoinRoom(uint32 RoomID);
+	void DevGetRoomList();
 
 	UFUNCTION(Exec)
-	void TempCreateRoom();
+	void DevJoinRoom(uint32 RoomID);
 
 	UFUNCTION(Exec)
-	void TempChangeWorld();
+	void DevCreateRoom();
+
+	UFUNCTION(Exec)
+	void DevChangeWorld();
 
 
 	// util
+
 	void SendPacket(const TArray<uint8>& data);
+	void OnLevelLoaded(UWorld* LoadedWorld);
+	
 
 public:
 	// blueprint 다른 플레이어의 타입 지정
@@ -111,9 +134,16 @@ private:
 	FSocket* Socket{};
 	TSharedPtr<SocketIO> SocketIOInstance{};
 	TSharedPtr<STPacketHandler> PacketHandler{};
+
+
+	// 가비지 컬렉터 삭제 방지
+	UPROPERTY(VisibleAnywhere, Category = "Network")
 	TMap<uint64, ASTFieldPlayer*> PlayerMap{};
 
 	// GameInstance 자체 Ticker
 	FTSTicker::FDelegateHandle TickHandle{};
+
+	// 레벨 로딩 중 여부
+	bool IsLoadingLevel{ false };
 
 };

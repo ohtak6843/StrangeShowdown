@@ -140,7 +140,8 @@ void PacketHandler::HandleCreateRoom(SessionPtr session, const Common::CSCreateR
 	auto res{ GET_SINGLE(RoomManager)->CreateRoom(room_id) };
 
 	// 방을 성공적으로 만들었으면 패킷을 보내준다
-	auto buffer{ Serializer::Serialize(Common::SCCreateRoom{ res }) };
+	Common::SCCreateRoom room_packet{ res };
+	session->DoSend(room_packet);
 
 	if (false == res)
 	{

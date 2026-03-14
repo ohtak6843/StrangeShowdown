@@ -14,6 +14,7 @@ bool RoomManager::CreateRoom(OUT uint32& room_id)
 	auto id{ _roomCounter++ };
 	_rooms[id] = GET_SINGLE(ObjectManager)->Pop<Room>();
 	_rooms[id]->SetRoomID(id);
+	room_id = id;
 	return true;
 }
 

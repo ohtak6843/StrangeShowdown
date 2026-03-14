@@ -78,6 +78,7 @@ void STPacketHandler::HandleSpawnObject(const Common::SCSpawnObject& Packet)
 		return;
 	}
 	GameInstance->HandleSpawn(Packet);
+	UE_LOG(LogTemp, Log, TEXT("Spawn Success"));
 }
 
 void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)
@@ -114,6 +115,7 @@ void STPacketHandler::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 	{
 		return;
 	}
+	GameInstance->HandleJoinRoom(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Room Join Success. roomID: %s"), Packet.success ? TEXT("true") : TEXT("false"));
 }
 

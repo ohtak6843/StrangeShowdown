@@ -42,6 +42,8 @@ void USTGameInstance::Init()
 	}
 
 #if NETWORK_ENABLED
+	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
+	
 	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
 		FTickerDelegate::CreateUObject(this, &USTGameInstance::GameInstanceTick)
 	);
@@ -57,6 +59,12 @@ bool USTGameInstance::GameInstanceTick(float DeltaTime)
 
 void USTGameInstance::Shutdown()
 {
+#ifdef NETWORK_ENABLED
+	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+	FTSTicker::GetCoreTicker().RemoveTicker(TickHandle);
+
+#endif // NETWORK_ENABLED
+
 	DisconnectFromGameServer();
 
 	Super::Shutdown();
@@ -146,11 +154,16 @@ void USTGameInstance::DisconnectFromGameServer()
 void USTGameInstance::HandleRecvPackets()
 {
 #if NETWORK_ENABLED
-	if (nullptr == Socket || nullptr == SocketIOInstance)
-		return;
 
 	while (true)
 	{
+		if (nullptr == Socket ||
+			nullptr == SocketIOInstance ||
+			true == IsLoadingLevel)
+		{
+			return;
+		}
+
 		TArray<uint8> Packet;
 		if (false == SocketIOInstance->PopRecvPacket(Packet)) {
 			break;
@@ -193,46 +206,86 @@ void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
 
 void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (ASTFieldPlayer * *player_ptr{ PlayerMap.Find(Packet.id) })
+	if (ASTFieldPlayer **PlayerPtr{ PlayerMap.Find(Packet.id) })
 	{
-		ASTFieldPlayer* player{ *player_ptr };
+		ASTFieldPlayer* Player{ *PlayerPtr };
+		
+		if (false == IsValid(Player))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player with ID %d is not valid"), Packet.id);
+			return;
+		}
 
 		FVector location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 		FRotator rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
-		player->Move(location, rotation);
-		player->PlayerStateFlag = Packet.state;
+		Player->Move(location, rotation);
+		Player->PlayerStateFlag = Packet.state;
 	}
 }
 
-
-void USTGameInstance::TempGetRoomList()
+void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
-	Common::CSGetRoomList LoginPacket{};
-	auto Packet{ STSerializer::Serialize(LoginPacket) };
-	SendPacket(Packet);
-	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] ConnectServer called"));
+	if (true == Packet.success)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Successfully joined the room"));
+		ChangeWorld();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Failed to join the room"));
+	}
 }
 
-void USTGameInstance::TempJoinRoom(uint32 RoomID)
+void USTGameInstance::GetRoomList()
 {
-	Common::CSJoinRoom JoinPacket{ RoomID };
+	Common::CSGetRoomList GetRoomListPacket{};
+	auto Packet{ STSerializer::Serialize(GetRoomListPacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("GetRoomList called"));
+}
+
+void USTGameInstance::JoinRoom(int64 RoomID)
+{
+	Common::CSJoinRoom JoinPacket{ static_cast<uint32>(RoomID) };
 	auto Packet{ STSerializer::Serialize(JoinPacket) };
 	SendPacket(Packet);
-	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] JoinRoom called: RoomID=%d"), RoomID);
+	UE_LOG(LogTemp, Log, TEXT("JoinRoom called: RoomID=%d"), RoomID);
 }
 
-void USTGameInstance::TempCreateRoom()
+void USTGameInstance::CreateRoom()
 {
 	Common::CSCreateRoom CreatePacket{};
 	auto Packet{ STSerializer::Serialize(CreatePacket) };
 	SendPacket(Packet);
-	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] CreateRoom called"));
+	UE_LOG(LogTemp, Log, TEXT("CreateRoom called"));
 }
 
-void USTGameInstance::TempChangeWorld()
+void USTGameInstance::ChangeWorld()
 {
+	IsLoadingLevel = true;
+	//PlayerMap.Empty();
 	UGameplayStatics::OpenLevel(this, FName(TEXT("L_NetworkTestLevel")));
-	UE_LOG(LogTemp, Log, TEXT("[DEV CMD] ChangeWorld called"));
+	UE_LOG(LogTemp, Log, TEXT("ChangeWorld called"));
+}
+
+void USTGameInstance::DevGetRoomList()
+{
+	GetRoomList();
+}
+
+void USTGameInstance::DevJoinRoom(uint32 RoomID)
+{
+	JoinRoom(RoomID);
+}
+
+void USTGameInstance::DevCreateRoom()
+{
+	CreateRoom();
+}
+
+void USTGameInstance::DevChangeWorld()
+{
+	ChangeWorld();
 }
 
 
@@ -241,5 +294,14 @@ void USTGameInstance::SendPacket(const TArray<uint8>& data)
 	if (SocketIOInstance)
 	{
 		SocketIOInstance->PushSendPacket(data);
+	}
+}
+
+void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
+{
+	if (LoadedWorld)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
+		IsLoadingLevel = false;
 	}
 }
