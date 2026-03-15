@@ -56,6 +56,12 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		return false;
 	}
 
+	// 0,1번 슬롯은 사용 불가
+	if (TargetQuickSlotIndex == 0 || TargetQuickSlotIndex == 1)
+	{
+		return false;
+	}
+
 	// 인벤토리에서 아이템 가져오기
 	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
