@@ -106,10 +106,11 @@ struct CSLogin : Header
 	{}
 };
 
-
+// [ 가변 크기 패킷 ]
 // Param:
 //		uint16 roomCount
 // 서버 방 리스트 제공
+// 방의 갯수만큼 크기를 조절해 RoomInfo를 이어 보낸다.
 struct SCGiveRoomList : Header
 {
 	uint16 roomCount{};
@@ -133,7 +134,6 @@ struct CSGetRoomList : Header
 };
 
 
-// SCCreateRoom
 // Param:
 //	bool success
 // 서버 방 생성 여부

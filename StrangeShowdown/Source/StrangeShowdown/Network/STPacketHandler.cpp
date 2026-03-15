@@ -7,7 +7,8 @@ STPacketHandler::STPacketHandler()
 {
 	
 	GameInstance = Cast<USTGameInstance>(GWorld->GetGameInstance());
-
+	
+	// 고정 크기 패킷 핸들러 등록
 	RegisterHandler<Common::SCSpawnObject>(
 		Common::PacketType::SC_SPAWN_OBJECT,
 		[this](const auto& Packet)
@@ -24,13 +25,6 @@ STPacketHandler::STPacketHandler()
 		}
 	);
 
-	RegisterHandler<Common::SCGiveRoomList>(
-		Common::PacketType::SC_GIVE_ROOM_LIST,
-		[this](const auto& Packet)
-		{
-			HandleGiveRoomList(Packet);
-		}
-	);
 
 	RegisterHandler<Common::SCCreateRoom>(
 		Common::PacketType::SC_CREATE_ROOM,
@@ -53,6 +47,15 @@ STPacketHandler::STPacketHandler()
 		[this](const auto& Packet)
 		{
 			HandleLogin(Packet);
+		}
+	);
+
+	// 가변 크기 핸들러 등록
+	RegisterHandlerDynamic<Common::SCGiveRoomList>(
+		Common::PacketType::SC_GIVE_ROOM_LIST,
+		[this](const auto& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+		{
+			HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
 		}
 	);
 }
@@ -90,14 +93,32 @@ void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)
 	GameInstance->HandleMove(Packet);
 }
 
-void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
+//void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
+//{
+//	if (nullptr == GameInstance)
+//	{
+//		return;
+//	}
+//	// GameInstance->HandleGiveRoomList(Packet);
+//	UE_LOG(LogTemp, Log, TEXT("Room Get Success. count: %d"), Packet.roomCount);
+//}
+
+void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	if (nullptr == GameInstance)
+	// 패킷에 들어있는 가변 갯수
+	uint16 RoomCount = Packet.roomCount;
+
+	// 만약 RoomInfo 구조체가 연속되어서 왔다면?
+	// 안전한 접근을 위해 포인터 캐스팅
+	const Common::RoomInfo* Rooms = reinterpret_cast<const Common::RoomInfo*>(PayloadPtr);
+
+	for (uint16 i = 0; i < RoomCount; ++i)
 	{
-		return;
+		uint32 ID = Rooms[i].roomID;
+		uint8 PlayerCount = Rooms[i].currentPlayerCount;
+
+		UE_LOG(LogTemp, Log, TEXT("Room Get Success. ID: %d, PlayerCount: %d"), ID, PlayerCount);
 	}
-	// GameInstance->HandleGiveRoomList(Packet);
-	UE_LOG(LogTemp, Log, TEXT("Room Get Success. count: %d"), Packet.roomCount);
 }
 
 void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)

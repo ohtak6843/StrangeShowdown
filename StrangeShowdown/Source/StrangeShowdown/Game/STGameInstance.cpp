@@ -63,10 +63,10 @@ void USTGameInstance::Shutdown()
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
 	FTSTicker::GetCoreTicker().RemoveTicker(TickHandle);
 
-#endif // NETWORK_ENABLED
 
 	DisconnectFromGameServer();
 
+#endif // NETWORK_ENABLED
 	Super::Shutdown();
 }
 
@@ -221,6 +221,11 @@ void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 		Player->Move(location, rotation);
 		Player->PlayerStateFlag = Packet.state;
 	}
+}
+
+void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
+{
+	
 }
 
 void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)

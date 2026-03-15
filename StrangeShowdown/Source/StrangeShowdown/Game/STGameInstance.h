@@ -82,11 +82,17 @@ public:
 	// --
 	// packet handle
 	// --
+
+	// 정적
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
-	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
 	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+
+	// 동적
+	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
+
+
 
 	// blueprint 명령어
 

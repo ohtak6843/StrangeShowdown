@@ -19,12 +19,18 @@ public:
 	void HandlePacket(const TArray<uint8>& Data);
 
 private:
+
+	// 고정 크기 핸들러
 	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
 	void HandleMoveObject(const Common::SCMovePlayer& Packet);
-	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
+	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleLogin(const Common::SCLogin& Packet);
+
+	// 가변 크기 핸들러
+	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
+
 
 
 	// 핸들러 맵에 함수 등록
@@ -35,12 +41,39 @@ private:
 			Type,
 			[LogicFunc](const TArray<uint8>& Data)
 			{
-				T Pkt{ STSerializer::Deserialize<T>(Data) };
-				LogicFunc(Pkt);
+				T Packet{ STSerializer::Deserialize<T>(Data) };
+				LogicFunc(Packet);
 			}
 		);
 	}
-	
+
+	// 동적 크기 패킷을 처리하는 핸들러 등록
+	template <typename T>
+	void RegisterHandlerDynamic(Common::PacketType Type, TFunction<void(const T&, const uint8*, const uint16)> LogicFunc)
+	{
+		HandlerMap.Add(
+			Type,
+			[LogicFunc](const TArray<uint8>& Data)
+			{
+				// 방어: 버퍼 크기가 최소 헤더 크기도 안 되면 무시
+				const uint16 PacketSize{ sizeof(T) };
+				if (Data.Num() < sizeof(T))
+				{
+					return;
+				}
+
+				// 고정 데이터 파싱
+				T Packet{ STSerializer::Deserialize<T>(Data) };
+				const uint16 TotalSize{ Packet.size };
+
+				// 가변 데이터 파싱
+				const uint8* PayloadPtr{ Data.GetData() + PacketSize };
+				const uint16 PayloadSize{ static_cast<uint16>(TotalSize - PacketSize) };
+
+				LogicFunc(Packet, PayloadPtr, PayloadSize);
+			}
+		);
+	}
 
 private:
 
