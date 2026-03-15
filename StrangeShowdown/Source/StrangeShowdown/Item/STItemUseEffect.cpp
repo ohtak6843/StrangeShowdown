@@ -16,7 +16,7 @@ bool USTItemUseEffect::CanUse(ASTLocalPlayer* User, USTItemDataAssetBase* ItemDa
 	return true;
 }
 
-void USTItemUseEffect::Use_Implementation(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
+bool USTItemUseEffect::Use_Implementation(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-
+	return true;
 }
