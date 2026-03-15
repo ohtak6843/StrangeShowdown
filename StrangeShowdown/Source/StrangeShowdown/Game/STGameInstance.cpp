@@ -223,9 +223,28 @@ void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 	}
 }
 
-void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
+void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	
+	RoomList.Empty();
+
+	const auto* Rooms{ reinterpret_cast<const Common::RoomInfo*>(PayloadPtr) };
+
+	for (uint16 i{}; i < Packet.roomCount; ++i)
+	{
+		USTRoomInfoObject* TestRoom{ NewObject<USTRoomInfoObject>() };
+		TestRoom->RoomInfo.RoomName = FString::Printf(TEXT("Room %d"), Rooms[i].roomID);
+		TestRoom->RoomInfo.CurrentPlayers = static_cast<int32>(Rooms[i].currentPlayerCount);
+		TestRoom->RoomInfo.MaxPlayers = 6;
+		TestRoom->RoomInfo.bHasPassword = true;
+		TestRoom->RoomInfo.Password = TEXT("1234") ;
+		TestRoom->RoomInfo.ID = static_cast<int64>(Rooms[i].roomID);
+		RoomList.Add(TestRoom);
+
+		UE_LOG(LogTemp, Log, TEXT("Room Get Success. ID: %d, PlayerCount: %d"),
+			Rooms[i].roomID, Rooms[i].currentPlayerCount);
+	}
+
+	OnRoomListUpdated.Broadcast();
 }
 
 void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)

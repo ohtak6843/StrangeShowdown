@@ -105,20 +105,11 @@ void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)
 
 void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	// 패킷에 들어있는 가변 갯수
-	uint16 RoomCount = Packet.roomCount;
-
-	// 만약 RoomInfo 구조체가 연속되어서 왔다면?
-	// 안전한 접근을 위해 포인터 캐스팅
-	const Common::RoomInfo* Rooms = reinterpret_cast<const Common::RoomInfo*>(PayloadPtr);
-
-	for (uint16 i = 0; i < RoomCount; ++i)
+	if (nullptr == GameInstance)
 	{
-		uint32 ID = Rooms[i].roomID;
-		uint8 PlayerCount = Rooms[i].currentPlayerCount;
-
-		UE_LOG(LogTemp, Log, TEXT("Room Get Success. ID: %d, PlayerCount: %d"), ID, PlayerCount);
+		return;
 	}
+	GameInstance->HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
 }
 
 void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)

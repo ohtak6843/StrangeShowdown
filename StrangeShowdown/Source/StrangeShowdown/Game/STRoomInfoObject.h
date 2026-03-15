@@ -18,13 +18,16 @@ struct FRoomInfo
 	int32 CurrentPlayers;
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 MaxPlayers = 5;
+	int32 MaxPlayers = 6;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bHasPassword;
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Password;
+
+	UPROPERTY(BlueprintReadWrite)
+	int64 ID{};
 };
 
 UCLASS(Blueprintable)

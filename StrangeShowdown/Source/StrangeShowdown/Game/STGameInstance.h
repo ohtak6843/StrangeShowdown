@@ -90,7 +90,7 @@ public:
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 
 	// 동적
-	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
+	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
 
@@ -134,7 +134,7 @@ public:
 public:
 	// blueprint 다른 플레이어의 타입 지정
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
+	TSubclassOf<ASTFieldPlayer> OtherPlayerClass{};
 
 private:
 	FSocket* Socket{};
