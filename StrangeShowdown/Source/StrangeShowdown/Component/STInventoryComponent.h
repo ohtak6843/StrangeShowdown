@@ -5,6 +5,16 @@
 #include "Components/WidgetComponent.h"
 #include "STInventoryComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EItemUseType : uint8
+{
+	CanUse,
+	NotEnoughStaminaCost,
+	NoEffect,
+	Exception,
+	UnValid
+};
+
 USTRUCT(BlueprintType)
 struct FInventorySlot
 {
@@ -55,7 +65,7 @@ public:
 
 	// 아이템 사용
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot);
+	EItemUseType UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot);
 
 	// 슬롯 교환
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
