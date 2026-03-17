@@ -277,7 +277,7 @@ void USTGameInstance::JoinRoom(int64 RoomID)
 {
 	Common::CSJoinRoom JoinPacket{
 		static_cast<uint32>(RoomID),
-		"Secre"
+		"Secret"
 	};
 	auto Packet{ STSerializer::Serialize(JoinPacket) };
 	SendPacket(Packet);
@@ -288,7 +288,7 @@ void USTGameInstance::CreateRoom()
 {
 	Common::CSCreateRoom CreatePacket{
 		"Test Room",
-		false,
+		true,
 		"Secret"
 	};
 
