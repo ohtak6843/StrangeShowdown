@@ -27,9 +27,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSubSlicedBlueprint();
 
-public:
-	bool bIsSubSliced;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
 	UStaticMeshComponent* SubMineralMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
+	USkeletalMeshComponent* SkeletalMeshComponent;
+
+private:
+	bool bIsSubSliced;
+
+	UAnimSequence* IdleAnimation;
 };
