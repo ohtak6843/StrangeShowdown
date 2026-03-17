@@ -231,17 +231,22 @@ void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, c
 
 	for (uint16 i{}; i < Packet.roomCount; ++i)
 	{
+		auto& Info{ Rooms[i] };
 		USTRoomInfoObject* TestRoom{ NewObject<USTRoomInfoObject>() };
-		TestRoom->RoomInfo.RoomName = FString::Printf(TEXT("Room %d"), Rooms[i].roomID);
+		TestRoom->RoomInfo.RoomName = FString{ UTF8_TO_TCHAR(Info.name) };
 		TestRoom->RoomInfo.CurrentPlayers = static_cast<int32>(Rooms[i].currentPlayerCount);
 		TestRoom->RoomInfo.MaxPlayers = 6;
-		TestRoom->RoomInfo.bHasPassword = true;
-		TestRoom->RoomInfo.Password = TEXT("1234") ;
-		TestRoom->RoomInfo.ID = static_cast<int64>(Rooms[i].roomID);
+		TestRoom->RoomInfo.bHasPassword = Info.hasPassword;
+		TestRoom->RoomInfo.Password = TEXT("");
+		TestRoom->RoomInfo.ID = static_cast<int64>(Info.roomId);
 		RoomList.Add(TestRoom);
 
-		UE_LOG(LogTemp, Log, TEXT("Room Get Success. ID: %d, PlayerCount: %d"),
-			Rooms[i].roomID, Rooms[i].currentPlayerCount);
+		UE_LOG(LogTemp, Log, TEXT("Room Get Success. RoomID: %d, CurrentPlayers: %d, HasPassword: %d, RoomName: %s"),
+			Info.roomId,
+			Info.currentPlayerCount,
+			Info.hasPassword,
+			*FString{ UTF8_TO_TCHAR(Info.name) }
+		);
 	}
 
 	OnRoomListUpdated.Broadcast();
@@ -270,7 +275,10 @@ void USTGameInstance::GetRoomList()
 
 void USTGameInstance::JoinRoom(int64 RoomID)
 {
-	Common::CSJoinRoom JoinPacket{ static_cast<uint32>(RoomID) };
+	Common::CSJoinRoom JoinPacket{
+		static_cast<uint32>(RoomID),
+		"Secre"
+	};
 	auto Packet{ STSerializer::Serialize(JoinPacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("JoinRoom called: RoomID=%d"), RoomID);
@@ -278,7 +286,12 @@ void USTGameInstance::JoinRoom(int64 RoomID)
 
 void USTGameInstance::CreateRoom()
 {
-	Common::CSCreateRoom CreatePacket{};
+	Common::CSCreateRoom CreatePacket{
+		"Test Room",
+		false,
+		"Secret"
+	};
+
 	auto Packet{ STSerializer::Serialize(CreatePacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("CreateRoom called"));
