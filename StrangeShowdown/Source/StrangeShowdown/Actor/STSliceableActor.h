@@ -21,11 +21,11 @@ public:
 
 	// 도끼에서 호출(충돌 지점, 노멀)
 	UFUNCTION(BlueprintCallable, Category = "Slice")
-	void Slice(const FVector& HitLocation, const FVector& HitNormal);
+	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal);
 
 	// BP 연출/보상
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnSliced();
+	void OnSlicedBlueprint();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
