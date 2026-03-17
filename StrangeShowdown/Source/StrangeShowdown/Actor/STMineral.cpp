@@ -16,7 +16,18 @@ void ASTMineral::BeginPlay()
 
 void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal)
 {
-	Super::Slice(HitLocation, HitNormal);
+	// 1단계
+	if (!bIsSubSliced)
+	{
+		OnSubSlicedBlueprint();
+		bIsSubSliced = true;
+		return;
+	}
 
-
+	// 2단계
+	if (!bIsSliced)
+	{
+		Super::Slice(HitLocation, HitNormal);
+		return;
+	}
 }

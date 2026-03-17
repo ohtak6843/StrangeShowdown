@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Slice")
 	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal);
 
-	// BP 연출/보상
+	// BP 연출
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSlicedBlueprint();
 

@@ -23,7 +23,13 @@ protected:
 public:
 	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal) override;
 
+	// BP ø¨√‚
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSubSlicedBlueprint();
+
 public:
+	bool bIsSubSliced;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
 	UStaticMeshComponent* SubMineralMeshComponent;
 };

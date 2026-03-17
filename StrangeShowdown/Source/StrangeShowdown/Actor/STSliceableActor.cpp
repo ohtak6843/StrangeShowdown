@@ -7,8 +7,11 @@ ASTSliceableActor::ASTSliceableActor()
 
 	PrimaryActorTick.bCanEverTick = false;
 
+	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = SceneRoot;
+
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	RootComponent = MeshComponent;
+	MeshComponent->SetupAttachment(RootComponent);
 
 	MeshComponent->SetIsReplicated(true);
 
