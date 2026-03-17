@@ -4,6 +4,7 @@
 #include "Actor/STMineral.h"
 #include "Character/Sheriff/STFieldSheriff.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Animation/AnimSingleNodeInstance.h"
 
 ASTMineral::ASTMineral()
 {
@@ -25,6 +26,11 @@ void ASTMineral::BeginPlay()
 	Super::BeginPlay();
 
 	SkeletalMeshComponent->PlayAnimation(IdleAnimation, true);
+	UAnimSingleNodeInstance* SingleNodeInstance = SkeletalMeshComponent->GetSingleNodeInstance();
+	if (SingleNodeInstance)
+	{
+		SingleNodeInstance->SetPlaying(false);
+	}
 }
 
 void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, ASTPlayerBase* Player)
