@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
-	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal) override;
+	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal, class ASTPlayerBase* Player) override;
 
 	// BP ø¨√‚
 	UFUNCTION(BlueprintImplementableEvent)

@@ -2,6 +2,7 @@
 
 
 #include "Actor/STMineral.h"
+#include "Character/Player/STPlayerBase.h"
 
 ASTMineral::ASTMineral()
 {
@@ -14,11 +15,12 @@ void ASTMineral::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal)
+void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, ASTPlayerBase* Player)
 {
 	// 1단계
 	if (!bIsSubSliced)
 	{
+		Player->StatComp->AddGold(5);
 		OnSubSlicedBlueprint();
 		bIsSubSliced = true;
 		return;
@@ -27,7 +29,8 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal)
 	// 2단계
 	if (!bIsSliced)
 	{
-		Super::Slice(HitLocation, HitNormal);
+		Player->StatComp->AddGold(5);
+		Super::Slice(HitLocation, HitNormal, Player);
 		return;
 	}
 }
