@@ -12,13 +12,11 @@ public:
 	// Handle Packet method
 	// --
 
-	// todo: 현재 thread unsafe!!!!
-	// @Param: room_id 방 번호 반환용 아웃 파라미터
-	// @Return: 방 제작 성공 여부
-	bool CreateRoom(OUT uint32& room_id);
+	// todo: thread unsafe
+	void HandleCreateRoom(SessionPtr session, const Common::CSCreateRoom& packet);
 
 	// todo: thread unsafe
-	void JoinRoom(SessionPtr session, uint32 room_id);
+	void HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet);
 
 	// todo: 현재 thread unsafe!!!!
 	std::vector<Common::RoomInfo> GetRoomList();

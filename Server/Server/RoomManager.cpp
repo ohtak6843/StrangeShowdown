@@ -4,23 +4,29 @@
 
 
 
-bool RoomManager::CreateRoom(OUT uint32& room_id)
+void RoomManager::HandleCreateRoom(SessionPtr session, const Common::CSCreateRoom& packet)
 {
 	// todo: 메모리 매니저에서 꺼내오자.
 	// 현재 room이 있는지 검사할 필요가 있음.
 	// 나중에 방 입장 코드도 필요
 	// 나중에 방 허용량이 다 찼을 경우엔 실패 반환
 
+	// 방 생성 및 초기화
 	auto id{ _roomCounter++ };
 	_rooms[id] = GET_SINGLE(ObjectManager)->Pop<Room>();
-	_rooms[id]->SetRoomID(id);
-	room_id = id;
-	return true;
+	_rooms[id]->Init(id, packet);
+
+	// 방을 성공적으로 만들었으면 패킷을 보내준다
+	Common::SCCreateRoom room_packet{ true };
+	session->DoSend(room_packet);
+
+	// HandleJoinRoom을 통해 방에 입장한다.
+	HandleJoinRoom(session, Common::CSJoinRoom{ id, packet.password });
 }
 
-void RoomManager::JoinRoom(SessionPtr session, uint32 room_id)
+void RoomManager::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet)
 {
-	const auto res{ _rooms.find(room_id) };
+	const auto res{ _rooms.find(packet.roomID) };
 	const auto id{ session->GetSessionID() };
 	if (res == _rooms.end())
 	{

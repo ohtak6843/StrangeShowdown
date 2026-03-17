@@ -6,6 +6,14 @@ void Room::PushJob(Job& job)
 	_jobQueue.push(job);
 }
 
+void Room::Init(const uint32 roomID, const Common::CSCreateRoom& packet)
+{
+	_roomID = roomID;
+	_name = packet.name;
+	_hasPassword = packet.hasPassword;
+	_password = packet.password;
+}
+
 void Room::Update()
 {
 	bool expected{ false };

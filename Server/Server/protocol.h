@@ -70,8 +70,10 @@ enum class PacketType : uint16
 // 방 정보
 struct RoomInfo
 {
-	uint32 roomID{};
+	uint32 roomId{};
 	uint8 currentPlayerCount{};
+	bool hasPassword{};
+	char name[100]{};
 };
 
 // 패킷 앞에 공통으로 붙는 헤더
@@ -154,11 +156,22 @@ struct SCCreateRoom : Header
 // 클라이언트 방 생성 요청
 struct CSCreateRoom : Header
 {
-	CSCreateRoom() :
-		Header{ sizeof(CSCreateRoom), PacketType::CS_CREATE_ROOM }
-	{}
-};
+	char name[100]{};
+	bool hasPassword{ false };
+	char password[21]{};
 
+	CSCreateRoom() = default;
+	CSCreateRoom(const char* _name, bool _hasPassword, const char* _password = "") :
+		Header{ sizeof(CSCreateRoom), PacketType::CS_CREATE_ROOM },
+		hasPassword{ _hasPassword }
+	{
+		strncpy_s(name, _name, sizeof(name) - 1);
+		if (_hasPassword && _password != nullptr)
+		{
+			strncpy_s(password, _password, sizeof(password) - 1);
+		}
+	}
+};
 
 // SCJoinRoom
 // Param:
@@ -179,11 +192,16 @@ struct SCJoinRoom : Header
 struct CSJoinRoom : Header
 {
 	uint32 roomID{};
+	char password[21]{};
 	CSJoinRoom() = default;
-	CSJoinRoom(const uint32 _roomID) :
+	CSJoinRoom(const uint32 _roomID, const char* _password = "") :
 		Header{ sizeof(CSJoinRoom), PacketType::CS_JOIN_ROOM },
 		roomID{ _roomID }
 	{
+		if (_password != nullptr)
+		{
+			strncpy_s(password, _password, sizeof(password) - 1);
+		}
 	}
 };
 
