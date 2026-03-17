@@ -3,6 +3,12 @@
 
 #include "Actor/STMineral.h"
 
+ASTMineral::ASTMineral()
+{
+	SubMineralMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMineralMeshComponent"));
+	SubMineralMeshComponent->SetupAttachment(RootComponent);
+}
+
 void ASTMineral::BeginPlay()
 {
 	Super::BeginPlay();
