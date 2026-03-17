@@ -39,7 +39,7 @@ ASTSheriffBase::ASTSheriffBase()
 	}
 
 	// Set Anim Instance
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/StrangeShowdown/Animation/ABP_STSheriff.ABP_STSheriff_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/StrangeShowdown/Animation/ABP_Sheriff.ABP_Sheriff_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
