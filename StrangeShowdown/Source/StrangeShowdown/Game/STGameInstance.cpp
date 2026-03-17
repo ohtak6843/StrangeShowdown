@@ -273,24 +273,34 @@ void USTGameInstance::GetRoomList()
 	UE_LOG(LogTemp, Log, TEXT("GetRoomList called"));
 }
 
-void USTGameInstance::JoinRoom(int64 RoomID)
+void USTGameInstance::JoinRoom(const int64 RoomID, const FText& Password)
 {
 	Common::CSJoinRoom JoinPacket{
 		static_cast<uint32>(RoomID),
 		"Secret"
 	};
+	UE_LOG(LogTemp, Log, TEXT("JoinRoom Password=%s"), *FString{ Password.ToString() });
+	strcpy_s(JoinPacket.password, TCHAR_TO_UTF8(*Password.ToString()));
+
 	auto Packet{ STSerializer::Serialize(JoinPacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("JoinRoom called: RoomID=%d"), RoomID);
 }
 
-void USTGameInstance::CreateRoom()
+void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 {
 	Common::CSCreateRoom CreatePacket{
-		"Test Room",
-		true,
-		"Secret"
+		"NAME",
+		false,
+		"PASS"
 	};
+	UE_LOG(LogTemp, Log, TEXT("CreateRoom Password=%s"), *FString{ Password.ToString() });
+	strcpy_s(CreatePacket.name, TCHAR_TO_UTF8(*Name.ToString()));
+	strcpy_s(CreatePacket.password, TCHAR_TO_UTF8(*Password.ToString()));
+	if (false == Password.IsEmpty())
+	{
+		CreatePacket.hasPassword = true;
+	}
 
 	auto Packet{ STSerializer::Serialize(CreatePacket) };
 	SendPacket(Packet);
@@ -310,14 +320,17 @@ void USTGameInstance::DevGetRoomList()
 	GetRoomList();
 }
 
-void USTGameInstance::DevJoinRoom(uint32 RoomID)
+void USTGameInstance::DevJoinRoom(const uint32 RoomID)
 {
 	JoinRoom(RoomID);
 }
 
-void USTGameInstance::DevCreateRoom()
+void USTGameInstance::DevCreateRoom(const FString& RoomName, const FString& Password)
 {
-	CreateRoom();
+	FText TextRoomName = FText::FromString(RoomName);
+	FText TextPassword = FText::FromString(Password);
+
+	CreateRoom(TextRoomName, TextPassword);
 }
 
 void USTGameInstance::DevChangeWorld()

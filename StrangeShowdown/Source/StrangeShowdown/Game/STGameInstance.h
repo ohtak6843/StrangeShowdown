@@ -101,10 +101,10 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void JoinRoom(int64 RoomID);
+	void JoinRoom(const int64 RoomID, const FText& Password = FText::GetEmpty());
 
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void CreateRoom();
+	void CreateRoom(const FText& Name, const FText& Password);
 
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void ChangeWorld();
@@ -116,10 +116,10 @@ public:
 	void DevGetRoomList();
 
 	UFUNCTION(Exec)
-	void DevJoinRoom(uint32 RoomID);
+	void DevJoinRoom(const uint32 RoomID);
 
 	UFUNCTION(Exec)
-	void DevCreateRoom();
+	void DevCreateRoom(const FString& RoomName, const FString& Password);
 
 	UFUNCTION(Exec)
 	void DevChangeWorld();
