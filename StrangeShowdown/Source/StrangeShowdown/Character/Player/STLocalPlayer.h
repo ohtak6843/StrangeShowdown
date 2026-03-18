@@ -5,16 +5,19 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Types/PlayerTypes.h"
+#include "Interface/STAnimAttackInterface.h"
 #include "STLocalPlayer.generated.h"
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase
+class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase, public ISTAnimAttackInterface
 {
 	GENERATED_BODY()
 	
 public:
 	// Sets default values for this character's properties
 	ASTLocalPlayer();
+
+	virtual void AttackHitCheck() override;
 
 	void SetCameraPose(ECameraPose NewPose);
 
@@ -91,4 +94,7 @@ private:
 	// Network
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TObjectPtr<class UNiagaraSystem> HitEffect;
 };

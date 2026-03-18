@@ -12,7 +12,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
+#include "Engine/DamageEvents.h"
+#include "Actor/STSliceableActor.h"
+#include "Particles/ParticleSystem.h"
 #include "StrangeShowdown.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -45,6 +50,12 @@ ASTLocalPlayer::ASTLocalPlayer()
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> EffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Prop/SmashFX/NS_Smash.NS_Smash'"));
+	if (EffectRef.Object)
+	{
+		HitEffect = EffectRef.Object;
+	}
 
 	// MiniMap 검색
 	TArray<AActor*> WorldMiniMapActors;
@@ -79,6 +90,53 @@ ASTLocalPlayer::ASTLocalPlayer()
 			break;
 		}
 	}
+}
+
+void ASTLocalPlayer::AttackHitCheck()
+{
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * 100;
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	if (!bHit)
+		return;
+
+	AActor* HitActor = Hit.GetActor();
+	if (!HitActor)
+		return;
+
+	ASTSliceableActor* SliceableActor = Cast<ASTSliceableActor>(HitActor);
+	if (SliceableActor)
+	{
+		SliceableActor->Slice(Hit.ImpactPoint, Hit.ImpactNormal, this);
+	}
+
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		HitEffect,
+		Hit.ImpactPoint,
+		Hit.ImpactNormal.Rotation()
+	);
+
+	// 스태미나 감소
+	StatComp->AddStamina(-1.f);
+
+	// TODO: UpdateStat UI C++로 옮기면 호출 필요
+
+#if ENABLE_DRAW_DEBUG
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
+#endif
 }
 
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
