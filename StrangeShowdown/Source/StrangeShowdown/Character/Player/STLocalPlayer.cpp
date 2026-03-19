@@ -7,6 +7,7 @@
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
+#include "Component/STMissionComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
@@ -45,6 +46,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 
 	// Attack Trace Component
 	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
+
+	// Mission Component
+	MissionComponent = CreateDefaultSubobject<USTMissionComponent>(TEXT("MissionComponent"));
 
 	// Camera Pose Settings
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });

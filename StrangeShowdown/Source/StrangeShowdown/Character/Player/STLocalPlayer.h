@@ -45,6 +45,8 @@ public:
 
 	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
 
+	TObjectPtr<class USTMissionComponent> GetMissionComp() { return MissionComponent; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -74,6 +76,10 @@ protected:
 	// Attack Trace Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
+
+	// Mission Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mission")
+	TObjectPtr<class USTMissionComponent> MissionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
 	bool IsSmashing = false;
