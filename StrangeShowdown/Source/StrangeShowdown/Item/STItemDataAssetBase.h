@@ -16,6 +16,7 @@ enum class EItemType : uint16
 	Meat				UMETA(DisplayName = "Meat"),
 	Whiskey				UMETA(DisplayName = "Whiskey"),
 	EnhancePower		UMETA(DisplayName = "EnhancePower"),
+	Letter				UMETA(DisplayName = "Letter"),
 };
 
 UCLASS(BlueprintType, Blueprintable)

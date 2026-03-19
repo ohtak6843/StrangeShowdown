@@ -249,6 +249,7 @@ void ASTLocalPlayer::HoldItem()
 	case EItemType::Meat:
 	case EItemType::Whiskey:
 	case EItemType::EnhancePower:
+	case EItemType::Letter:
 		RightHandStaticMesh->SetSimulatePhysics(false);
 		RightHandStaticMesh->SetEnableGravity(false);
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
