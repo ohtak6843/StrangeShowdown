@@ -21,6 +21,9 @@ public:
 
 	void SetCameraPose(ECameraPose NewPose);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStatUIUpdated();
+
 	UFUNCTION(BlueprintCallable)
 	void ApplyStateSettings(ECameraPose NewState);
 

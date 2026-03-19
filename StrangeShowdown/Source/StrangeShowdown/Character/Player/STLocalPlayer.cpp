@@ -132,7 +132,7 @@ void ASTLocalPlayer::AttackHitCheck()
 	// 스태미나 감소
 	StatComp->AddStamina(-1.f);
 
-	// TODO: UpdateStat UI C++로 옮기면 호출 필요
+	OnStatUIUpdated();
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
