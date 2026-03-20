@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Item/STMeatEffect.h"
+#include "Item/STWhiskeyEffect.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Component/STStatComponent.h"
 
-USTMeatEffect::USTMeatEffect()
+USTWhiskeyEffect::USTWhiskeyEffect()
 	: Super()
 {
 	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(
-		TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_EatMeat.SW_EatMeat'")
+		TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_DrinkWhiskey.SW_DrinkWhiskey'")
 	);
 	if (SoundAsset.Succeeded())
 	{
@@ -17,16 +17,16 @@ USTMeatEffect::USTMeatEffect()
 	}
 }
 
-bool USTMeatEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
+bool USTWhiskeyEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentHp >= User->StatComp->MaxHp)
+	if (User->StatComp->CurrentStamina >= User->StatComp->MaxStamina)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	User->StatComp->AddHp(1);
+	User->StatComp->AddStamina(1);
 
 	return true;
 }
