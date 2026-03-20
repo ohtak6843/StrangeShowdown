@@ -226,6 +226,36 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	PickupItem->Destroy();
 }
 
+void ASTLocalPlayer::UseItem()
+{
+	if (!InventoryComp || !QuickSlotComp)
+		return;
+
+	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
+	if (QuickSlotIndex == INDEX_NONE)
+		return;
+
+	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
+	if (InventorySlotIndex == INDEX_NONE)
+		return;
+
+	// 결과
+	FInventorySlot OutSlot;
+
+	// 아이템 사용
+	EItemUseType Result = InventoryComp->UseItem(
+		InventorySlotIndex,
+		this,
+		0,
+		OutSlot
+	);
+
+	// 사용 결과에 따른 분기 효과(Implement)
+	UseItemEffect(OutSlot, Result);
+
+	HoldItem();
+}
+
 void ASTLocalPlayer::HoldItem()
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();

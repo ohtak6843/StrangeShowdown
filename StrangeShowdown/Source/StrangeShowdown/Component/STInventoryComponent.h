@@ -3,17 +3,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Types/PlayerTypes.h"
 #include "STInventoryComponent.generated.h"
-
-UENUM(BlueprintType)
-enum class EItemUseType : uint8
-{
-	CanUse,
-	NotEnoughStaminaCost,
-	NoEffect,
-	Exception,
-	UnValid
-};
 
 USTRUCT(BlueprintType)
 struct FInventorySlot

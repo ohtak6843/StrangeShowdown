@@ -62,7 +62,7 @@ void ASTMiniMapActor::BringHUD()
 	if (STPC)
 	{
 		HUDWidget = STPC->HUDWidget;
-		MiniMapWidget = HUDWidget->GetBigMapWidget();
+		MiniMapWidget = HUDWidget->GetMiniMapWidget();
 		if (!MiniMapWidget)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));

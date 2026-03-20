@@ -17,6 +17,7 @@ public:
 	// Sets default values for this character's properties
 	ASTLocalPlayer();
 
+	// ISTAnimAttackInterface
 	virtual void AttackHitCheck() override;
 
 	void SetCameraPose(ECameraPose NewPose);
@@ -30,12 +31,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void UseItem();
+
 	// 아이템 장착 관련
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void HoldItem();
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UseItemEffect(struct FInventorySlot slot, EItemUseType UseType);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void NotEnoughStaminaCostFloatingMessage();
 
 	// TODO: 임시로 블프에 함수 만들어놓은 것, 나중에 함수들 c++로 옮기면서 없애야 함
 	UFUNCTION(BlueprintImplementableEvent)
