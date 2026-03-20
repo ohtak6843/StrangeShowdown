@@ -277,7 +277,7 @@ void USTGameInstance::JoinRoom(const int64 RoomID, const FText& Password)
 {
 	Common::CSJoinRoom JoinPacket{
 		static_cast<uint32>(RoomID),
-		"Secret"
+		""
 	};
 	UE_LOG(LogTemp, Log, TEXT("JoinRoom Password=%s"), *FString{ Password.ToString() });
 	strcpy_s(JoinPacket.password, TCHAR_TO_UTF8(*Password.ToString()));
@@ -290,9 +290,9 @@ void USTGameInstance::JoinRoom(const int64 RoomID, const FText& Password)
 void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 {
 	Common::CSCreateRoom CreatePacket{
-		"NAME",
+		"",
 		false,
-		"PASS"
+		""
 	};
 	UE_LOG(LogTemp, Log, TEXT("CreateRoom Password=%s"), *FString{ Password.ToString() });
 	strcpy_s(CreatePacket.name, TCHAR_TO_UTF8(*Name.ToString()));

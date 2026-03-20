@@ -105,6 +105,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Common\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,6 +123,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Common\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +144,7 @@
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Common\Source\protocol.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="Job.h" />
     <ClInclude Include="ObjectManager.h" />
@@ -154,7 +157,6 @@
     <ClInclude Include="IOCP.h" />
     <ClInclude Include="OverlappedEx.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="protocol.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>

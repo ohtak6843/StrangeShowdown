@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 constexpr int PORT_NUMBER{ 7777 };
 constexpr const char* SERVER_IP{ "127.0.0.1" };

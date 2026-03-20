@@ -22,6 +22,9 @@
     <Filter Include="Game\Content">
       <UniqueIdentifier>{e2fa8e42-b286-4726-82f8-b9313fa0126f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{34d7b18d-0052-462e-8b9d-5f4ec57f49ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -71,9 +74,6 @@
     <ClInclude Include="struct.h">
       <Filter>pch</Filter>
     </ClInclude>
-    <ClInclude Include="protocol.h">
-      <Filter>pch</Filter>
-    </ClInclude>
     <ClInclude Include="type.h">
       <Filter>pch</Filter>
     </ClInclude>
@@ -103,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="ObjectManager.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\protocol.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
