@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StrangeShowdown.h"
+#include "Protocol.h"
 #include "Network/STSerializer.h"
 #include "Game/STGameInstance.h"
 

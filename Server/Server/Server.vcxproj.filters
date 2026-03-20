@@ -104,7 +104,19 @@
     <ClInclude Include="ObjectManager.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Source\protocol.h">
+    <ClInclude Include="..\..\Common\Source\Protocol.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\BasicStruct.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonDefine.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonEnum.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonNamespace.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

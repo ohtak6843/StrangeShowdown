@@ -12,7 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
-#include "StrangeShowdown.h"
+#include "Protocol.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {

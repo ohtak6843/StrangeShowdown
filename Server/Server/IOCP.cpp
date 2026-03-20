@@ -3,7 +3,7 @@
 #include "OverlappedEx.h"
 #include "Session.h"
 #include "RoomManager.h"
-#include "protocol.h"
+#include "Protocol.h"
 #include "ObjectManager.h"
 
 
@@ -28,7 +28,7 @@ bool IOCP::Init()
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUMBER);
+	server_addr.sin_port = htons(Common::PORT_NUMBER);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
 
 	// bind

@@ -144,7 +144,11 @@
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Common\Source\protocol.h" />
+    <ClInclude Include="..\..\Common\Source\BasicStruct.h" />
+    <ClInclude Include="..\..\Common\Source\CommonDefine.h" />
+    <ClInclude Include="..\..\Common\Source\CommonEnum.h" />
+    <ClInclude Include="..\..\Common\Source\CommonNamespace.h" />
+    <ClInclude Include="..\..\Common\Source\Protocol.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="Job.h" />
     <ClInclude Include="ObjectManager.h" />

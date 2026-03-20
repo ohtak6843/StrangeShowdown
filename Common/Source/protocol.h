@@ -1,50 +1,27 @@
 #pragma once
-#include <cstdint>
 
-constexpr int PORT_NUMBER{ 7777 };
-constexpr const char* SERVER_IP{ "127.0.0.1" };
-
-constexpr float MOVE_PACKET_TIME_MS{ 75.f }; // 초당 13.3회
-constexpr float MAX_NETWORK_DELAY_MS{ 100.f }; // 최대 네트워크 딜레이
-
-#define COMMON_START	namespace Common {
-#define COMMON_END		}
+#include "BasicStruct.h"
+#include "CommonNamespace.h"
+#include "CommonDefine.h"
+#include "CommonEnum.h"
 
 COMMON_START
-enum class PlayerType : uint8
-{
-	Badguy,
-	BuisinessMan,
-	Cowboy,
-	Cowgirl,
-	Gunman,
-	Sheriff,
-	Woman,
-	WorkingGirl,
-};
-
-enum class PlayerState : uint8
-{
-	None		= 0,
-	Idle		= 1 << 0,
-	Jumping		= 1 << 1,
-	HoldItem	= 1 << 2,
-	ArmedPistol = 1 << 3,
-	ArmedHammer = 1 << 4,
-	Aiming		= 1 << 5,
-	LookingUp	= 1 << 6,
-	Dead		= 1 << 7,
-};
 
 enum class PacketType : uint16
 {
 	NONE = 0,
 
+	// --
 	// prepare
+	// --
+
 	SC_LOGIN,
 	CS_LOGIN,
 
+	// --
 	// room
+	// --
+
 	SC_GIVE_ROOM_LIST,
 	CS_GET_ROOM_LIST,
 
@@ -54,7 +31,10 @@ enum class PacketType : uint16
 	SC_JOIN_ROOM,
 	CS_JOIN_ROOM,
 
+	// --
 	// object
+	// --
+
 	SC_SPAWN_OBJECT,
 
 	SC_MOVE_OBJECT,

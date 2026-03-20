@@ -1,6 +1,6 @@
 #pragma once
 #include "Session.h"
-#include "protocol.h"
+#include "Protocol.h"
 
 class Player
 {

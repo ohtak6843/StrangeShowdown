@@ -3,7 +3,7 @@
 
 #include "Network/SocketIO.h"
 #include "Sockets.h"
-#include "StrangeShowdown.h"
+#include "Protocol.h"
 
 
 // --

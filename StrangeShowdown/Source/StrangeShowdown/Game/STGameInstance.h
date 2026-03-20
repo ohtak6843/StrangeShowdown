@@ -7,7 +7,7 @@
 #include "Engine/GameInstance.h"
 
 #include "Containers/Map.h"
-#include "StrangeShowdown.h"
+#include "Protocol.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Character/Player/STFieldPlayer.h"
 
