@@ -45,4 +45,4 @@ struct Vec3f
 	}
 };
 
-#include "../../Server/Server/protocol.h"
+#include "protocol.h"
