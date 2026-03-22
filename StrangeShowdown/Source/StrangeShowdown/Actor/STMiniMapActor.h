@@ -35,7 +35,8 @@ public:
 	void UpdateItemOnMiniMap(float DeltaTime);
 	void UpdateMiniMapRotation(float DeltaTime);
 
-	void HiddenWidgetComponent();
+	void InitWidgetComponent();
+	void ApplyMiniMapHidden();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MiniMap")

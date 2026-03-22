@@ -28,13 +28,10 @@ void ASTMiniMapActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MiniMapCapture->ShowFlags.SetLighting(false);
-	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
-	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
-	MiniMapCapture->ShowFlags.SetPostProcessing(false);
+	InitWidgetComponent();
 
-	// À§Á¬ ÄÄÆ÷³ÍÆ® ¼û±â±â
-	HiddenWidgetComponent();
+	// ¼û°Ü¾ß ÇÒ ¾×ÅÍ ¼û±â±â
+	ApplyMiniMapHidden();
 
 	// HUD ¿¬°á Å¸ÀÌ¸Ó ¼³Á¤(µô·¹ÀÌ)
 	FTimerHandle TimerHandle;
@@ -190,7 +187,46 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 	SetActorRotation(SmoothRot);
 }
 
-void ASTMiniMapActor::HiddenWidgetComponent()
+void ASTMiniMapActor::InitWidgetComponent()
+{
+	if (!MiniMapCapture)
+		return;
+
+	MiniMapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
+	MiniMapCapture->OrthoWidth = 6000.f;
+
+	MiniMapCapture->bCaptureEveryFrame = false;
+	MiniMapCapture->bCaptureOnMovement = true;
+	MiniMapCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+
+	MiniMapCapture->LODDistanceFactor = 3.0f;
+	MiniMapCapture->MaxViewDistanceOverride = 5000.f;
+
+	MiniMapCapture->PostProcessBlendWeight = 0.0f;
+
+	auto& Flags = MiniMapCapture->ShowFlags;
+
+	Flags.SetLighting(false);
+	Flags.SetDynamicShadows(false);
+	Flags.SetShadowFrustums(false);
+	Flags.SetPostProcessing(false);
+	Flags.SetBloom(false);
+	Flags.SetFog(false);
+	Flags.SetVolumetricFog(false);
+	Flags.SetAtmosphere(false);
+	Flags.SetSkyLighting(false);
+	Flags.SetAntiAliasing(false);
+
+	Flags.SetSkeletalMeshes(false);
+	Flags.SetParticles(false);
+
+	Flags.SetStaticMeshes(true);
+	Flags.SetLandscape(true);
+
+	MiniMapCapture->CaptureScene();
+}
+
+void ASTMiniMapActor::ApplyMiniMapHidden()
 {
 	TArray<AActor*> AllActors;
 	UGameplayStatics::GetAllActorsOfClass(
@@ -200,6 +236,12 @@ void ASTMiniMapActor::HiddenWidgetComponent()
 
 	for (AActor* Actor : AllActors)
 	{
+		if (Actor->ActorHasTag("MiniMapHidden"))
+		{
+			// ¾×ÅÍ ÀÚÃ¼ ¼û±è
+			MiniMapCapture->HiddenActors.Add(Actor);
+		}
+
 		TArray<UWidgetComponent*> Widgets;
 		Actor->GetComponents<UWidgetComponent>(Widgets);
 
