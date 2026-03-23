@@ -1,21 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Actor/STMiniMapActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Controller/STBaseController.h"
 #include "Widget/STMiniMapWidget.h"
-#include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
-#include "Item/STPickupItem.h"
-#include "Actor/STMineral.h"
+#include "Interface/STMiniMapTargetInterface.h"
 
 // Sets default values
 ASTMiniMapActor::ASTMiniMapActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -24,17 +18,13 @@ ASTMiniMapActor::ASTMiniMapActor()
 	MiniMapCapture->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
 void ASTMiniMapActor::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitWidgetComponent();
-
-	// 숨겨야 할 액터 숨기기
 	ApplyMiniMapHidden();
 
-	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
@@ -44,89 +34,71 @@ void ASTMiniMapActor::BeginPlay()
 		false);
 }
 
-// Called every frame
 void ASTMiniMapActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	UpdateMiniMapRotation(DeltaTime);
-
-	UpdateItemOnMiniMap(DeltaTime);
-
-	UpdateMineralOnMiniMap(DeltaTime);
+	UpdateTargetOnMiniMap(DeltaTime);
 }
 
 void ASTMiniMapActor::BringHUD()
 {
 	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (STPC)
+	if (!STPC) return;
+	if (!STPC->HUDWidget) return;
+
+	HUDWidget = STPC->HUDWidget;
+	MiniMapWidget = HUDWidget->GetMiniMapWidget();
+
+	if (!MiniMapWidget)
 	{
-		HUDWidget = STPC->HUDWidget;
-		MiniMapWidget = HUDWidget->GetMiniMapWidget();
-		if (!MiniMapWidget)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
-			return;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
 	}
 }
 
-void ASTMiniMapActor::RegisterItem(ASTPickupItem* NewItem)
+void ASTMiniMapActor::RegisterMiniMapTarget(AActor* Actor)
 {
-	if (!NewItem) return;
+	if (!Actor) return;
 
-	MiniMapItems.AddUnique(NewItem);
-
-	NewItem->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnItemDestroyed);
-}
-
-void ASTMiniMapActor::RegisterMineral(ASTMineral* NewMineral)
-{
-	if (!NewMineral) return;
-
-	MiniMapMinerals.AddUnique(NewMineral);
-
-	NewMineral->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnMineralDestroyed);
-}
-
-void ASTMiniMapActor::OnItemDestroyed(AActor* DestroyedActor)
-{
-	ASTPickupItem* Item = Cast<ASTPickupItem>(DestroyedActor);
-	if (!Item) return;
-
-	MiniMapItems.Remove(Item);
-
-	if (MiniMapWidget)
+	if (!Actor->Implements<USTMiniMapTargetInterface>())
 	{
-		MiniMapWidget->HideItemIcon(Item);
+		return;
 	}
+
+	MiniMapTargets.AddUnique(Actor);
+
+	Actor->OnDestroyed.RemoveDynamic(this, &ASTMiniMapActor::OnIconDestroyed);
+	Actor->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnIconDestroyed);
 }
 
-void ASTMiniMapActor::OnMineralDestroyed(AActor* DestroyedActor)
+void ASTMiniMapActor::OnIconDestroyed(AActor* DestroyedActor)
 {
-	ASTMineral* Mineral = Cast<ASTMineral>(DestroyedActor);
-	if (!Mineral) return;
+	if (!DestroyedActor) return;
 
-	MiniMapMinerals.Remove(Mineral);
+	MiniMapTargets.Remove(DestroyedActor);
 
 	if (MiniMapWidget)
 	{
-		MiniMapWidget->HideMineralIcon(Mineral);
+		MiniMapWidget->HideTargetIcon(DestroyedActor);
 	}
 }
 
 FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
-	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
 	FVector2D Relative(
 		ItemLocation.Y - PlayerLocation.Y,
 		ItemLocation.X - PlayerLocation.X);
 
 	Relative.Y *= -1.f;
 
-	// 미니맵 회전 적용
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
+
+	if (!HUDWidget || !HUDWidget->MiniMapWidget || !MiniMapCapture)
+	{
+		return FVector2D::ZeroVector;
+	}
 
 	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
@@ -140,50 +112,6 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	return Relative;
 }
 
-void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
-{
-	if (!MiniMapWidget) return;
-
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC) return;
-
-	APawn* PlayerPawn = PC->GetPawn();
-	if (!PlayerPawn) return;
-
-	float CurrentYaw = GetActorRotation().Yaw;
-
-	for (ASTPickupItem* Item : MiniMapItems)
-	{
-		if (!Item) continue;
-
-		FVector2D MiniMapPos =
-			WorldToMiniMap(
-				Item->GetActorLocation(),
-				PlayerPawn->GetActorLocation(),
-				CurrentYaw);
-
-		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
-		FVector2D Offset(-55.f, -20.f);
-		MiniMapPos += Offset;
-
-		const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
-
-		const float MinX = Offset.X + 10.f;
-		const float MaxX = Offset.X + WidgetSize - 15.f;
-		const float MinY = Offset.Y + 10.f;
-		const float MaxY = Offset.Y + WidgetSize - 10.f;
-
-		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
-		{
-			MiniMapWidget->HideItemIcon(Item);
-		}
-		else
-		{
-			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
-		}
-	}
-}
-
 void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -192,17 +120,13 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 	APawn* Pawn = PC->GetPawn();
 	if (!Pawn) return;
 
-	// 위치 따라가기
 	FVector NewLocation = Pawn->GetActorLocation() + FVector(0, 0, zPosition);
 	SetActorLocation(NewLocation);
 
-	// 플레이어 마우스 회전 가져오기
 	float ControlYaw = PC->GetControlRotation().Yaw;
 
-	// 미니맵은 반대로 회전
 	FRotator TargetRot(-90.f, ControlYaw, 0.f);
 
-	// RInterpTo
 	FRotator SmoothRot = FMath::RInterpTo(
 		GetActorRotation(),
 		TargetRot,
@@ -212,9 +136,10 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 	SetActorRotation(SmoothRot);
 }
 
-void ASTMiniMapActor::UpdateMineralOnMiniMap(float DeltaTime)
+void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
+	if (!HUDWidget || !HUDWidget->MiniMapWidget) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -224,17 +149,29 @@ void ASTMiniMapActor::UpdateMineralOnMiniMap(float DeltaTime)
 
 	float CurrentYaw = GetActorRotation().Yaw;
 
-	for (ASTMineral* Mineral : MiniMapMinerals)
+	for (int32 i = MiniMapTargets.Num() - 1; i >= 0; --i)
 	{
-		if (!Mineral) continue;
+		AActor* TargetActor = MiniMapTargets[i].Get();
+		if (!TargetActor)
+		{
+			MiniMapTargets.RemoveAt(i);
+			continue;
+		}
+
+		if (!TargetActor->Implements<USTMiniMapTargetInterface>())
+		{
+			continue;
+		}
+
+		const FVector TargetLocation =
+			ISTMiniMapTargetInterface::Execute_GetMiniMapLocation(TargetActor);
 
 		FVector2D MiniMapPos =
 			WorldToMiniMap(
-				Mineral->GetActorLocation(),
+				TargetLocation,
 				PlayerPawn->GetActorLocation(),
 				CurrentYaw);
 
-		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
@@ -247,19 +184,18 @@ void ASTMiniMapActor::UpdateMineralOnMiniMap(float DeltaTime)
 
 		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
 		{
-			MiniMapWidget->HideMineralIcon(Mineral);
+			MiniMapWidget->HideTargetIcon(TargetActor);
 		}
 		else
 		{
-			MiniMapWidget->UpdateMineralIcon(Mineral, MiniMapPos);
+			MiniMapWidget->UpdateTargetIcon(TargetActor, MiniMapPos);
 		}
 	}
 }
 
 void ASTMiniMapActor::InitWidgetComponent()
 {
-	if (!MiniMapCapture)
-		return;
+	if (!MiniMapCapture) return;
 
 	MiniMapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
 	MiniMapCapture->OrthoWidth = 6000.f;
@@ -270,7 +206,6 @@ void ASTMiniMapActor::InitWidgetComponent()
 
 	MiniMapCapture->LODDistanceFactor = 3.0f;
 	MiniMapCapture->MaxViewDistanceOverride = 5000.f;
-
 	MiniMapCapture->PostProcessBlendWeight = 0.0f;
 
 	auto& Flags = MiniMapCapture->ShowFlags;
@@ -298,16 +233,14 @@ void ASTMiniMapActor::InitWidgetComponent()
 void ASTMiniMapActor::ApplyMiniMapHidden()
 {
 	TArray<AActor*> AllActors;
-	UGameplayStatics::GetAllActorsOfClass(
-		GetWorld(),
-		AActor::StaticClass(),
-		AllActors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), AllActors);
 
 	for (AActor* Actor : AllActors)
 	{
-		if (Actor->ActorHasTag("MiniMapHidden"))
+		if (!Actor) continue;
+
+		if (Actor->ActorHasTag(TEXT("MiniMapHidden")))
 		{
-			// 액터 자체 숨김
 			MiniMapCapture->HiddenActors.Add(Actor);
 		}
 
@@ -316,7 +249,10 @@ void ASTMiniMapActor::ApplyMiniMapHidden()
 
 		for (UWidgetComponent* WidgetComp : Widgets)
 		{
-			MiniMapCapture->HiddenComponents.Add(WidgetComp);
+			if (WidgetComp)
+			{
+				MiniMapCapture->HiddenComponents.Add(WidgetComp);
+			}
 		}
 	}
 }

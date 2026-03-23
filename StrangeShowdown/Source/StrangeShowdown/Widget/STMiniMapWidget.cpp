@@ -1,23 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Widget/STMiniMapWidget.h"
 #include "Components/Image.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Item/STPickupItem.h"
-#include "Actor/STMineral.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Interface/STMiniMapTargetInterface.h"
+#include "Widget/STMiniMapItemIconWidget.h"
 
 void USTMiniMapWidget::NativeConstruct()
 {
+	Super::NativeConstruct();
+
 	APlayerController* PC = GetOwningPlayer();
 	if (!PC) return;
 
 	APawn* Pawn = PC->GetPawn();
 	if (!Pawn) return;
 
-	USkeletalMeshComponent* Mesh =
-		Pawn->FindComponentByClass<USkeletalMeshComponent>();
+	USkeletalMeshComponent* Mesh = Pawn->FindComponentByClass<USkeletalMeshComponent>();
 	if (!Mesh) return;
 
 	PlayerController = PC;
@@ -45,83 +44,81 @@ void USTMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	}
 	else
 	{
-		float TextureYaw = MeshYaw;
-		TextureYaw += 90.f;
+		float TextureYaw = MeshYaw + 90.f;
 		PlayerTexture->SetRenderTransformAngle(TextureYaw);
 	}
 }
 
-void USTMiniMapWidget::UpdateItemIcon(ASTPickupItem* Item, const FVector2D& MiniMapPos)
+void USTMiniMapWidget::UpdateTargetIcon(AActor* TargetActor, const FVector2D& MiniMapPos)
 {
-	if (!Item) return;
+	if (!TargetActor) return;
+	if (!TargetActor->Implements<USTMiniMapTargetInterface>()) return;
+	if (!IconLayer) return;
+	if (!IconClass) return;
 
-	UUserWidget** FoundWidget = ItemIconMap.Find(Item);
-	UUserWidget* IconWidget = nullptr;
+	USTMiniMapItemIconWidget* IconWidget = nullptr;
+
+	UUserWidget** FoundWidget = IconMap.Find(TargetActor);
 
 	if (!FoundWidget)
 	{
-		IconWidget = CreateWidget<USTMiniMapItemIconWidget>(GetWorld(), ItemIconClass);
+		IconWidget = CreateWidget<USTMiniMapItemIconWidget>(GetWorld(), IconClass);
 		if (!IconWidget) return;
 
-		ItemLayer->AddChild(IconWidget);
-		ItemIconMap.Add(Item, IconWidget);
+		UTexture2D* IconTexture =
+			ISTMiniMapTargetInterface::Execute_GetMiniMapIcon(TargetActor);
+
+		if (IconTexture)
+		{
+			IconWidget->SetIconTexture(IconTexture);
+		}
+
+		IconWidget->SetVisibility(ESlateVisibility::Hidden);
+
+		IconLayer->AddChild(IconWidget);
+		IconMap.Add(TargetActor, IconWidget);
 	}
 	else
 	{
-		IconWidget = *FoundWidget;
+		IconWidget = Cast<USTMiniMapItemIconWidget>(*FoundWidget);
 	}
 
-	IconWidget->SetRenderTranslation(MiniMapPos);
-}
+	if (!IconWidget) return;
 
-void USTMiniMapWidget::HideItemIcon(ASTPickupItem* Item)
-{
-	if (!Item) return;
-
-	UUserWidget** FoundWidget = ItemIconMap.Find(Item);
-	if (!FoundWidget) return;
-
-	(*FoundWidget)->RemoveFromParent();
-
-	ItemIconMap.Remove(Item);
-}
-
-void USTMiniMapWidget::UpdateMineralIcon(ASTMineral* Mineral, const FVector2D& MiniMapPos)
-{
-	if (!Mineral) return;
-
-	UUserWidget** FoundWidget = MineralIconMap.Find(Mineral);
-	UUserWidget* IconWidget = nullptr;
-
-	if (!FoundWidget)
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(IconWidget->Slot))
 	{
-		IconWidget = CreateWidget<USTMiniMapItemIconWidget>(GetWorld(), MineralIconClass);
-		if (!IconWidget) return;
-
-		MineralLayer->AddChild(IconWidget);
-		MineralIconMap.Add(Mineral, IconWidget);
+		CanvasSlot->SetPosition(MiniMapPos);
 	}
 	else
 	{
-		IconWidget = *FoundWidget;
+		IconWidget->SetRenderTranslation(MiniMapPos);
 	}
 
-	IconWidget->SetRenderTranslation(MiniMapPos);
+	if (IconWidget->GetVisibility() != ESlateVisibility::HitTestInvisible)
+	{
+		IconWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
 }
 
-void USTMiniMapWidget::HideMineralIcon(ASTMineral* Mineral)
+void USTMiniMapWidget::HideTargetIcon(AActor* TargetActor)
 {
-	if (!Mineral) return;
+	if (!TargetActor) return;
 
-	UUserWidget** FoundWidget = MineralIconMap.Find(Mineral);
+	UUserWidget** FoundWidget = IconMap.Find(TargetActor);
 	if (!FoundWidget) return;
 
-	(*FoundWidget)->RemoveFromParent();
+	UUserWidget* Widget = *FoundWidget;
+	if (!Widget) return;
 
-	MineralIconMap.Remove(Mineral);
+	if (Widget->GetVisibility() != ESlateVisibility::Hidden)
+	{
+		Widget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void USTMiniMapWidget::UpdatePlayerIcon(const FVector2D& MiniMapPos)
 {
+	if (!PlayerTexture) return;
+
 	PlayerTexture->SetRenderTranslation(MiniMapPos);
 }

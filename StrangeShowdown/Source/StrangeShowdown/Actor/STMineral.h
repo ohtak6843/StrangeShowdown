@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Actor/STSliceableActor.h"
+#include "Interface/STMiniMapTargetInterface.h"
 #include "STMineral.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTMineral : public ASTSliceableActor
+class STRANGESHOWDOWN_API ASTMineral : public ASTSliceableActor, public ISTMiniMapTargetInterface
 {
 	GENERATED_BODY()
 
@@ -36,8 +37,16 @@ public:
 	UPROPERTY()
 	APlayerCameraManager* CachedCameraManager = nullptr;
 
+	// 미니맵에 보이는 아이콘
+	TObjectPtr<UTexture2D> MiniMapIcon;
+
 private:
 	bool bIsSubSliced;
 
 	UAnimSequence* IdleAnimation;
+
+public:
+	// ISTMiniMapTargetInterface 구현
+	virtual FVector GetMiniMapLocation_Implementation() const;
+	virtual UTexture2D* GetMiniMapIcon_Implementation() const;
 };

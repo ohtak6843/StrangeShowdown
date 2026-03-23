@@ -101,10 +101,6 @@ void ASTBigMapActor::OnItemDestroyed(AActor* DestroyedActor)
 
 	MiniMapItems.Remove(Item);
 
-	if (MiniMapWidget)
-	{
-		MiniMapWidget->HideItemIcon(Item);
-	}
 }
 
 FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
@@ -159,14 +155,6 @@ void ASTBigMapActor::UpdateItemOnMiniMap(float DeltaTime)
 		const float MinY = Offset.Y + 10.f;
 		const float MaxY = Offset.Y + WidgetSize - 10.f;
 
-		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
-		{
-			MiniMapWidget->HideItemIcon(Item);
-		}
-		else
-		{
-			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
-		}
 	}
 }
 

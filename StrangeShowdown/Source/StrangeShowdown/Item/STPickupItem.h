@@ -8,13 +8,14 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Character/Player/STLocalPlayer.h"
+#include "Interface/STMiniMapTargetInterface.h"
 #include "STPickupItem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerEnter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerExit);
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTPickupItem : public AActor
+class STRANGESHOWDOWN_API ASTPickupItem : public AActor, public ISTMiniMapTargetInterface
 {
 	GENERATED_BODY()
 	
@@ -73,4 +74,12 @@ public:
 
 	UPROPERTY()
 	APlayerCameraManager* CachedCameraManager = nullptr;
+
+	// 미니맵에 보이는 아이콘
+	TObjectPtr<UTexture2D> MiniMapIcon;
+
+public:
+	// Interface 구현
+	virtual FVector GetMiniMapLocation_Implementation() const;
+	virtual UTexture2D* GetMiniMapIcon_Implementation() const;
 };

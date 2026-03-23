@@ -22,6 +22,15 @@ ASTMineral::ASTMineral()
 	{
 		IdleAnimation = IdleAnimationRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> IconRef(
+		TEXT("/Script/Engine.Texture2D'/Game/StrangeShowdown/UI/Texture/T_MineralIcon.T_MineralIcon'")
+	);
+
+	if (IconRef.Succeeded())
+	{
+		MiniMapIcon = IconRef.Object;
+	}
 }
 
 void ASTMineral::BeginPlay()
@@ -45,7 +54,7 @@ void ASTMineral::BeginPlay()
 
 		if (LocalPlayer && LocalPlayer->MiniMapActor)
 		{
-			LocalPlayer->MiniMapActor->RegisterMineral(this);
+			LocalPlayer->MiniMapActor->RegisterMiniMapTarget(this);
 		}
 
 		if (LocalPlayer && LocalPlayer->BigMapActor)
@@ -85,4 +94,14 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 
 		return;
 	}
+}
+
+FVector ASTMineral::GetMiniMapLocation_Implementation() const
+{
+	return GetActorLocation();
+}
+
+UTexture2D* ASTMineral::GetMiniMapIcon_Implementation() const
+{
+	return MiniMapIcon;
 }

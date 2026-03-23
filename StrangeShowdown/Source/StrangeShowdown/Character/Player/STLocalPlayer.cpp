@@ -120,11 +120,12 @@ void ASTLocalPlayer::AttackHitCheck()
 		return;
 
 	ASTSliceableActor* SliceableActor = Cast<ASTSliceableActor>(HitActor);
-	if (SliceableActor)
+	if (!SliceableActor)
 	{
-		SliceableActor->Slice(Hit.ImpactPoint, Hit.ImpactNormal, this);
+		return;
 	}
 
+	SliceableActor->Slice(Hit.ImpactPoint, Hit.ImpactNormal, this);
 
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),

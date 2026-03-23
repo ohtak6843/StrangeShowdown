@@ -19,11 +19,8 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	void UpdateItemIcon(class ASTPickupItem* Item, const FVector2D& MiniMapPos);
-	void HideItemIcon(class ASTPickupItem* Item);
-
-	void UpdateMineralIcon(class ASTMineral* Item, const FVector2D& MiniMapPos);
-	void HideMineralIcon(class ASTMineral* Item);
+	void UpdateTargetIcon(class AActor* Target, const FVector2D& MiniMapPos);
+	void HideTargetIcon(class AActor* Target);
 
 	// BigMap¿ë ÇÔ¼ö
 	void UpdatePlayerIcon(const FVector2D& MiniMapPos);
@@ -34,23 +31,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* PlayerTexture;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TMap<class ASTPickupItem*, UUserWidget*> ItemIconMap;
+	UPROPERTY()
+	TMap<TWeakObjectPtr<AActor>, UUserWidget*> IconMap;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TSubclassOf<USTMiniMapItemIconWidget> ItemIconClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TMap<class ASTMineral*, UUserWidget* > MineralIconMap;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TSubclassOf<USTMiniMapItemIconWidget> MineralIconClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mini Map")
+	TSubclassOf<class USTMiniMapItemIconWidget> IconClass;
 
 	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* ItemLayer;
+	class UCanvasPanel* IconLayer;
 
-	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* MineralLayer;
 private:
 	bool IsRotationAble = true;
 	

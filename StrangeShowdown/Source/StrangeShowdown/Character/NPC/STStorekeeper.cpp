@@ -10,6 +10,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Prop/STCarriage.h"
 #include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 
 ASTStorekeeper::ASTStorekeeper()
 {
@@ -71,6 +73,15 @@ ASTStorekeeper::ASTStorekeeper()
 	Carriage->SetupAttachment(GetMesh());
 	Carriage->SetRelativeLocationAndRotation(FVector(0.f, -120.f, 118.f), FRotator(0.f, 0.f, 0.f));
 	Carriage->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> IconRef(
+		TEXT("/Script/Engine.Texture2D'/Game/StrangeShowdown/UI/Texture/T_StoreIcon.T_StoreIcon'")
+	);
+
+	if (IconRef.Succeeded())
+	{
+		MiniMapIcon = IconRef.Object;
+	}
 }
 
 void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
@@ -130,10 +141,18 @@ void ASTStorekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// CameraManager Ä³½Ì
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PC)
 	{
 		CachedCameraManager = PC->PlayerCameraManager;
+
+		ASTCharacter* LocalPlayer = Cast<ASTCharacter>(PC->GetPawn());
+
+		if (LocalPlayer && LocalPlayer->MiniMapActor)
+		{
+			LocalPlayer->MiniMapActor->RegisterMiniMapTarget(this);
+		}
 	}
 
 	InteractCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTStorekeeper::HandleBeginOverlap);
@@ -184,4 +203,14 @@ void ASTStorekeeper::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, 
 		if (InteractWidgetComponent)
 			InteractWidgetComponent->SetVisibility(false);
 	}
+}
+
+FVector ASTStorekeeper::GetMiniMapLocation_Implementation() const
+{
+	return GetActorLocation();
+}
+
+UTexture2D* ASTStorekeeper::GetMiniMapIcon_Implementation() const
+{
+	return MiniMapIcon;
 }
