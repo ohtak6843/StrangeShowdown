@@ -5,6 +5,9 @@
 #include "Character/Sheriff/STFieldSheriff.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Animation/AnimSingleNodeInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actor/STMiniMapActor.h"
+#include "Actor/STBigMapActor.h"
 
 ASTMineral::ASTMineral()
 {
@@ -30,6 +33,25 @@ void ASTMineral::BeginPlay()
 	if (SingleNodeInstance)
 	{
 		SingleNodeInstance->SetPlaying(false);
+	}
+
+	// CameraManager Ä³½Ì
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		CachedCameraManager = PC->PlayerCameraManager;
+
+		ASTCharacter* LocalPlayer = Cast<ASTCharacter>(PC->GetPawn());
+
+		if (LocalPlayer && LocalPlayer->MiniMapActor)
+		{
+			LocalPlayer->MiniMapActor->RegisterMineral(this);
+		}
+
+		if (LocalPlayer && LocalPlayer->BigMapActor)
+		{
+			LocalPlayer->BigMapActor->RegisterMineral(this);
+		}
 	}
 }
 

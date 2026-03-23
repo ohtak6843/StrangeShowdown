@@ -22,17 +22,23 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void BringHUD();
-	void RegisterItem(ASTPickupItem* NewItem);
+	void RegisterItem(class ASTPickupItem* NewItem);
+	void RegisterMineral(class ASTMineral* NewMineral);
 
 	// 아이템이 파괴될 때 호출
 	UFUNCTION()
 	void OnItemDestroyed(AActor* DestroyedActor);
 
+	// 광물이 파괴될 때 호출
+	UFUNCTION()
+	void OnMineralDestroyed(AActor* DestroyedActor);
+
 	// 미니맵 좌표로 변환
 	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;
 
-	// 미니맵 아이템 위치 업데이트
+	// 아이콘 위치 업데이트
 	void UpdateItemOnMiniMap(float DeltaTime);
+	void UpdateMineralOnMiniMap(float DeltaTime);
 	void UpdateMiniMapRotation(float DeltaTime);
 
 	void InitWidgetComponent();
@@ -44,6 +50,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<class ASTPickupItem*> MiniMapItems;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<class ASTMineral*> MiniMapMinerals;
 
 	UPROPERTY(BlueprintReadOnly)
 	class USTMiniMapWidget* MiniMapWidget;

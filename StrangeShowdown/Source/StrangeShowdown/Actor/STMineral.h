@@ -33,6 +33,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
 	USkeletalMeshComponent* SkeletalMeshComponent;
 
+	UPROPERTY()
+	APlayerCameraManager* CachedCameraManager = nullptr;
+
 private:
 	bool bIsSubSliced;
 

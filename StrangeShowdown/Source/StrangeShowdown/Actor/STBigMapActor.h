@@ -25,7 +25,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void BringHUD();
-	void RegisterItem(ASTPickupItem* NewItem);
+	void RegisterItem(class ASTPickupItem* NewItem);
+	void RegisterMineral(class ASTMineral* NewMineral);
 
 	// 아이템이 파괴될 때 호출
 	UFUNCTION()
@@ -48,6 +49,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<class ASTPickupItem*> MiniMapItems;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<class ASTMineral*> MiniMapMinerals;
 
 	UPROPERTY(BlueprintReadOnly)
 	class USTMiniMapWidget* MiniMapWidget;

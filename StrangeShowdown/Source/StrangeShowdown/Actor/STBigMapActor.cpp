@@ -10,6 +10,7 @@
 #include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
 #include "Item/STPickupItem.h"
+#include "Actor/STMineral.h"
 
 // Sets default values
 ASTBigMapActor::ASTBigMapActor()
@@ -82,6 +83,15 @@ void ASTBigMapActor::RegisterItem(ASTPickupItem* NewItem)
 	MiniMapItems.AddUnique(NewItem);
 
 	NewItem->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnItemDestroyed);
+}
+
+void ASTBigMapActor::RegisterMineral(class ASTMineral* NewMineral)
+{
+	if (!NewMineral) return;
+
+	MiniMapMinerals.AddUnique(NewMineral);
+
+	NewMineral->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnItemDestroyed);
 }
 
 void ASTBigMapActor::OnItemDestroyed(AActor* DestroyedActor)

@@ -10,6 +10,7 @@
 #include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
 #include "Item/STPickupItem.h"
+#include "Actor/STMineral.h"
 
 // Sets default values
 ASTMiniMapActor::ASTMiniMapActor()
@@ -51,6 +52,8 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 	UpdateMiniMapRotation(DeltaTime);
 
 	UpdateItemOnMiniMap(DeltaTime);
+
+	UpdateMineralOnMiniMap(DeltaTime);
 }
 
 void ASTMiniMapActor::BringHUD()
@@ -77,6 +80,15 @@ void ASTMiniMapActor::RegisterItem(ASTPickupItem* NewItem)
 	NewItem->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnItemDestroyed);
 }
 
+void ASTMiniMapActor::RegisterMineral(ASTMineral* NewMineral)
+{
+	if (!NewMineral) return;
+
+	MiniMapMinerals.AddUnique(NewMineral);
+
+	NewMineral->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnMineralDestroyed);
+}
+
 void ASTMiniMapActor::OnItemDestroyed(AActor* DestroyedActor)
 {
 	ASTPickupItem* Item = Cast<ASTPickupItem>(DestroyedActor);
@@ -87,6 +99,19 @@ void ASTMiniMapActor::OnItemDestroyed(AActor* DestroyedActor)
 	if (MiniMapWidget)
 	{
 		MiniMapWidget->HideItemIcon(Item);
+	}
+}
+
+void ASTMiniMapActor::OnMineralDestroyed(AActor* DestroyedActor)
+{
+	ASTMineral* Mineral = Cast<ASTMineral>(DestroyedActor);
+	if (!Mineral) return;
+
+	MiniMapMinerals.Remove(Mineral);
+
+	if (MiniMapWidget)
+	{
+		MiniMapWidget->HideMineralIcon(Mineral);
 	}
 }
 
@@ -185,6 +210,50 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 		8.f);
 
 	SetActorRotation(SmoothRot);
+}
+
+void ASTMiniMapActor::UpdateMineralOnMiniMap(float DeltaTime)
+{
+	if (!MiniMapWidget) return;
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC) return;
+
+	APawn* PlayerPawn = PC->GetPawn();
+	if (!PlayerPawn) return;
+
+	float CurrentYaw = GetActorRotation().Yaw;
+
+	for (ASTMineral* Mineral : MiniMapMinerals)
+	{
+		if (!Mineral) continue;
+
+		FVector2D MiniMapPos =
+			WorldToMiniMap(
+				Mineral->GetActorLocation(),
+				PlayerPawn->GetActorLocation(),
+				CurrentYaw);
+
+		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
+		FVector2D Offset(-55.f, -20.f);
+		MiniMapPos += Offset;
+
+		const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
+
+		const float MinX = Offset.X + 10.f;
+		const float MaxX = Offset.X + WidgetSize - 15.f;
+		const float MinY = Offset.Y + 10.f;
+		const float MaxY = Offset.Y + WidgetSize - 10.f;
+
+		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
+		{
+			MiniMapWidget->HideMineralIcon(Mineral);
+		}
+		else
+		{
+			MiniMapWidget->UpdateMineralIcon(Mineral, MiniMapPos);
+		}
+	}
 }
 
 void ASTMiniMapActor::InitWidgetComponent()
