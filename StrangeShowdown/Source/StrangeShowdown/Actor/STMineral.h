@@ -26,7 +26,13 @@ public:
 
 	// BP 연출
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnSubSlicedBlueprint();
+	void OnSubSlicedBlueprint(int gold);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMainSlicedBlueprint(int gold);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHitSoundBlueprint(int gold);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
 	UStaticMeshComponent* SubMineralMeshComponent;
@@ -44,6 +50,8 @@ private:
 	bool bIsSubSliced;
 
 	UAnimSequence* IdleAnimation;
+
+	int hp = 10;
 
 public:
 	// ISTMiniMapTargetInterface 구현

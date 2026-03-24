@@ -66,22 +66,28 @@ void ASTMineral::BeginPlay()
 
 void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, ASTPlayerBase* Player)
 {
+	// 랜텀으로 hp 감소
+	// TODO: 서버에서 랜덤값 받아오도록 수정
+	int AttackHp = FMath::RandRange(1, 5);
+	hp -= AttackHp;
+	UE_LOG(LogTemp, Log, TEXT("Attack Hp: %d, Mineral HP: %d"), AttackHp, hp);
+
 	// 1단계
-	if (!bIsSubSliced)
+	if (hp <= 5 && !bIsSubSliced)
 	{
-		Player->StatComp->AddGold(5);
-		OnSubSlicedBlueprint();
+		Player->StatComp->AddGold(AttackHp * 2);
+		OnSubSlicedBlueprint(AttackHp * 2);
 		bIsSubSliced = true;
 		return;
 	}
 
 	// 2단계
-	if (!bIsSliced)
+	if (hp <= 0 && !bIsSliced)
 	{
 		Super::Slice(HitLocation, HitNormal, Player);
 
-		Player->StatComp->AddGold(5);
-
+		Player->StatComp->AddGold(AttackHp * 2);
+		OnMainSlicedBlueprint(AttackHp * 2);
 		SkeletalMeshComponent->SetVisibility(false);
 
 		// FieldSheriff 스폰
@@ -91,9 +97,12 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 		{
 			SpawnedFieldSheriff->FinishSpawning(SpawnTransform);
 		}
-
 		return;
 	}
+
+	// 부서지지 않았으면 피격 사운드 재생
+	Player->StatComp->AddGold(AttackHp * 2);
+	OnHitSoundBlueprint(AttackHp * 2);
 }
 
 FVector ASTMineral::GetMiniMapLocation_Implementation()
