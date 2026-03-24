@@ -59,7 +59,7 @@ void ASTMineral::BeginPlay()
 
 		if (LocalPlayer && LocalPlayer->BigMapActor)
 		{
-			LocalPlayer->BigMapActor->RegisterMineral(this);
+			LocalPlayer->BigMapActor->RegisterBigMapTarget(this);
 		}
 	}
 }
@@ -96,12 +96,12 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 	}
 }
 
-FVector ASTMineral::GetMiniMapLocation_Implementation() const
+FVector ASTMineral::GetMiniMapLocation_Implementation()
 {
 	return GetActorLocation();
 }
 
-UTexture2D* ASTMineral::GetMiniMapIcon_Implementation() const
+UTexture2D* ASTMineral::GetMiniMapIcon_Implementation()
 {
 	return MiniMapIcon;
 }

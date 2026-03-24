@@ -21,8 +21,8 @@ class STRANGESHOWDOWN_API ISTMiniMapTargetInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MiniMap")
-	FVector GetMiniMapLocation() const;
+	FVector GetMiniMapLocation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MiniMap")
-	UTexture2D* GetMiniMapIcon() const;
+	UTexture2D* GetMiniMapIcon();
 };

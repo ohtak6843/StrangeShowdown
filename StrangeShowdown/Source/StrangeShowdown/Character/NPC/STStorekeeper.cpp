@@ -153,6 +153,11 @@ void ASTStorekeeper::BeginPlay()
 		{
 			LocalPlayer->MiniMapActor->RegisterMiniMapTarget(this);
 		}
+
+		if (LocalPlayer && LocalPlayer->BigMapActor)
+		{
+			LocalPlayer->BigMapActor->RegisterBigMapTarget(this);
+		}
 	}
 
 	InteractCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTStorekeeper::HandleBeginOverlap);
@@ -205,12 +210,12 @@ void ASTStorekeeper::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
-FVector ASTStorekeeper::GetMiniMapLocation_Implementation() const
+FVector ASTStorekeeper::GetMiniMapLocation_Implementation()
 {
 	return GetActorLocation();
 }
 
-UTexture2D* ASTStorekeeper::GetMiniMapIcon_Implementation() const
+UTexture2D* ASTStorekeeper::GetMiniMapIcon_Implementation()
 {
 	return MiniMapIcon;
 }

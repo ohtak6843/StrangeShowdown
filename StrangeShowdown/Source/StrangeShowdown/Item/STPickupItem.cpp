@@ -73,7 +73,7 @@ void ASTPickupItem::BeginPlay()
 
 		if (LocalPlayer && LocalPlayer->BigMapActor)
 		{
-			LocalPlayer->BigMapActor->RegisterItem(this);
+			LocalPlayer->BigMapActor->RegisterBigMapTarget(this);
 		}
 	}
 }
@@ -112,12 +112,12 @@ void ASTPickupItem::HandleEndOverlap(
 	}
 }
 
-FVector ASTPickupItem::GetMiniMapLocation_Implementation() const
+FVector ASTPickupItem::GetMiniMapLocation_Implementation()
 {
 	return GetActorLocation();
 }
 
-UTexture2D* ASTPickupItem::GetMiniMapIcon_Implementation() const
+UTexture2D* ASTPickupItem::GetMiniMapIcon_Implementation()
 {
 	return MiniMapIcon;
 }

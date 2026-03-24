@@ -80,6 +80,6 @@ public:
 
 public:
 	// Interface ±¸Çö
-	virtual FVector GetMiniMapLocation_Implementation() const;
-	virtual UTexture2D* GetMiniMapIcon_Implementation() const;
+	virtual FVector GetMiniMapLocation_Implementation();
+	virtual UTexture2D* GetMiniMapIcon_Implementation();
 };
