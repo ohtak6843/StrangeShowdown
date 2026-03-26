@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Widget/STLobbyStatusWidget.h"
 #include "STLobbyHUD.generated.h"
 
 /**
@@ -14,4 +15,7 @@ class STRANGESHOWDOWN_API USTLobbyHUD : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USTLobbyStatusWidget* LobbyStatusWidget;
 };

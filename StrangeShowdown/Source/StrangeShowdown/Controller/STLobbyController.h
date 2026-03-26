@@ -18,4 +18,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	void SetReady(bool bReady);
+
+private:
+	bool bIsReady = false;
 };

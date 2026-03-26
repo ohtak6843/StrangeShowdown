@@ -12,3 +12,10 @@ void ASTLobbyController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void ASTLobbyController::SetReady(bool bReady)
+{
+	bIsReady = bReady;
+	
+	// TODO: 서버에 레디 상태 전달
+}
