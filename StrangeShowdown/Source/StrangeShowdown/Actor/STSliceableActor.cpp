@@ -1,4 +1,5 @@
 #include "STSliceableActor.h"
+#include "Character/Player/STPlayerBase.h"
 
 ASTSliceableActor::ASTSliceableActor()
 {
@@ -23,7 +24,7 @@ void ASTSliceableActor::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ASTSliceableActor::Slice(const FVector& HitLocation, const FVector& HitNormal)
+void ASTSliceableActor::Slice(const FVector& HitLocation, const FVector& HitNormal, ASTPlayerBase* Player)
 {
 	if (bIsSliced)
 	{

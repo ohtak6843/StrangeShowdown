@@ -21,7 +21,7 @@ public:
 
 	// 도끼에서 호출(충돌 지점, 노멀)
 	UFUNCTION(BlueprintCallable, Category = "Slice")
-	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal);
+	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal, class ASTPlayerBase* Player);
 
 	// BP 연출
 	UFUNCTION(BlueprintImplementableEvent)

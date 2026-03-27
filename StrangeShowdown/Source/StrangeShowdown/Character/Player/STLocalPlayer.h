@@ -6,10 +6,11 @@
 #include "Character/Player/STPlayerBase.h"
 #include "Types/PlayerTypes.h"
 #include "Interface/STCharacterHUDInterface.h"
+#include "Interface/STAnimAttackInterface.h"
 #include "STLocalPlayer.generated.h"
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase, public ISTCharacterHUDInterface
+class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase, public ISTAnimAttackInterface, public ISTCharacterHUDInterface
 {
 	GENERATED_BODY()
 	
@@ -26,13 +27,22 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	// ISTAnimAttackInterface
+	virtual void AttackHitCheck() override;
+
 	void SetCameraPose(ECameraPose NewPose);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStatUIUpdated();
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyStateSettings(ECameraPose NewState);
 
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void UseItem();
 
 	// 아이템 장착 관련
 	UFUNCTION(BlueprintCallable, Category = "Item")
@@ -41,6 +51,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void UseItemEffect(struct FInventorySlot slot, EItemUseType UseType);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void NotEnoughStaminaCostFloatingMessage();
+
 	// TODO: 임시로 블프에 함수 만들어놓은 것, 나중에 함수들 c++로 옮기면서 없애야 함
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateQuickslotForCpp();
@@ -48,6 +64,8 @@ public:
 	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
 
 	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
+
+	TObjectPtr<class USTMissionComponent> GetMissionComp() { return MissionComponent; }
 
 protected:
 
@@ -74,6 +92,10 @@ protected:
 	// Attack Trace Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
+
+	// Mission Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mission")
+	TObjectPtr<class USTMissionComponent> MissionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
 	bool IsSmashing = false;
@@ -102,4 +124,7 @@ private:
 private:
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TObjectPtr<class UNiagaraSystem> HitEffect;
 };

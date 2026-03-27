@@ -135,24 +135,10 @@ void PacketHandler::HandleGetRoomList(SessionPtr session, const Common::CSGetRoo
 
 void PacketHandler::HandleCreateRoom(SessionPtr session, const Common::CSCreateRoom& packet)
 {
-	// 방을 하나 만든다.
-	uint32 room_id{};
-	auto res{ GET_SINGLE(RoomManager)->CreateRoom(room_id) };
-
-	// 방을 성공적으로 만들었으면 패킷을 보내준다
-	Common::SCCreateRoom room_packet{ res };
-	session->DoSend(room_packet);
-
-	if (false == res)
-	{
-		return;
-	}
-
-	// HandleJoinRoom을 통해 방에 입장한다.
-	HandleJoinRoom(session, Common::CSJoinRoom{ room_id });
+	GET_SINGLE(RoomManager)->HandleCreateRoom(session, packet);
 }
 
 void PacketHandler::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet)
 {
-	GET_SINGLE(RoomManager)->JoinRoom(session, packet.roomID);
+	GET_SINGLE(RoomManager)->HandleJoinRoom(session, packet);
 }

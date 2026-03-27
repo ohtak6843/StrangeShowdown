@@ -7,14 +7,20 @@
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
+#include "Component/STMissionComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
+#include "Engine/DamageEvents.h"
+#include "Actor/STSliceableActor.h"
+#include "Particles/ParticleSystem.h"
 #include "StrangeShowdown.h"
 #include "UI/STHUDWidget.h"
 #include "UI/STQuickSlotWidget.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -43,10 +49,19 @@ ASTLocalPlayer::ASTLocalPlayer()
 	// Attack Trace Component
 	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
 
+	// Mission Component
+	MissionComponent = CreateDefaultSubobject<USTMissionComponent>(TEXT("MissionComponent"));
+
 	// Camera Pose Settings
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> EffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Prop/SmashFX/NS_Smash.NS_Smash'"));
+	if (EffectRef.Object)
+	{
+		HitEffect = EffectRef.Object;
+	}
 
 	// MiniMap 검색
 	TArray<AActor*> WorldMiniMapActors;
@@ -148,6 +163,54 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 	}
 }
 
+void ASTLocalPlayer::AttackHitCheck()
+{
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * 100;
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	if (!bHit)
+		return;
+
+	AActor* HitActor = Hit.GetActor();
+	if (!HitActor)
+		return;
+
+	ASTSliceableActor* SliceableActor = Cast<ASTSliceableActor>(HitActor);
+	if (!SliceableActor)
+	{
+		return;
+	}
+
+	SliceableActor->Slice(Hit.ImpactPoint, Hit.ImpactNormal, this);
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		HitEffect,
+		Hit.ImpactPoint,
+		Hit.ImpactNormal.Rotation()
+	);
+
+	// 스태미나 감소
+	StatComp->AddStamina(-1.f);
+
+	OnStatUIUpdated();
+
+#if ENABLE_DRAW_DEBUG
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
+#endif
+}
+
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 {
 	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
@@ -233,6 +296,36 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	PickupItem->Destroy();
 }
 
+void ASTLocalPlayer::UseItem()
+{
+	if (!InventoryComp || !QuickSlotComp)
+		return;
+
+	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
+	if (QuickSlotIndex == INDEX_NONE)
+		return;
+
+	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
+	if (InventorySlotIndex == INDEX_NONE)
+		return;
+
+	// 결과
+	FInventorySlot OutSlot;
+
+	// 아이템 사용
+	EItemUseType Result = InventoryComp->UseItem(
+		InventorySlotIndex,
+		this,
+		0,
+		OutSlot
+	);
+
+	// 사용 결과에 따른 분기 효과(Implement)
+	UseItemEffect(OutSlot, Result);
+
+	HoldItem();
+}
+
 void ASTLocalPlayer::HoldItem()
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
@@ -260,6 +353,7 @@ void ASTLocalPlayer::HoldItem()
 	case EItemType::Meat:
 	case EItemType::Whiskey:
 	case EItemType::EnhancePower:
+	case EItemType::Letter:
 		RightHandStaticMesh->SetSimulatePhysics(false);
 		RightHandStaticMesh->SetEnableGravity(false);
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);

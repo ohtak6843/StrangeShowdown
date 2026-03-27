@@ -1,20 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Actor/STMiniMapActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Controller/STBaseController.h"
 #include "Widget/STMiniMapWidget.h"
-#include "GameFramework/HUD.h"
 #include "Widget/STHUD.h"
-#include "Item/STPickupItem.h"
+#include "Interface/STMiniMapTargetInterface.h"
 
 // Sets default values
 ASTMiniMapActor::ASTMiniMapActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -23,20 +18,13 @@ ASTMiniMapActor::ASTMiniMapActor()
 	MiniMapCapture->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
 void ASTMiniMapActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MiniMapCapture->ShowFlags.SetLighting(false);
-	MiniMapCapture->ShowFlags.SetShadowFrustums(false);
-	MiniMapCapture->ShowFlags.SetDynamicShadows(false);
-	MiniMapCapture->ShowFlags.SetPostProcessing(false);
+	InitWidgetComponent();
+	ApplyMiniMapHidden();
 
-	// 위젯 컴포넌트 숨기기
-	HiddenWidgetComponent();
-
-	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		TimerHandle,
@@ -46,65 +34,71 @@ void ASTMiniMapActor::BeginPlay()
 		false);
 }
 
-// Called every frame
 void ASTMiniMapActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	UpdateMiniMapRotation(DeltaTime);
-
-	UpdateItemOnMiniMap(DeltaTime);
+	UpdateTargetOnMiniMap(DeltaTime);
 }
 
 void ASTMiniMapActor::BringHUD()
 {
 	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (STPC)
+	if (!STPC) return;
+	if (!STPC->GetHUDWidget()) return;
+
+	HUDWidget = STPC->GetHUDWidget();
+	MiniMapWidget = HUDWidget->GetMiniMapWidget();
+
+	if (!MiniMapWidget)
 	{
-		HUDWidget = STPC->GetHUDWidget();
-		MiniMapWidget = HUDWidget->GetBigMapWidget();
-		if (!MiniMapWidget)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
-			return;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
 	}
 }
 
-void ASTMiniMapActor::RegisterItem(ASTPickupItem* NewItem)
+void ASTMiniMapActor::RegisterMiniMapTarget(AActor* Actor)
 {
-	if (!NewItem) return;
+	if (!Actor) return;
 
-	MiniMapItems.AddUnique(NewItem);
+	if (!Actor->Implements<USTMiniMapTargetInterface>())
+	{
+		return;
+	}
 
-	NewItem->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnItemDestroyed);
+	MiniMapTargets.AddUnique(Actor);
+
+	Actor->OnDestroyed.RemoveDynamic(this, &ASTMiniMapActor::OnIconDestroyed);
+	Actor->OnDestroyed.AddDynamic(this, &ASTMiniMapActor::OnIconDestroyed);
 }
 
-void ASTMiniMapActor::OnItemDestroyed(AActor* DestroyedActor)
+void ASTMiniMapActor::OnIconDestroyed(AActor* DestroyedActor)
 {
-	ASTPickupItem* Item = Cast<ASTPickupItem>(DestroyedActor);
-	if (!Item) return;
+	if (!DestroyedActor) return;
 
-	MiniMapItems.Remove(Item);
+	MiniMapTargets.Remove(DestroyedActor);
 
 	if (MiniMapWidget)
 	{
-		MiniMapWidget->HideItemIcon(Item);
+		MiniMapWidget->HideTargetIcon(DestroyedActor);
 	}
 }
 
 FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const
 {
-	// 플레이어 기준 상대 위치(월드와 미니맵 좌표계는 XY축이 반대)
 	FVector2D Relative(
 		ItemLocation.Y - PlayerLocation.Y,
 		ItemLocation.X - PlayerLocation.X);
 
 	Relative.Y *= -1.f;
 
-	// 미니맵 회전 적용
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
+
+	if (!HUDWidget || !HUDWidget->MiniMapWidget || !MiniMapCapture)
+	{
+		return FVector2D::ZeroVector;
+	}
 
 	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
@@ -118,9 +112,34 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	return Relative;
 }
 
-void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
+void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC) return;
+
+	APawn* Pawn = PC->GetPawn();
+	if (!Pawn) return;
+
+	FVector NewLocation = Pawn->GetActorLocation() + FVector(0, 0, zPosition);
+	SetActorLocation(NewLocation);
+
+	float ControlYaw = PC->GetControlRotation().Yaw;
+
+	FRotator TargetRot(-90.f, ControlYaw, 0.f);
+
+	FRotator SmoothRot = FMath::RInterpTo(
+		GetActorRotation(),
+		TargetRot,
+		DeltaTime,
+		8.f);
+
+	SetActorRotation(SmoothRot);
+}
+
+void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
+	if (!HUDWidget || !HUDWidget->MiniMapWidget) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -130,17 +149,29 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 
 	float CurrentYaw = GetActorRotation().Yaw;
 
-	for (ASTPickupItem* Item : MiniMapItems)
+	for (int32 i = MiniMapTargets.Num() - 1; i >= 0; --i)
 	{
-		if (!Item) continue;
+		AActor* TargetActor = MiniMapTargets[i].Get();
+		if (!TargetActor)
+		{
+			MiniMapTargets.RemoveAt(i);
+			continue;
+		}
+
+		if (!TargetActor->Implements<USTMiniMapTargetInterface>())
+		{
+			continue;
+		}
+
+		const FVector TargetLocation =
+			ISTMiniMapTargetInterface::Execute_GetMiniMapLocation(TargetActor);
 
 		FVector2D MiniMapPos =
 			WorldToMiniMap(
-				Item->GetActorLocation(),
+				TargetLocation,
 				PlayerPawn->GetActorLocation(),
 				CurrentYaw);
 
-		// TODO: 아이템이 밀리는 현상 존재, 임시 오프셋을 적용
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
@@ -153,59 +184,75 @@ void ASTMiniMapActor::UpdateItemOnMiniMap(float DeltaTime)
 
 		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
 		{
-			MiniMapWidget->HideItemIcon(Item);
+			MiniMapWidget->HideTargetIcon(TargetActor);
 		}
 		else
 		{
-			MiniMapWidget->UpdateItemIcon(Item, MiniMapPos);
+			MiniMapWidget->UpdateTargetIcon(TargetActor, MiniMapPos);
 		}
 	}
 }
 
-void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
+void ASTMiniMapActor::InitWidgetComponent()
 {
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC) return;
+	if (!MiniMapCapture) return;
 
-	APawn* Pawn = PC->GetPawn();
-	if (!Pawn) return;
+	MiniMapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
+	MiniMapCapture->OrthoWidth = 6000.f;
 
-	// 위치 따라가기
-	FVector NewLocation = Pawn->GetActorLocation() + FVector(0, 0, zPosition);
-	SetActorLocation(NewLocation);
+	MiniMapCapture->bCaptureEveryFrame = false;
+	MiniMapCapture->bCaptureOnMovement = true;
+	MiniMapCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 
-	// 플레이어 마우스 회전 가져오기
-	float ControlYaw = PC->GetControlRotation().Yaw;
+	MiniMapCapture->LODDistanceFactor = 3.0f;
+	MiniMapCapture->MaxViewDistanceOverride = 5000.f;
+	MiniMapCapture->PostProcessBlendWeight = 0.0f;
 
-	// 미니맵은 반대로 회전
-	FRotator TargetRot(-90.f, ControlYaw, 0.f);
+	auto& Flags = MiniMapCapture->ShowFlags;
 
-	// RInterpTo
-	FRotator SmoothRot = FMath::RInterpTo(
-		GetActorRotation(),
-		TargetRot,
-		DeltaTime,
-		8.f);
+	Flags.SetLighting(false);
+	Flags.SetDynamicShadows(false);
+	Flags.SetShadowFrustums(false);
+	Flags.SetPostProcessing(false);
+	Flags.SetBloom(false);
+	Flags.SetFog(false);
+	Flags.SetVolumetricFog(false);
+	Flags.SetAtmosphere(false);
+	Flags.SetSkyLighting(false);
+	Flags.SetAntiAliasing(false);
 
-	SetActorRotation(SmoothRot);
+	Flags.SetSkeletalMeshes(false);
+	Flags.SetParticles(false);
+
+	Flags.SetStaticMeshes(true);
+	Flags.SetLandscape(true);
+
+	MiniMapCapture->CaptureScene();
 }
 
-void ASTMiniMapActor::HiddenWidgetComponent()
+void ASTMiniMapActor::ApplyMiniMapHidden()
 {
 	TArray<AActor*> AllActors;
-	UGameplayStatics::GetAllActorsOfClass(
-		GetWorld(),
-		AActor::StaticClass(),
-		AllActors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), AllActors);
 
 	for (AActor* Actor : AllActors)
 	{
+		if (!Actor) continue;
+
+		if (Actor->ActorHasTag(TEXT("MiniMapHidden")))
+		{
+			MiniMapCapture->HiddenActors.Add(Actor);
+		}
+
 		TArray<UWidgetComponent*> Widgets;
 		Actor->GetComponents<UWidgetComponent>(Widgets);
 
 		for (UWidgetComponent* WidgetComp : Widgets)
 		{
-			MiniMapCapture->HiddenComponents.Add(WidgetComp);
+			if (WidgetComp)
+			{
+				MiniMapCapture->HiddenComponents.Add(WidgetComp);
+			}
 		}
 	}
 }

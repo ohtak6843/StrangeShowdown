@@ -22,27 +22,28 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void BringHUD();
-	void RegisterItem(ASTPickupItem* NewItem);
+	void RegisterMiniMapTarget(AActor* Actor);
 
-	// 아이템이 파괴될 때 호출
+	// 리플랙션 기반이므로 UFUNCTION으로 선언
 	UFUNCTION()
-	void OnItemDestroyed(AActor* DestroyedActor);
+	void OnIconDestroyed(AActor* DestroyedActor);
 
 	// 미니맵 좌표로 변환
 	FVector2D WorldToMiniMap(const FVector& ItemLocation, const FVector& PlayerLocation, float PlayerYaw) const;
 
-	// 미니맵 아이템 위치 업데이트
-	void UpdateItemOnMiniMap(float DeltaTime);
+	// 아이콘 위치 업데이트
 	void UpdateMiniMapRotation(float DeltaTime);
+	void UpdateTargetOnMiniMap(float DeltaTime);
 
-	void HiddenWidgetComponent();
+	void InitWidgetComponent();
+	void ApplyMiniMapHidden();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MiniMap")
 	class USceneCaptureComponent2D* MiniMapCapture;
 
-	UPROPERTY(BlueprintReadOnly)
-	TArray<class ASTPickupItem*> MiniMapItems;
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> MiniMapTargets;
 
 	UPROPERTY(BlueprintReadOnly)
 	class USTMiniMapWidget* MiniMapWidget;

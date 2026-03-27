@@ -7,6 +7,7 @@
 #include "Actor/STInteractableActor.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "Interface/STMiniMapTargetInterface.h"
 #include "STStorekeeper.generated.h"
 
 /**
@@ -17,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterEnter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterExit);
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTStorekeeper : public ASTCharacter, public IInteractable
+class STRANGESHOWDOWN_API ASTStorekeeper : public ASTCharacter, public IInteractable, public ISTMiniMapTargetInterface
 {
 	GENERATED_BODY()
 
@@ -81,4 +82,12 @@ private:
 	// 상점을 열고 있는 플레이어(의 상점 컴포넌트)
 	UPROPERTY()
 	TArray<USTStoreComponent*> OpenedStores;
+
+	// 미니맵에 보이는 아이콘
+	TObjectPtr<UTexture2D> MiniMapIcon;
+
+public:
+	// ISTMiniMapTargetInterface 구현
+	virtual FVector GetMiniMapLocation_Implementation();
+	virtual UTexture2D* GetMiniMapIcon_Implementation();
 };

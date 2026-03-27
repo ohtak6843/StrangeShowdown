@@ -1,6 +1,6 @@
 #include "Widget/STMissionWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "Game/STPlayerState.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "Component/STMissionComponent.h"
 #include "Game/STMissionRowData.h"
 
@@ -10,12 +10,11 @@ void USTMissionWidget::NativeConstruct()
 
 	if (APlayerController* PC = GetOwningPlayer())
 	{
-		if (ASTPlayerState* PS = PC->GetPlayerState<ASTPlayerState>())
+		if (ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn()))
 		{
-			if (PS->MissionComponent)
+			if (LocalPlayer->GetMissionComp())
 			{
-				// MissionComponent 델리게이트 바인딩
-				PS->MissionComponent->OnMissionUpdated.AddDynamic(
+				LocalPlayer->GetMissionComp()->OnMissionUpdated.AddDynamic(
 					this,
 					&USTMissionWidget::AddMission
 				);
