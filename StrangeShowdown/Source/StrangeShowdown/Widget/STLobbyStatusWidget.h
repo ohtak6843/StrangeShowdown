@@ -20,6 +20,7 @@ public:
 
 	// 새로운 플레이어가 들어오면 ID를 받아 슬롯 추가
 	void AddPlayerSlot(uint64 PlayerID);
+	void AddRoomOwnerSlot(uint64 PlayerID);
 
 	// ID를 받아 플레이어 Ready 상태를 업데이트
 	void SetPlayerReady(uint64 PlayerID, bool bReady);
