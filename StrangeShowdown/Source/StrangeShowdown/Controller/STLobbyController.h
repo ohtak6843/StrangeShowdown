@@ -37,9 +37,13 @@ protected:
 
 private:
 	void AddInputAction();
+	void FocusChatManager();
 	bool bIsReady = false;
 	bool bIsRoomOwner = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ReadyAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> FocusChatManagerAction;
 };

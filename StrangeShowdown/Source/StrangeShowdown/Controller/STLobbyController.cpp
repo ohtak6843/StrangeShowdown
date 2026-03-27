@@ -20,6 +20,7 @@ void ASTLobbyController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
 	EnhancedInputComponent->BindAction(ReadyAction, ETriggerEvent::Started, this, &ASTLobbyController::SetReady);
+	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTLobbyController::FocusChatManager);
 }
 
 void ASTLobbyController::BeginPlay()
@@ -73,4 +74,16 @@ void ASTLobbyController::AddInputAction()
 	{
 		ReadyAction = InputActionReadyRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionFocusChatManagerRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_FocusChatManager.IA_FocusChatManager'"));
+	if (nullptr != InputActionFocusChatManagerRef.Object)
+	{
+		FocusChatManagerAction = InputActionFocusChatManagerRef.Object;
+	}
+}
+
+void ASTLobbyController::FocusChatManager()
+{
+	SetInputMode(FInputModeGameAndUI());
+
+	LobbyHUDWidget->ChatManagerWidget->ChatInputTextBox->SetKeyboardFocus();
 }
