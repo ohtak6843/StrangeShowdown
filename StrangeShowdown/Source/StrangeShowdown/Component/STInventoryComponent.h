@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameData/STItemSlot.h"
 #include "STInventoryComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -15,21 +16,7 @@ enum class EItemUseType : uint8
 	UnValid
 };
 
-USTRUCT(BlueprintType)
-struct FInventorySlot
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class USTItemDataAssetBase> ItemData = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool bIsInfinite = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Count = 0;
-};
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const TArray<FSTItemSlot>& /*InItemSlots*/);
 
 // MouseDrop 이벤트 디스패처
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
@@ -39,8 +26,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
 	int32, BeforeIndex
 );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STRANGESHOWDOWN_API USTInventoryComponent : public UActorComponent
 {
@@ -49,12 +34,9 @@ class STRANGESHOWDOWN_API USTInventoryComponent : public UActorComponent
 public:
 	USTInventoryComponent();
 
-protected:
-	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex);
@@ -65,7 +47,7 @@ public:
 
 	// 아이템 사용
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	EItemUseType UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot);
+	EItemUseType UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FSTItemSlot& OutSlot);
 
 	// 슬롯 교환
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -93,12 +75,12 @@ public:
 	FMouseDropEvent MouseDrop;
 
 	// OnInventoryUpdated 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+
 	FOnInventoryUpdated OnInventoryUpdated;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	TArray<FInventorySlot> Slots;
+	TArray<FSTItemSlot> Slots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 MaxSlots = 8;

@@ -4,36 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "STBaseController.generated.h"
+#include "STTestController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTBaseController : public APlayerController
+class STRANGESHOWDOWN_API ASTTestController : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
-	ASTBaseController();
+	ASTTestController();
 
 	virtual void SetupInputComponent() override;
-
-public:
-	class USTHUD* GetHUDWidget() const { return HUDWidget; }
 
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
+	void Interact();
 
-	virtual void Interact();
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class USTHUDWidget> HUDWidgetClass;
 
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	TObjectPtr<class USTHUD> HUDWidget;
-
-private:
-	void AddInputAction();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class USTHUDWidget> HUDWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> InteractAction;

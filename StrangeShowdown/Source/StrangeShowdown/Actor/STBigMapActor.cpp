@@ -63,7 +63,7 @@ void ASTBigMapActor::BringHUD()
 	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (STPC)
 	{
-		HUDWidget = STPC->HUDWidget;
+		HUDWidget = STPC->GetHUDWidget();
 		MiniMapWidget = HUDWidget->GetBigMapWidget();
 		if (!MiniMapWidget)
 		{

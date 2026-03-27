@@ -5,23 +5,17 @@
 
 USTInventoryComponent::USTInventoryComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	bWantsInitializeComponent = true;
 }
 
-void USTInventoryComponent::BeginPlay()
+void USTInventoryComponent::InitializeComponent()
 {
-	Super::BeginPlay();
+	Super::InitializeComponent();
 
 	Slots.SetNum(MaxSlots);
 
 	// MouseDrop이 발생하면 ChangeSlot 실행되도록 바인딩
 	MouseDrop.AddDynamic(this, &USTInventoryComponent::ChangeSlot_FromEvent);
-}
-
-void USTInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex)
@@ -67,7 +61,7 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	if (!Slots.IsValidIndex(SlotIndex) || Count <= 0)
 		return false;
 
-	FInventorySlot& Slot = Slots[SlotIndex];
+	FSTItemSlot& Slot = Slots[SlotIndex];
 
 	if (!Slot.ItemData)
 		return false;
@@ -104,9 +98,9 @@ bool USTInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 	return true;
 }
 
-EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FInventorySlot& OutSlot)
+EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Player, int32 StaminaCost, FSTItemSlot& OutSlot)
 {
-	OutSlot = FInventorySlot();
+	OutSlot = FSTItemSlot();
 
 	// Valid 체크
 	if (!Slots.IsValidIndex(SlotIndex))
@@ -114,7 +108,7 @@ EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Pla
 		return EItemUseType::UnValid;
 	}
 
-	FInventorySlot& Slot = Slots[SlotIndex];
+	FSTItemSlot& Slot = Slots[SlotIndex];
 
 	// ItemData 체크
 	if (!Slot.ItemData)
@@ -128,7 +122,7 @@ EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Pla
 		return EItemUseType::NoEffect;
 	}
 
-	FInventorySlot PreUseSlot = Slot;
+	FSTItemSlot& PreUseSlot = Slot;
 
 	USTItemUseEffect* Effect = NewObject<USTItemUseEffect>(this, Slot.ItemData->UseEffectClass);
 	if (!Effect)
@@ -158,7 +152,7 @@ EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Pla
 		Player->StatComp->AddStamina(-Cost);
 	}
 
-	OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast(Slots);
 
 	// 실제 아이템 사용
 	OutSlot = PreUseSlot;
@@ -170,18 +164,18 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 	if (!Slots.IsValidIndex(SlotAIndex) || !Slots.IsValidIndex(SlotBIndex))
 		return false;
 
-	FInventorySlot& SlotA = Slots[SlotAIndex];
-	FInventorySlot& SlotB = Slots[SlotBIndex];
+	FSTItemSlot& SlotA = Slots[SlotAIndex];
+	FSTItemSlot& SlotB = Slots[SlotBIndex];
 
 	if (BeforeInventorySystem)
 	{
-		FInventorySlot Temp = SlotA;
+		FSTItemSlot Temp = SlotA;
 		SlotA = BeforeInventorySystem->Slots[SlotBIndex];
 		BeforeInventorySystem->Slots[SlotBIndex] = Temp;
 	}
 	else
 	{
-		FInventorySlot Temp = SlotA;
+		FSTItemSlot Temp = SlotA;
 		SlotA = SlotB;
 		SlotB = Temp;
 	}
@@ -207,11 +201,11 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 	OnSlotChanged(SlotAIndex, SlotBIndex);
 
 	// WB_Inventory에서 바인드 해둔 UpdateInventoryDrop 이벤트를 호출
-	OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast(Slots);
 
 	if (BeforeInventorySystem)
 	{
-		BeforeInventorySystem->OnInventoryUpdated.Broadcast();
+		BeforeInventorySystem->OnInventoryUpdated.Broadcast(Slots);
 	}
 
 	return true;

@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Types/PlayerTypes.h"
+#include "Interface/STCharacterHUDInterface.h"
 #include "STLocalPlayer.generated.h"
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase
+class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase, public ISTCharacterHUDInterface
 {
 	GENERATED_BODY()
 	
@@ -16,6 +17,15 @@ public:
 	// Sets default values for this character's properties
 	ASTLocalPlayer();
 
+	virtual void PostInitializeComponents() override;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
+public:
 	void SetCameraPose(ECameraPose NewPose);
 
 	UFUNCTION(BlueprintCallable)
@@ -40,10 +50,6 @@ public:
 	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaTime) override;
 
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -72,8 +78,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
 	bool IsSmashing = false;
 
+// HUD Section
+protected:
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
+
+// Camera Pose Section
 private:
-	// Change Camera Settings with State
 	void ChangeToIdle();
 	void ChangeToAiming();
 	void ChangeToLookingUp();
@@ -88,7 +98,8 @@ private:
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
 
-	// Network
+	// Network Section
+private:
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
 };

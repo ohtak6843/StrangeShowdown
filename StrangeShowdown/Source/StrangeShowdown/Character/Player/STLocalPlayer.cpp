@@ -13,6 +13,8 @@
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
 #include "StrangeShowdown.h"
+#include "UI/STHUDWidget.h"
+#include "UI/STQuickSlotWidget.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -81,6 +83,71 @@ ASTLocalPlayer::ASTLocalPlayer()
 	}
 }
 
+void ASTLocalPlayer::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Set Weapon and Hammer Data
+	if (1 < QuickSlotComp->QuickSlots.Num())
+	{
+		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
+		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+		QuickSlotComp->QuickSlots[0].bIsCountable = false;
+
+		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
+		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+		QuickSlotComp->QuickSlots[1].bIsCountable = false;
+	}
+}
+
+void ASTLocalPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	HoldItem();
+}
+
+void ASTLocalPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
+
+	// Send Move Packet to Server
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
+}
+
+void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
+{
+	if (InHUDWidget)
+	{
+		InHUDWidget->ShowInventoryMenu(InventoryComp->Slots);
+		InHUDWidget->UpdateInventoryMenu(InventoryComp->Slots);
+		InHUDWidget->UpdateQuickSlots(QuickSlotComp->QuickSlots, QuickSlotComp->CurrentSelectQuickSlotIndex);
+
+		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
+		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
+
+		// OnDrop 시 업데이트 연결
+		for (int i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
+		{
+			InHUDWidget->GetQuickSlotWidget(i)->OnQuickSlotWidgetDrop.AddUObject(QuickSlotComp, &USTQuickSlotComponent::AddItem);
+		}
+	}
+}
+
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 {
 	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
@@ -141,15 +208,17 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 		AddedInventoryIndex
 	);
 
+	// TODO: 인벤토리 위젯 업데이트 하도록 브로드캐스트
+
 	if (bAdded && QuickSlotComp)
 	{
 		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
 		{
-			FInventorySlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+			FSTItemSlot& QuickSlot = QuickSlotComp->QuickSlots[i];
 			if (QuickSlot.ItemData == PickupItem->ItemData)
 			{
 				QuickSlot.Count += 1;
-				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+				QuickSlotComp->OnQuickSlotUpdated.Broadcast(QuickSlotComp->QuickSlots, QuickSlotComp->CurrentSelectQuickSlotIndex);
 				break;
 			}
 		}
@@ -227,49 +296,6 @@ void ASTLocalPlayer::DropItem()
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
-}
-
-void ASTLocalPlayer::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// Set Weapon and Hammer Data
-	if (1 < QuickSlotComp->QuickSlots.Num())
-	{
-		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
-		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
-		QuickSlotComp->QuickSlots[0].bIsInfinite = true;
-
-		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
-		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
-		QuickSlotComp->QuickSlots[1].bIsInfinite = true;
-	}
-
-	UpdateQuickslotForCpp();
-
-	HoldItem();
-}
-
-void ASTLocalPlayer::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// Camera Pose Blending
-	PoseElapsedTime += DeltaTime;
-	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
-
-	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
-
-	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
-
-	FVector Rel = CameraComp->GetRelativeLocation();
-	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
-	CameraComp->SetRelativeLocation(Rel);
-
-	// Send Move Packet to Server
-#if NETWORK_ENABLED
-	SendMovePacket(DeltaTime);
-#endif
 }
 
 void ASTLocalPlayer::ChangeToIdle()
