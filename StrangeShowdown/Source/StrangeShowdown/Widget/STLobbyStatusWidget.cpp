@@ -14,11 +14,16 @@ void USTLobbyStatusWidget::NativeConstruct()
 
 	// 자신이 방장일 경우 초기화 시 본인 슬롯을 추가
 	// 아래 함수에 방장 ID 넣으면 됨
+	
 	// if 방장
 	AddRoomOwnerSlot(0);
 
-	// 방장이 아닌 경우 현재 방에 있는 모든 플레이어의 슬롯 추가
+	// else if 방장이 아닌 경우 현재 방에 있는 모든 플레이어의 슬롯 추가
+	AddPlayerSlot(1);
 
+	// 여기서 직접 추가하는 것보다 컨트롤러에서 정보를 보내
+	// 리스트를 추가하는 방법도 고려해볼 필요가 있음
+	// 방장인지 아닌지는 컨트롤러에서 판단중
 }
 
 void USTLobbyStatusWidget::AddPlayerSlot(uint64 PlayerID)

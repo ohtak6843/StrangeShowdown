@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Widget/STLobbyStatusWidget.h"
+#include "Widget/STChatManagerWidget.h"
+#include "Components/TextBlock.h"
 #include "STLobbyHUD.generated.h"
 
 /**
@@ -17,5 +19,11 @@ class STRANGESHOWDOWN_API USTLobbyHUD : public UUserWidget
 	
 public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USTLobbyStatusWidget* LobbyStatusWidget;
+	TObjectPtr<USTChatManagerWidget> ChatManagerWidget;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<USTLobbyStatusWidget> LobbyStatusWidget;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UTextBlock> ReadyText;
 };
