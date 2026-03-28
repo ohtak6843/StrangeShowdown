@@ -23,18 +23,20 @@ public:
 
 	void Init(const uint32 roomID, const Common::CSCreateRoom& packet);
 
-	void JoinRoom(SessionPtr session, const Common::CSJoinRoom& packet);
+	void JoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
 
-	void AddPlayer(uint64 playerId, const std::shared_ptr<Player>& player)
+	void AddPlayer(const uint64 playerId, const std::shared_ptr<Player>& player)
 	{
 		_players[playerId] = player;
 	}
 
-	void RemovePlayer(uint64 playerId)
-	{
-		_players.erase(playerId);
-	}
+	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }
 
+	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
+	
+	void HandleStart(const SessionPtr session);
+	
+	
 	// --
 	// getter and setter
 	// --
@@ -44,25 +46,13 @@ public:
 		return _players;
 	}
 
-	bool HasPassword() const
-	{
-		return _hasPassword;
-	}
+	bool HasPassword() const { return _hasPassword; }
+	
+	std::string GetPassword() const { return _password; }
 
-	std::string GetPassword() const
-	{
-		return _password;
-	}
+	std::string GetName() const { return _name; }
 
-	std::string GetName() const
-	{
-		return _name;
-	}
-
-	void SetRoomID(const uint32 roomID)
-	{
-		_roomID = roomID;
-	}
+	void SetRoomID(const uint32 roomID) { _roomID = roomID; }
 
 private:
 
@@ -85,5 +75,8 @@ private:
 	std::string _name{};
 	bool _hasPassword{ false };
 	std::string _password{};
+	
+	// 임시. 이후 enum으로 변경
+	bool _inGame{ false };
 };
 

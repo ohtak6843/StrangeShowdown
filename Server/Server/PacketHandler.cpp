@@ -48,6 +48,22 @@ void PacketHandler::Init()
 			HandleJoinRoom(session, packet);
 		}
 	);
+
+	RegisterHandler<Common::CSReady>(
+		Common::PacketType::CS_READY,
+		[](SessionPtr session, const auto& packet)
+		{
+			HandleReady(session, packet);
+		}
+	);
+
+	RegisterHandler<Common::CSStartGame>(
+		Common::PacketType::CS_START_GAME,
+		[](SessionPtr session, const auto& packet)
+		{
+			HandleStartGame(session, packet);
+		}
+	);
 }
 
 void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
@@ -141,4 +157,20 @@ void PacketHandler::HandleCreateRoom(SessionPtr session, const Common::CSCreateR
 void PacketHandler::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet)
 {
 	GET_SINGLE(RoomManager)->HandleJoinRoom(session, packet);
+}
+
+void PacketHandler::HandleReady(SessionPtr session, const Common::CSReady& packet)
+{
+	if (auto room{ session->GetRoom() }; nullptr != room)
+	{
+		room->HandleReady(session, packet);
+	}
+}
+
+void PacketHandler::HandleStartGame(SessionPtr session, const Common::CSStartGame& packet)
+{
+	if (auto room{ session->GetRoom() }; nullptr != room)
+	{
+		room->HandleStart(session);
+	}
 }

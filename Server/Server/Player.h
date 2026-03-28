@@ -36,6 +36,10 @@ public:
 
 	void HandleMove(const Common::CSMovePlayer& packet);
 
+	// getter and setter
+	bool IsReady() const { return ready; }
+	void SetReady(bool _ready) { ready = _ready; }
+
 private:
 
 	// player ingame info
@@ -43,6 +47,8 @@ private:
 	Vec3f _direction{};
 
 	uint8 _state{};
+
+	bool ready{ false };
 
 	// owner
 	SessionPtr _ownerSession{ nullptr };

@@ -37,8 +37,13 @@ void RoomManager::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& p
 	}
 
 	// 방이 존재하면 입장 시도
+	// todo: cas 실행
+	session->SetIOState(IOState::INGAME);
+
 	auto room{ res->second };
 	session->SetRoom(room);
+
+	// todo: 나중에 cas로 변경 필요 한지 확인
 	room->JoinRoom(session, packet);
 }
 

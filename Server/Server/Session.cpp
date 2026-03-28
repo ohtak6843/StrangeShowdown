@@ -6,6 +6,7 @@
 #include "RoomManager.h"
 #include "Job.h"
 #include "ObjectManager.h"
+#include "Player.h"
 
 
 Session::Session()

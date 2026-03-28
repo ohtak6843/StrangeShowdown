@@ -30,6 +30,8 @@ private:
 	static void HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet);
 	static void HandleCreateRoom(SessionPtr session, const Common::CSCreateRoom& packet);
 	static void HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet);
+	static void HandleReady(SessionPtr session, const Common::CSReady& packet);
+	static void HandleStartGame(SessionPtr session, const Common::CSStartGame& packet);
 
 
 

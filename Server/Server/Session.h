@@ -4,6 +4,7 @@
 #include "Serializer.h"
 
 class Room;
+class Player;
 
 class Session : public std::enable_shared_from_this<Session>
 {
@@ -65,7 +66,8 @@ public:
 	std::shared_ptr<Room> GetRoom() const { return _room; }
 	void SetRoom(const std::shared_ptr<Room>& room) { _room = room; }
 
-	
+	std::shared_ptr<Player> GetPlayer() const { return _player; }
+	void SetPlayer(const std::shared_ptr<Player>& player) { _player = player; }
 
 private:
 
@@ -99,6 +101,7 @@ private:
 	// --
 
 	std::shared_ptr<Room>	_room{ nullptr };
+	std::shared_ptr<Player>	_player{ nullptr };
 
 
 	// --

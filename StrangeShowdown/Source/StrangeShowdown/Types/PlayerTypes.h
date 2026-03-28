@@ -2,7 +2,7 @@
 
 
 #include "CoreMinimal.h"
-#include "Protocol.h"
+#include "CommonEnum.h"
 #include "PlayerTypes.generated.h"
 
 UENUM(BlueprintType)

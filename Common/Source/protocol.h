@@ -31,6 +31,16 @@ enum class PacketType : uint16
 	SC_JOIN_ROOM,
 	CS_JOIN_ROOM,
 
+	// -- 
+	// ingame system
+	// --
+
+	SC_READY,
+	CS_READY,
+
+	SC_START_GAME,
+	CS_START_GAME,
+
 	// --
 	// object
 	// --
@@ -186,6 +196,61 @@ struct CSJoinRoom : Header
 	}
 };
 
+// SCReady
+// Param:
+//		uint64 id
+//		bool ready
+struct SCReady : Header
+{
+	uint64 id{};
+	bool ready{ false };
+	SCReady() = default;
+	SCReady(const uint64 _id, const bool _ready) :
+		Header{ sizeof(SCReady), PacketType::SC_READY },
+		id{ _id },
+		ready{ _ready }
+	{}
+};
+
+
+// CSReady
+// Param:
+//		bool ready
+// 
+struct CSReady : Header
+{
+	bool ready{ false };
+	CSReady() = default;
+	CSReady(const bool _ready) :
+		Header{ sizeof(CSReady), PacketType::CS_READY },
+		ready{ _ready }
+	{}
+};
+
+
+// SCStartGame
+// param:
+//		bool start
+// brief:
+//  게임 시작 여부를 알리는 패킷. start가 true면 게임이 시작되고 false면 게임이 취소됨.
+struct SCStartGame : Header
+{
+	bool start{ false };
+	SCStartGame() = default;
+	SCStartGame(const bool _start) :
+		Header{ sizeof(SCStartGame), PacketType::SC_START_GAME },
+		start{ _start }
+	{}
+};
+
+// CSStartGame
+// No Param
+struct CSStartGame : Header
+{
+	CSStartGame() :
+		Header{ sizeof(CSStartGame), PacketType::CS_START_GAME }
+	{}
+};
 
 
 // Param:
