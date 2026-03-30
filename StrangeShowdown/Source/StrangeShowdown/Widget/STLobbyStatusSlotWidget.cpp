@@ -4,11 +4,11 @@
 #include "Widget/STLobbyStatusSlotWidget.h"
 #include "GameFramework/PlayerState.h"
 
-void USTLobbyStatusSlotWidget::Init(uint64 NewPlayerID)
+void USTLobbyStatusSlotWidget::Init(uint64 NewPlayerID, const FString& NickName)
 {
 	PlayerID = NewPlayerID;
 
-	NickNameText->SetText(FText::FromString(TEXT("Player")));
+	NickNameText->SetText(FText::FromString(NickName));
 }
 
 void USTLobbyStatusSlotWidget::Ready(bool bReady)
