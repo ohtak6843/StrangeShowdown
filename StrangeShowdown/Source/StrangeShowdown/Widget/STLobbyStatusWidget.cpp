@@ -22,10 +22,6 @@ void USTLobbyStatusWidget::NativeConstruct()
 	// else if 방장이 아닌 경우 현재 방에 있는 모든 플레이어의 슬롯 추가
 	// 닉네임도 설정
 	AddPlayerSlot(1, TEXT("Player1"));
-
-	// 여기서 직접 추가하는 것보다 컨트롤러에서 정보를 보내
-	// 리스트를 추가하는 방법도 고려해볼 필요가 있음
-	// 방장인지 아닌지는 컨트롤러에서 판단중
 }
 
 void USTLobbyStatusWidget::AddPlayerSlot(uint64 PlayerID, const FString& NickName)
