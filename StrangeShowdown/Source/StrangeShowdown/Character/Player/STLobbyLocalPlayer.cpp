@@ -4,6 +4,9 @@
 #include "Character/Player/STLobbyLocalPlayer.h"
 #include "STLobbyLocalPlayer.h"
 #include "Game/STGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Controller/STLobbyController.h"
+#include "Widget/STLobbyHUD.h"
 
 ASTLobbyLocalPlayer::ASTLobbyLocalPlayer()
 {
@@ -57,6 +60,25 @@ void ASTLobbyLocalPlayer::ApplyStateSettings(ECameraPose NewState)
 void ASTLobbyLocalPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC)
+		return;
+
+	// LobbyController로 캐스팅
+	ASTLobbyController* STPC = Cast<ASTLobbyController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (STPC)
+	{
+		LobbyHUDWidget = STPC->LobbyHUDWidget;
+		if (!LobbyHUDWidget)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get LobbyHUDWidget from Controller"));
+			return;
+		}
+	}
+
+	// Add Player 델리게이트
+	// 어디서 호출할지 정해야함(Instance?)
 }
 
 void ASTLobbyLocalPlayer::Tick(float DeltaTime)
@@ -136,4 +158,9 @@ void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
 		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
 		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
 	}
+}
+
+void ASTLobbyLocalPlayer::AddFieldPlayer(uint64 PlayerID, const FString& NickName)
+{
+	LobbyHUDWidget->LobbyStatusWidget->AddPlayerSlot(PlayerID, NickName);
 }

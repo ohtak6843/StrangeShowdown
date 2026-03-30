@@ -46,6 +46,8 @@ private:
 
 	void SendMovePacket(const float DeltaTime);
 
+	void AddFieldPlayer(uint64 PlayerID, const FString& NickName);
+
 	TMap<ECameraPose, FCameraPoseSetting> PoseSettings;
 
 	float PoseBlendTime = 0.2f;
@@ -57,4 +59,6 @@ private:
 	// Network
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
+
+	TObjectPtr<class USTLobbyHUD> LobbyHUDWidget;
 };

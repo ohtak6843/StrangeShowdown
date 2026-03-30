@@ -12,6 +12,7 @@ void USTLobbyStatusWidget::NativeConstruct()
 
 	WrapBox->ClearChildren();
 
+	// 초기화 단계
 	// 자신이 방장일 경우 초기화 시 본인 슬롯을 추가
 	// 아래 함수에 방장 ID 넣으면 됨
 	
