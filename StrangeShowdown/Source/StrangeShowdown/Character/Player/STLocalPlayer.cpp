@@ -37,6 +37,17 @@ ASTLocalPlayer::ASTLocalPlayer()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
+	// Stat Component
+	StatComp->CurrentHp = StatComp->MaxHp;
+	StatComp->Gold = 0;
+	StatComp->Kill = 0;
+	StatComp->CurrentArmor = 0;
+	StatComp->MoveSpeed = 500;
+	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
+	StatComp->CurrentAction = StatComp->UseAbleAction;
+	StatComp->Prize = 0;
+	StatComp->bAlive = true;
+
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 
@@ -148,10 +159,12 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
-		InHUDWidget->ShowInventoryMenu(InventoryComp->Slots);
+		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->UpdateStat();
 		InHUDWidget->UpdateInventoryMenu(InventoryComp->Slots);
 		InHUDWidget->UpdateQuickSlots(QuickSlotComp->QuickSlots, QuickSlotComp->CurrentSelectQuickSlotIndex);
 
+		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 
@@ -310,7 +323,7 @@ void ASTLocalPlayer::UseItem()
 		return;
 
 	// 결과
-	FInventorySlot OutSlot;
+	FSTItemSlot OutSlot;
 
 	// 아이템 사용
 	EItemUseType Result = InventoryComp->UseItem(

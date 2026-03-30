@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "STStatComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnStatChanged);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STRANGESHOWDOWN_API USTStatComponent : public UActorComponent
@@ -16,14 +18,10 @@ public:
 	// Sets default values for this component's properties
 	USTStatComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+public:
+	FOnStatChanged OnStatChanged;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void AddHp(int32 HealAmount);
 

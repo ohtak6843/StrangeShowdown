@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Types/PlayerTypes.h"
+#include "GameData/STItemSlot.h"
 #include "Interface/STCharacterHUDInterface.h"
 #include "Interface/STAnimAttackInterface.h"
 #include "STLocalPlayer.generated.h"
@@ -52,7 +53,7 @@ public:
 	void DropItem();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void UseItemEffect(struct FInventorySlot slot, EItemUseType UseType);
+	void UseItemEffect(struct FSTItemSlot slot, EItemUseType UseType);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void NotEnoughStaminaCostFloatingMessage();

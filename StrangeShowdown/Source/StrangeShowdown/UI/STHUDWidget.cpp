@@ -28,13 +28,16 @@ void USTHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	QuickSlotWrapBox = Cast<UWrapBox>(GetWidgetFromName(TEXT("QuickSlots")));
-	ensure(QuickSlotWrapBox);
-
 	ISTCharacterHUDInterface* HUDPawn = Cast<ISTCharacterHUDInterface>(GetOwningPlayerPawn());
 	if (HUDPawn)
 	{
 		HUDPawn->SetupHUDWidget(this);
+	}
+
+	// TODO: 나중에 위젯 타입 어떻게 할지 고민하기
+	if (StatWidget)
+	{
+		StatWidget->SetWidgetType(HUDWidgetType);
 	}
 }
 
@@ -52,28 +55,32 @@ void USTHUDWidget::UpdateWorldMap()
 
 void USTHUDWidget::UpdateStat()
 {
+	if (StatWidget)
+	{
+		StatWidget->UpdateStat();
+	}
 }
 
 void USTHUDWidget::ShowInventoryMenu(const TArray<FSTItemSlot>& InItemSlots)
 {
-	if (nullptr == InventoryMenu)
+	if (nullptr == InventoryMenuWidget)
 	{
-		InventoryMenu = CreateWidget<USTInventoryMenuWidget>(this, InventoryMenuClass);
-		InventoryMenu->AddToViewport();
-		UpdateInventoryMenu(InItemSlots);
+		InventoryMenuWidget = CreateWidget<USTInventoryMenuWidget>(this, InventoryMenuClass);
+		InventoryMenuWidget->AddToViewport();
+		InventoryMenuWidget->UpdateInventory(InItemSlots);
 	}
 	else
 	{
-		InventoryMenu->RemoveFromParent();
-		InventoryMenu = nullptr;
+		InventoryMenuWidget->RemoveFromParent();
+		InventoryMenuWidget = nullptr;
 	}
 }
 
 void USTHUDWidget::UpdateInventoryMenu(const TArray<FSTItemSlot>& InItemSlots)
 {
-	if (InventoryMenu)
+	if (InventoryMenuWidget)
 	{
-		InventoryMenu->UpdateInventory(InItemSlots);
+		InventoryMenuWidget->UpdateInventory(InItemSlots);
 	}
 }
 

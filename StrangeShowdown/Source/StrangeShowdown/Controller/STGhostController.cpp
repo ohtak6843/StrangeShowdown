@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
+#include "Widget/STHUD.h"
 
 ASTGhostController::ASTGhostController()
 {

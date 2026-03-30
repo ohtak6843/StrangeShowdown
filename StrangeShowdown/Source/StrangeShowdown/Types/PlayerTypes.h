@@ -76,3 +76,11 @@ enum class EItemUseType : uint8
 	Exception,
 	UnValid
 };
+
+UENUM(BlueprintType)
+enum class EHUDWidgetType : uint8
+{
+	Player,
+	Ghost,
+	Sheriff
+};

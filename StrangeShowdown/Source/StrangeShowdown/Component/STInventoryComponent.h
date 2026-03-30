@@ -7,16 +7,6 @@
 #include "Types/PlayerTypes.h"
 #include "STInventoryComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EItemUseType : uint8
-{
-	CanUse,
-	NotEnoughStaminaCost,
-	NoEffect,
-	Exception,
-	UnValid
-};
-
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const TArray<FSTItemSlot>& /*InItemSlots*/);
 
 // MouseDrop 이벤트 디스패처

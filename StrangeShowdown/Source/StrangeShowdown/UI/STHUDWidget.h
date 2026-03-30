@@ -19,11 +19,12 @@ class STRANGESHOWDOWN_API USTHUDWidget : public UUserWidget
 public:
 	USTHUDWidget(const FObjectInitializer& ObjectInitializer);
 
-
 protected:
 	virtual void NativeConstruct() override;
 
 public:
+	class USTStatWidget* GetStatWidget() const { return StatWidget; }
+
 	void UpdateMission();
 	void UpdateMiniMap();
 	void UpdateWorldMap();
@@ -32,25 +33,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	EHUDWidgetType HUDWidgetType = EHUDWidgetType::Player;
 
-	// TODO: StoreMenuWidget 추가하기
-	//	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-	//TObjectPtr<class USTStoreMenuWidget> StoreMenu;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<class USTMissionWidget> Mission;
 
-	// TODO: MapWidget 추가하기, MiniMap, WorldMap
 
-	// TODO: 현상금 게시판 추가하기
-// Stat Section
+#pragma region Stat Section
 public:
 	void UpdateStat();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-	TObjectPtr<class USTStatWidget> Stat;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTStatWidget> StatWidget;
+#pragma endregion
 
-// InventoryMenu Section
+#pragma region Inventory Section
 public:
 	void ShowInventoryMenu(const TArray<FSTItemSlot>& InItemSlots);
 	void UpdateInventoryMenu(const TArray<FSTItemSlot>& InItemSlots);
@@ -60,9 +56,10 @@ protected:
 	TSubclassOf<class USTInventoryMenuWidget> InventoryMenuClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-	TObjectPtr<class USTInventoryMenuWidget> InventoryMenu;
+	TObjectPtr<class USTInventoryMenuWidget> InventoryMenuWidget;
+#pragma endregion
 
-// QuickSlot Section
+#pragma region QuickSlot Section
 public:
 	class USTQuickSlotWidget* GetQuickSlotWidget(int32 Index);
 
@@ -73,6 +70,38 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
 	TSubclassOf<class USTQuickSlotWidget> QuickSlotWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class UWrapBox> QuickSlotWrapBox;
+#pragma endregion
+
+#pragma region Store Section
+public:
+
+protected:
+	// TODO: StoreMenuWidget 추가하기
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	//TObjectPtr<class USTStoreMenuWidget> StoreMenu;
+
+#pragma endregion
+
+#pragma region Chat Section
+public:
+
+protected:
+
+#pragma endregion
+
+#pragma region Bounty Board Section
+public:
+
+protected:
+
+#pragma endregion
+
+#pragma region Map Section
+public:
+
+protected:
+
+#pragma endregion
 };
