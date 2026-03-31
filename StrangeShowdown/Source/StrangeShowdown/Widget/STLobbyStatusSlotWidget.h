@@ -17,7 +17,7 @@ class USTLobbyStatusSlotWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Init(uint64 PlayerID);
+	void Init(uint64 PlayerID, const FString& NickName);
 
 	void Ready(bool bReady);
 
