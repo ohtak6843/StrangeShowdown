@@ -23,9 +23,13 @@ protected:
 	virtual void NativeDestruct() override;
 
 public:
-	void UpdateInventory(const TArray<FSTItemSlot>& InItemSlots);
+	void SetInventoryComponent(class USTInventoryComponent* InInventoryComp);
+
+	void UpdateInventory();
 
 protected:
+	TWeakObjectPtr<class USTInventoryComponent> SourceInventoryComp;
+
 	UPROPERTY()
 	TObjectPtr<class USTInventoryWidget> Inventory;
 };

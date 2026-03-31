@@ -17,9 +17,8 @@ class STRANGESHOWDOWN_API ASTTestController : public APlayerController
 public:
 	ASTTestController();
 
-	virtual void SetupInputComponent() override;
-
 protected:
+	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
 
 	void Interact();

@@ -152,7 +152,7 @@ EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Pla
 		Player->StatComp->AddStamina(-Cost);
 	}
 
-	OnInventoryUpdated.Broadcast(Slots);
+	OnInventoryUpdated.Broadcast();
 
 	// 실제 아이템 사용
 	OutSlot = PreUseSlot;
@@ -201,11 +201,11 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 	OnSlotChanged(SlotAIndex, SlotBIndex);
 
 	// WB_Inventory에서 바인드 해둔 UpdateInventoryDrop 이벤트를 호출
-	OnInventoryUpdated.Broadcast(Slots);
+	OnInventoryUpdated.Broadcast();
 
 	if (BeforeInventorySystem)
 	{
-		BeforeInventorySystem->OnInventoryUpdated.Broadcast(Slots);
+		BeforeInventorySystem->OnInventoryUpdated.Broadcast();
 	}
 
 	return true;

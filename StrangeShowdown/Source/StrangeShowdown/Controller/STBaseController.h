@@ -20,7 +20,8 @@ public:
 	virtual void SetupInputComponent() override;
 
 public:
-	class USTHUD* GetHUDWidget() const { return HUDWidget; }
+	// TODO: 나중에 어떻게 할지 정하기
+	class USTHUD* GetHUDWidget() const { return nullptr; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,9 +29,6 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Interact();
-
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	TObjectPtr<class USTHUD> HUDWidget;
 
 private:
 	void AddInputAction();

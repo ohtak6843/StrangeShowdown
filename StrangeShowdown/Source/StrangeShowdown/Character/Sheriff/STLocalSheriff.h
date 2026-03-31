@@ -61,8 +61,8 @@ private:
 	void ChangeToAiming();
 
 	void AddInputMappingContext();
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	void ShoulderMove(const FInputActionValue& Value);
+	void ShoulderLook(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);
 	void PistolFire(const FInputActionValue& Value);
 

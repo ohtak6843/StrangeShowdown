@@ -3,11 +3,12 @@
 
 #include "UI/STHUDWidget.h"
 #include "Components/WrapBox.h"
+#include "UI/Stat/STStatWidget.h"
 #include "UI/STQuickSlotWidget.h"
 #include "Component/STQuickSlotComponent.h"
-#include "Interface/STCharacterHUDInterface.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "Component/STInventoryComponent.h"
+#include "Interface/STCharacterHUDInterface.h"
 
 USTHUDWidget::USTHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -61,13 +62,13 @@ void USTHUDWidget::UpdateStat()
 	}
 }
 
-void USTHUDWidget::ShowInventoryMenu(const TArray<FSTItemSlot>& InItemSlots)
+void USTHUDWidget::OpenInventoryMenu()
 {
 	if (nullptr == InventoryMenuWidget)
 	{
 		InventoryMenuWidget = CreateWidget<USTInventoryMenuWidget>(this, InventoryMenuClass);
 		InventoryMenuWidget->AddToViewport();
-		InventoryMenuWidget->UpdateInventory(InItemSlots);
+		InventoryMenuWidget->UpdateInventory();
 	}
 	else
 	{
@@ -76,17 +77,25 @@ void USTHUDWidget::ShowInventoryMenu(const TArray<FSTItemSlot>& InItemSlots)
 	}
 }
 
-void USTHUDWidget::UpdateInventoryMenu(const TArray<FSTItemSlot>& InItemSlots)
+void USTHUDWidget::UpdateInventoryMenu()
 {
 	if (InventoryMenuWidget)
 	{
-		InventoryMenuWidget->UpdateInventory(InItemSlots);
+		InventoryMenuWidget->UpdateInventory();
 	}
 }
 
 USTQuickSlotWidget* USTHUDWidget::GetQuickSlotWidget(int32 Index)
 {
 	return Cast<USTQuickSlotWidget>(QuickSlotWrapBox->GetChildAt(Index));
+}
+
+void USTHUDWidget::SetQuickSlotComponent(USTQuickSlotComponent* InQuickSlotComp)
+{
+	if (InQuickSlotComp)
+	{
+		SourceQuickSlotComp = InQuickSlotComp;
+	}
 }
 
 void USTHUDWidget::SetupQuickSlots(int32 QuickSlotCount)
@@ -103,10 +112,14 @@ void USTHUDWidget::SetupQuickSlots(int32 QuickSlotCount)
 	}
 }
 
-void USTHUDWidget::UpdateQuickSlots(const TArray<FSTItemSlot>& InItemSlots, int32 CurrentSelectedIndex)
+void USTHUDWidget::UpdateQuickSlots()
 {
 	int32 QuickSlotWidgetCount = QuickSlotWrapBox->GetChildrenCount();
-	int32 QuickSlotItemCount = InItemSlots.Num();
+	int32 QuickSlotItemCount = 0;
+	if (SourceQuickSlotComp.IsValid())
+	{
+		QuickSlotItemCount = SourceQuickSlotComp->QuickSlots.Num();
+	}
 
 	// QuickSlot 개수와 QuickSlotComponent의 Item 개수가 다르면 새로 세팅
 	if (QuickSlotWidgetCount != QuickSlotItemCount)
@@ -120,7 +133,15 @@ void USTHUDWidget::UpdateQuickSlots(const TArray<FSTItemSlot>& InItemSlots, int3
 		USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
 		if (QuickSlotWidget)
 		{
-			QuickSlotWidget->UpdateQuickSlot(InItemSlots[i], CurrentSelectedIndex);
+			QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp->QuickSlots[i], SourceQuickSlotComp->CurrentSelectQuickSlotIndex);
 		}
 	}
+}
+
+void USTHUDWidget::OpenStoreMenu()
+{
+}
+
+void USTHUDWidget::UpdateStoreMenu()
+{
 }

@@ -54,7 +54,10 @@ void USTStatWidget::NativeConstruct()
 
 void USTStatWidget::SetStatComponent(USTStatComponent* InStatComponent)
 {
-	StatComponent = InStatComponent;
+	if (InStatComponent)
+	{
+		SourceStatComp = InStatComponent;
+	}
 }
 
 void USTStatWidget::SetWidgetType(EHUDWidgetType InWidgetType)
@@ -137,9 +140,9 @@ void USTStatWidget::SetSheriffWidget()
 
 void USTStatWidget::UpdateStat()
 {
-	if (StatComponent.IsValid())
+	if (SourceStatComp.IsValid())
 	{
-		USTStatComponent* StatComp = StatComponent.Get();
+		USTStatComponent* StatComp = SourceStatComp.Get();
 
 #pragma region HP Update
 		float CurrentHp = StatComp->CurrentHp;

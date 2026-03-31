@@ -22,5 +22,5 @@ class STRANGESHOWDOWN_API ISTCharacterHUDInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) = 0;
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) {}
 };

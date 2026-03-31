@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GameData/STItemSlot.h"
-#include "Widget/STHUD.h"
+#include "Types/PlayerTypes.h"
 #include "STHUDWidget.generated.h"
 
 /**
@@ -48,8 +48,10 @@ protected:
 
 #pragma region Inventory Section
 public:
-	void ShowInventoryMenu(const TArray<FSTItemSlot>& InItemSlots);
-	void UpdateInventoryMenu(const TArray<FSTItemSlot>& InItemSlots);
+	class USTInventoryMenuWidget* GetInventoryMenuWidget() const { return InventoryMenuWidget; }
+
+	void OpenInventoryMenu();
+	void UpdateInventoryMenu();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
@@ -62,11 +64,14 @@ protected:
 #pragma region QuickSlot Section
 public:
 	class USTQuickSlotWidget* GetQuickSlotWidget(int32 Index);
+	void SetQuickSlotComponent(class USTQuickSlotComponent* InQuickSlotComp);
 
 	void SetupQuickSlots(int32 QuickSlotCount);
-	void UpdateQuickSlots(const TArray<FSTItemSlot>& InItemSlots, int32 CurrentSelectedIndex);
+	void UpdateQuickSlots();
 
 protected:
+	TWeakObjectPtr<class USTQuickSlotComponent> SourceQuickSlotComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
 	TSubclassOf<class USTQuickSlotWidget> QuickSlotWidgetClass;
 
@@ -76,6 +81,8 @@ protected:
 
 #pragma region Store Section
 public:
+	void OpenStoreMenu();
+	void UpdateStoreMenu();
 
 protected:
 	// TODO: StoreMenuWidget 추가하기

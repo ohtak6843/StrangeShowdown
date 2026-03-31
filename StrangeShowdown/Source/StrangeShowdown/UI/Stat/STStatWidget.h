@@ -31,7 +31,7 @@ public:
 	void UpdateStat();
 
 protected:
-	TWeakObjectPtr<class USTStatComponent> StatComponent;
+	TWeakObjectPtr<class USTStatComponent> SourceStatComp;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UProgressBar> HpBar;

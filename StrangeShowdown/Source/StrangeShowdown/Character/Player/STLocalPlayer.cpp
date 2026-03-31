@@ -2,6 +2,9 @@
 
 
 #include "Character/Player/STLocalPlayer.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Item/STPickupItem.h"
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
@@ -18,6 +21,8 @@
 #include "Particles/ParticleSystem.h"
 #include "StrangeShowdown.h"
 #include "UI/STHUDWidget.h"
+#include "UI/Stat/STStatWidget.h"
+#include "UI/Inventory/STInventoryMenuWidget.h"
 #include "UI/STQuickSlotWidget.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
@@ -62,6 +67,38 @@ ASTLocalPlayer::ASTLocalPlayer()
 
 	// Mission Component
 	MissionComponent = CreateDefaultSubobject<USTMissionComponent>(TEXT("MissionComponent"));
+
+	// Input Mapping Context
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_TestPlayerInput.IMC_TestPlayerInput"));
+	if (nullptr != InputMappingContextRef.Object)
+	{
+		DefaultMappingContext = InputMappingContextRef.Object;
+	}
+
+	// Input Actions
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
+	if (nullptr != InputActionShoulderMoveRef.Object)
+	{
+		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
+	if (nullptr != InputActionShoulderLookRef.Object)
+	{
+		ShoulderLookAction = InputActionShoulderLookRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolAim.IA_PistolAim'"));
+	if (nullptr != InputActionPistolAimRef.Object)
+	{
+		PistolAimAction = InputActionPistolAimRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolFireRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolFire.IA_PistolFire'"));
+	if (nullptr != InputActionPistolFireRef.Object)
+	{
+		PistolFireAction = InputActionPistolFireRef.Object;
+	}
 
 	// Camera Pose Settings
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
@@ -116,6 +153,7 @@ void ASTLocalPlayer::PostInitializeComponents()
 	// Set Weapon and Hammer Data
 	if (1 < QuickSlotComp->QuickSlots.Num())
 	{
+		// TODO: QuickSlot
 		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
 		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
 		QuickSlotComp->QuickSlots[0].bIsCountable = false;
@@ -124,13 +162,6 @@ void ASTLocalPlayer::PostInitializeComponents()
 		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
 		QuickSlotComp->QuickSlots[1].bIsCountable = false;
 	}
-}
-
-void ASTLocalPlayer::BeginPlay()
-{
-	Super::BeginPlay();
-
-	HoldItem();
 }
 
 void ASTLocalPlayer::Tick(float DeltaTime)
@@ -155,14 +186,44 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 #endif
 }
 
+void ASTLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderMove);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderLook);
+	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Started, this, &ASTLocalPlayer::PistolAim);
+	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Completed, this, &ASTLocalPlayer::PistolFire);
+	EnhancedInputComponent->BindAction(ChangeQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ChangeQuickSlot);
+}
+
+void ASTLocalPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	HoldItem();
+}
+
 void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+
 	if (InHUDWidget)
 	{
 		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->GetInventoryMenuWidget()->SetInventoryComponent(InventoryComp);
+		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
+
 		InHUDWidget->UpdateStat();
-		InHUDWidget->UpdateInventoryMenu(InventoryComp->Slots);
-		InHUDWidget->UpdateQuickSlots(QuickSlotComp->QuickSlots, QuickSlotComp->CurrentSelectQuickSlotIndex);
+		InHUDWidget->UpdateInventoryMenu();
+		InHUDWidget->UpdateQuickSlots();
 
 		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
@@ -234,24 +295,6 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	PoseElapsedTime = 0.f;
 }
 
-void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
-{
-	switch (NewState)
-	{
-	case ECameraPose::Idle:
-		ChangeToIdle();
-		break;
-	case ECameraPose::Aiming:
-		ChangeToAiming();
-		break;
-	case ECameraPose::LookingUp:
-		ChangeToLookingUp();
-		break;
-	default:
-		break;
-	}
-}
-
 void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 {
 	FVector Start = CameraComp->GetComponentLocation();
@@ -294,7 +337,7 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 			if (QuickSlot.ItemData == PickupItem->ItemData)
 			{
 				QuickSlot.Count += 1;
-				QuickSlotComp->OnQuickSlotUpdated.Broadcast(QuickSlotComp->QuickSlots, QuickSlotComp->CurrentSelectQuickSlotIndex);
+				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 				break;
 			}
 		}
@@ -401,6 +444,85 @@ void ASTLocalPlayer::DropItem()
 		RightHandStaticMesh->SetSimulatePhysics(true);
 		RightHandStaticMesh->SetEnableGravity(true);
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+	}
+}
+
+void ASTLocalPlayer::ShoulderMove(const FInputActionValue& Value)
+{
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardDirection, MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void ASTLocalPlayer::ShoulderLook(const FInputActionValue& Value)
+{
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	AddControllerYawInput(LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void ASTLocalPlayer::PistolAim(const FInputActionValue& Value)
+{
+	bool bIsAiming = HasAnyState(EPlayerState::Aiming);
+	if (bIsAiming)
+	{
+		RemoveState(EPlayerState::Aiming);
+		ApplyStateSettings(ECameraPose::Idle);
+		bUseControllerRotationYaw = false;
+	}
+	else
+	{
+		AddState(EPlayerState::Aiming);
+		ApplyStateSettings(ECameraPose::Aiming);
+		bUseControllerRotationYaw = true;
+	}
+}
+
+void ASTLocalPlayer::PistolFire(const FInputActionValue& Value)
+{
+	// TODO: 좌클릭 처리를 여기서 분기하기, 함수 이름 변경하기
+	bool bIsAiming = HasAnyState(EPlayerState::Aiming);
+	if (bIsAiming)
+	{
+		//TODO: 파티클 애니메이션 재생
+	}
+}
+
+void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
+{
+	int32 SlotIndex = FMath::RoundToInt(Value.Get<float>());
+
+	// TODO: 퀵슬롯 변경 로직 작성
+}
+
+void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
+{
+	// TODO: 스크롤로 퀵슬롯 번호 변경
+}
+
+void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+	case ECameraPose::Idle:
+		ChangeToIdle();
+		break;
+	case ECameraPose::Aiming:
+		ChangeToAiming();
+		break;
+	case ECameraPose::LookingUp:
+		ChangeToLookingUp();
+		break;
+	default:
 		break;
 	}
 }

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
-#include "Widget/STHUD.h"
+#include "InputActionValue.h"
 #include "STPlayerController.generated.h"
 
 /**
@@ -16,13 +16,30 @@ class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
-	void CreateStoreWidget();
+	ASTPlayerController();
 
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
+	void CreateStoreWidget();
 
-	void Interact() override;
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class USTHUDWidget> HUDWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class USTHUDWidget> HUDWidget;
+
+// Input Section
+protected:
+	void OpenInventory(const FInputActionValue& Value);
+	void OpenStore(const FInputActionValue& Value);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> OpenInventoryAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> OpenStoreAction;
 };

@@ -2,20 +2,38 @@
 
 
 #include "Controller/STPlayerController.h"
+#include "UI/STHUDWidget.h"
 #include "Actor/STInteractableActor.h"
 #include "DrawDebugHelpers.h"
+
+ASTPlayerController::ASTPlayerController()
+{
+}
 
 void ASTPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
+	}
+
+	if (HUDWidget)
+	{
+		HUDWidget->AddToViewport();
+	}
 }
 
-void ASTPlayerController::Tick(float DeltaTime)
+void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 {
-	Super::Tick(DeltaTime);
+	if (HUDWidget)
+	{
+		//HUDWidget->OpenInventoryMenu();
+	}
 }
 
-void ASTPlayerController::Interact()
+void ASTPlayerController::OpenStore(const FInputActionValue& Value)
 {
-	Super::Interact();
+
 }

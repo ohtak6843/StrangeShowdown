@@ -108,7 +108,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	QuickSlots[TargetQuickSlotIndex] = ItemSlot;
 
 	// Call On QuickSlotUpdated
-	OnQuickSlotUpdated.Broadcast(QuickSlots, CurrentSelectQuickSlotIndex);
+	OnQuickSlotUpdated.Broadcast();
 	return true;
 }
 

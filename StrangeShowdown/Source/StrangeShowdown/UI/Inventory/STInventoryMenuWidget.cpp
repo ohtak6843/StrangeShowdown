@@ -3,6 +3,7 @@
 
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "UI/Inventory/STInventoryWidget.h"
+#include "Component/STInventoryComponent.h"
 
 USTInventoryMenuWidget::USTInventoryMenuWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,10 +41,18 @@ void USTInventoryMenuWidget::NativeDestruct()
 	}
 }
 
-void USTInventoryMenuWidget::UpdateInventory(const TArray<FSTItemSlot>& InItemSlots)
+void USTInventoryMenuWidget::SetInventoryComponent(USTInventoryComponent* InInventoryComp)
 {
-	if (Inventory)
+	if (InInventoryComp)
 	{
-		Inventory->UpdateInventory(InItemSlots);
+		SourceInventoryComp = InInventoryComp;
+	}
+}
+
+void USTInventoryMenuWidget::UpdateInventory()
+{
+	if (Inventory && SourceInventoryComp.IsValid())
+	{
+		Inventory->UpdateInventory(SourceInventoryComp->Slots);
 	}
 }

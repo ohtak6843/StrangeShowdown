@@ -95,5 +95,4 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bAlive;
-		
 };

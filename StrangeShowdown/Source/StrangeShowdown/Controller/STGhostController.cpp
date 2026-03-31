@@ -6,7 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
-#include "Widget/STHUD.h"
+#include "UI/STHUDWidget.h"
 
 ASTGhostController::ASTGhostController()
 {
@@ -63,5 +63,6 @@ void ASTGhostController::FocusChatManager()
 {
 	SetInputMode(FInputModeGameAndUI());
 
-	HUDWidget->ChatManagerWidget->ChatInputTextBox->SetKeyboardFocus();
+	// TODO: ChatManagerWidget 구현 후 활성화
+	//HUDWidget->ChatManagerWidget->ChatInputTextBox->SetKeyboardFocus();
 }

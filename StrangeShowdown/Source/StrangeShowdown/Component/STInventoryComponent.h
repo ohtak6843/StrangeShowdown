@@ -7,7 +7,7 @@
 #include "Types/PlayerTypes.h"
 #include "STInventoryComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const TArray<FSTItemSlot>& /*InItemSlots*/);
+DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
 // MouseDrop 이벤트 디스패처
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(

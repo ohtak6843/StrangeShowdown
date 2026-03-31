@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Types/PlayerTypes.h"
+#include "InputActionValue.h"
 #include "GameData/STItemSlot.h"
 #include "Interface/STCharacterHUDInterface.h"
 #include "Interface/STAnimAttackInterface.h"
@@ -20,24 +21,18 @@ public:
 	ASTLocalPlayer();
 
 	virtual void PostInitializeComponents() override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
-	// Called when the game starts or when spawned
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaTime) override;
 
 public:
 	// ISTAnimAttackInterface
 	virtual void AttackHitCheck() override;
 
-	void SetCameraPose(ECameraPose NewPose);
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnStatUIUpdated();
-
-	UFUNCTION(BlueprintCallable)
-	void ApplyStateSettings(ECameraPose NewState);
 
 	UFUNCTION(BlueprintCallable)
 	void Interact(int32& OutAddedInventoryIndex);
@@ -58,10 +53,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void NotEnoughStaminaCostFloatingMessage();
 
-	// TODO: 임시로 블프에 함수 만들어놓은 것, 나중에 함수들 c++로 옮기면서 없애야 함
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateQuickslotForCpp();
-
 	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
 
 	TObjectPtr<class USTStoreComponent> GetStoreComp() { return StoreComp; }
@@ -69,7 +60,6 @@ public:
 	TObjectPtr<class USTMissionComponent> GetMissionComp() { return MissionComponent; }
 
 protected:
-
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
@@ -101,17 +91,44 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Smash")
 	bool IsSmashing = false;
 
+// Input Section
+protected:
+	void ShoulderMove(const FInputActionValue& Value);
+	void ShoulderLook(const FInputActionValue& Value);
+	void PistolAim(const FInputActionValue& Value);
+	void PistolFire(const FInputActionValue& Value);
+	void ChangeQuickSlot(const FInputActionValue& Value);
+	void ScrollQuickSlot(const FInputActionValue& Value);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> ShoulderMoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> ShoulderLookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> PistolAimAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> PistolFireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> ChangeQuickSlotAction;
+
 // HUD Section
 protected:
 	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
 
 // Camera Pose Section
-private:
+protected:
+	void ApplyStateSettings(ECameraPose NewState);
+	void SetCameraPose(ECameraPose NewPose);
 	void ChangeToIdle();
 	void ChangeToAiming();
 	void ChangeToLookingUp();
-
-	void SendMovePacket(const float DeltaTime);
 
 	TMap<ECameraPose, FCameraPoseSetting> PoseSettings;
 
@@ -121,11 +138,18 @@ private:
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
 
-	// Network Section
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TObjectPtr<class UNiagaraSystem> HitEffect;
+
+// Network Section
 private:
+	void SendMovePacket(const float DeltaTime);
+
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	TObjectPtr<class UNiagaraSystem> HitEffect;
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 };

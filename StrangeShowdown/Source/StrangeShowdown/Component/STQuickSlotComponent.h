@@ -9,7 +9,7 @@
 #include "STQuickSlotComponent.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnQuickSlotUpdated, const TArray<FSTItemSlot>& /*InItemSlots*/, int32 /*CurrentSelectedIndex*/);
+DECLARE_MULTICAST_DELEGATE(FOnQuickSlotUpdated);
 
 // MouseDrop 이벤트 디스패처
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
