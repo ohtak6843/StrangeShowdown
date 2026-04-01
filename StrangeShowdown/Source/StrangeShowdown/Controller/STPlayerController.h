@@ -19,9 +19,12 @@ public:
 	ASTPlayerController();
 
 protected:
+	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
 
 public:
+	class USTHUDWidget* GetHUDWidget() const { return HUDWidget; }
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
 	void CreateStoreWidget();
 
@@ -36,10 +39,14 @@ protected:
 protected:
 	void OpenInventory(const FInputActionValue& Value);
 	void OpenStore(const FInputActionValue& Value);
+	void FocusChatManager(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenInventoryAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenStoreAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> FocusChatManagerAction;
 };

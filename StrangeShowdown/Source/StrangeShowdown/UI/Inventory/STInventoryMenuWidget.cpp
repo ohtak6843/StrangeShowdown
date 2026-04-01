@@ -15,6 +15,7 @@ void USTInventoryMenuWidget::NativeConstruct()
 
 	Inventory = Cast<USTInventoryWidget>(GetWidgetFromName(TEXT("WidgetInventory")));
 
+	// TODO: STHUDWidget에서 OpenInventoryMenu() 쪽에서 하는 걸로 변경하기
 	APlayerController* PC = GetOwningPlayer();
 	if (PC)
 	{

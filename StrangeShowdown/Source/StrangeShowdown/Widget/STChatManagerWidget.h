@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/ScrollBox.h"
-#include "Components/EditableTextBox.h"
-#include "Misc/DateTime.h"
 #include "STChatManagerWidget.generated.h"
 
 /**
@@ -31,20 +28,13 @@ class STRANGESHOWDOWN_API USTChatManagerWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// UI Bind
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UScrollBox* ChatScrollBox;
+	USTChatManagerWidget(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UEditableTextBox* ChatInputTextBox;
-
-public:
-	UPROPERTY(BlueprintReadWrite, Category = "Chat")
-	TArray<FChatMessage> ChatLog;
-
-
-public:
+protected:
 	virtual void NativeConstruct() override;
+
+public:
+	class UEditableTextBox* GetChatInputTextBox() const { return ChatInputTextBox; }
 
 	// 메시지 추가(UI 갱신)
 	UFUNCTION(BlueprintCallable, Category = "Chat")
@@ -57,4 +47,14 @@ public:
 	// ChatManager 포커스
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 	void SetChatInputFocus();
+
+protected:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UScrollBox> ChatScrollBox;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UEditableTextBox> ChatInputTextBox;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Chat")
+	TArray<FChatMessage> ChatLog;
 };

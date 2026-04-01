@@ -57,5 +57,5 @@ public:
 	double zPosition = 2000.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-	class USTHUD* HUDWidget;
+	TObjectPtr<class USTHUDWidget> HUDWidget;
 };

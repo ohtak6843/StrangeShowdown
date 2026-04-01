@@ -118,6 +118,30 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> ChangeQuickSlotAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> ScrollQuickSlotAction;
+
+// Montage Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> PistolFireMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> SmashMontage;
+
+// Effect Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TObjectPtr<class UNiagaraSystem> MuzzleFlashEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TObjectPtr<class UNiagaraSystem> HitEffect;
+
+// Sound Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)
+	TObjectPtr<class USoundBase> PistolFireSound;
+
 // HUD Section
 protected:
 	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
@@ -138,9 +162,10 @@ protected:
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
 
+// Player Meshes Section
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	TObjectPtr<class UNiagaraSystem> HitEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 
 // Network Section
 private:
@@ -148,8 +173,4 @@ private:
 
 	float SendMoveDeltaTime{};
 	const float SendMoveMaxTime{ 0.1f };
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 };

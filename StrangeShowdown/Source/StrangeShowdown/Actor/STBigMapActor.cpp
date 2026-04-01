@@ -5,10 +5,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "Controller/STBaseController.h"
+#include "Controller/STPlayerController.h"
 #include "Widget/STMiniMapWidget.h"
 #include "GameFramework/HUD.h"
-#include "Widget/STHUD.h"
+#include "UI/STHUDWidget.h"
 #include "Interface/STMiniMapTargetInterface.h"
 
 // Sets default values
@@ -53,7 +53,7 @@ void ASTBigMapActor::Tick(float DeltaTime)
 
 void ASTBigMapActor::BringHUD()
 {
-	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	ASTPlayerController* STPC = Cast<ASTPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (STPC)
 	{
 		HUDWidget = STPC->GetHUDWidget();
@@ -105,7 +105,7 @@ FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 
 	Relative.Y *= -1.f;
 
-	const float WidgetSize = HUDWidget->BigMapWidget->GetDesiredSize().Y;
+	const float WidgetSize = HUDWidget->GetBigMapWidget()->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
 	const float Scale = WidgetSize / OrthoWidth;
@@ -120,7 +120,7 @@ FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
-	if (!HUDWidget || !HUDWidget->BigMapWidget) return;
+	if (!HUDWidget || !HUDWidget->GetBigMapWidget()) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -153,7 +153,7 @@ void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
-		const float WidgetSize = HUDWidget->BigMapWidget->GetDesiredSize().Y;
+		const float WidgetSize = HUDWidget->GetBigMapWidget()->GetDesiredSize().Y;
 
 		const float MinX = Offset.X + 10.f;
 		const float MaxX = Offset.X + WidgetSize - 15.f;

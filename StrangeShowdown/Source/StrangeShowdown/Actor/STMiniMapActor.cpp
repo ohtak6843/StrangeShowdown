@@ -2,9 +2,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "Controller/STBaseController.h"
+#include "Controller/STPlayerController.h"
 #include "Widget/STMiniMapWidget.h"
-#include "Widget/STHUD.h"
+#include "UI/STHUDWidget.h"
 #include "Interface/STMiniMapTargetInterface.h"
 
 // Sets default values
@@ -44,7 +44,7 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 
 void ASTMiniMapActor::BringHUD()
 {
-	ASTBaseController* STPC = Cast<ASTBaseController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	ASTPlayerController* STPC = Cast<ASTPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!STPC) return;
 	if (!STPC->GetHUDWidget()) return;
 
@@ -95,12 +95,12 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	if (!HUDWidget || !HUDWidget->MiniMapWidget || !MiniMapCapture)
+	if (!HUDWidget || !HUDWidget->GetMiniMapWidget() || !MiniMapCapture)
 	{
 		return FVector2D::ZeroVector;
 	}
 
-	const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
+	const float WidgetSize = HUDWidget->GetMiniMapWidget()->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
 	const float Scale = WidgetSize / OrthoWidth;
@@ -139,7 +139,7 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
-	if (!HUDWidget || !HUDWidget->MiniMapWidget) return;
+	if (!HUDWidget || !HUDWidget->GetMiniMapWidget()) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -175,7 +175,7 @@ void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
-		const float WidgetSize = HUDWidget->MiniMapWidget->GetDesiredSize().Y;
+		const float WidgetSize = HUDWidget->GetMiniMapWidget()->GetDesiredSize().Y;
 
 		const float MinX = Offset.X + 10.f;
 		const float MaxX = Offset.X + WidgetSize - 15.f;
