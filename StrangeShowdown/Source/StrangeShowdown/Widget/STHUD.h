@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Widget/STChatManagerWidget.h"
-#include "Widget/STStatWidget.h"
+#include "UI/Stat/STStatWidget.h"
 #include "Widget/STMissionWidget.h"
 #include "Widget/STMiniMapWidget.h"
 #include "STHUD.generated.h"
@@ -13,14 +13,6 @@
 /**
  * 
  */
-UENUM(BlueprintType)
-enum class EHUDWidgetType : uint8
-{
-	Player,
-	Ghost,
-	Sheriff
-};
-
 UCLASS()
 class STRANGESHOWDOWN_API USTHUD : public UUserWidget
 {
@@ -31,7 +23,7 @@ public:
 	USTChatManagerWidget* ChatManagerWidget;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USTStatWidget* StatWidget;
+	UUserWidget* StatWidget;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	USTMissionWidget* MissionWidget;

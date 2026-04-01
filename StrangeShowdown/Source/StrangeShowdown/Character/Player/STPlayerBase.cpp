@@ -33,15 +33,6 @@ ASTPlayerBase::ASTPlayerBase()
 
 	// Stat Component
 	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
-	StatComp->CurrentHp = StatComp->MaxHp;
-	StatComp->Gold = 0;
-	StatComp->Kill = 0;
-	StatComp->CurrentArmor = 0;
-	StatComp->MoveSpeed = 500;
-	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
-	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Prize = 0;
-	StatComp->bAlive = true;
 
 	// Right Hand Mesh
 	RightHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightItemMesh"));

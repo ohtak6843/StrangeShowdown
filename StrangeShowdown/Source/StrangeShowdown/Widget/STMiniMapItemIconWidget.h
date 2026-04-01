@@ -15,6 +15,8 @@ class STRANGESHOWDOWN_API USTMiniMapItemIconWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	void SetIconTexture(UTexture2D* Texture);
+
 	UPROPERTY(meta = (BindWidget))
 	class UImage* IconImage;
 };

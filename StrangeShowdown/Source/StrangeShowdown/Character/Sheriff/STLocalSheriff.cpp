@@ -83,8 +83,8 @@ void ASTLocalSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Move);
-	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::Look);
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::ShoulderMove);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::ShoulderLook);
 	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolAim);
 	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Triggered, this, &ASTLocalSheriff::PistolFire);
 }
@@ -193,7 +193,7 @@ void ASTLocalSheriff::AddInputMappingContext()
 	}
 }
 
-void ASTLocalSheriff::Move(const FInputActionValue& Value)
+void ASTLocalSheriff::ShoulderMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -207,7 +207,7 @@ void ASTLocalSheriff::Move(const FInputActionValue& Value)
 	AddMovementInput(RightDirection, MovementVector.Y);
 }
 
-void ASTLocalSheriff::Look(const FInputActionValue& Value)
+void ASTLocalSheriff::ShoulderLook(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 

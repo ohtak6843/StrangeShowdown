@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Widget/STHUD.h"
 #include "STBaseController.generated.h"
 
 /**
@@ -20,17 +19,15 @@ public:
 
 	virtual void SetupInputComponent() override;
 
-	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	TObjectPtr<USTHUD> HUDWidget;
-
-	
+public:
+	// TODO: 나중에 어떻게 할지 정하기
+	class USTHUD* GetHUDWidget() const { return nullptr; }
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
-	// 상호작용
 	virtual void Interact();
 
 private:

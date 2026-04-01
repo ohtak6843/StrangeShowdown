@@ -7,40 +7,24 @@
 // Sets default values for this component's properties
 USTQuickSlotComponent::USTQuickSlotComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	bWantsInitializeComponent = true;
 }
 
-
-// Called when the game starts
-void USTQuickSlotComponent::BeginPlay()
+void USTQuickSlotComponent::InitializeComponent()
 {
-	Super::BeginPlay();
+	Super::InitializeComponent();
 
-	// ...
 	// Resize QuickSlots array
 	QuickSlots.SetNum(QuickSlotSize);
 	InventorySlotIndex.SetNum(QuickSlotSize);
-	
+
 	// InventorySlotIndex 초기화
-	for(int32 i = 0; i < InventorySlotIndex.Num(); i++)
+	for (int32 i = 0; i < InventorySlotIndex.Num(); i++)
 	{
 		InventorySlotIndex[i] = -1;
 	}
 
 	MouseDropToQuickSlot.AddDynamic(this, &USTQuickSlotComponent::AddToQuickSlot_FromEvent);
-}
-
-
-// Called every frame
-void USTQuickSlotComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex)
@@ -63,7 +47,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	}
 
 	// 인벤토리에서 아이템 가져오기
-	FInventorySlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
+	FSTItemSlot ItemSlot = InventorySystem->Slots[InventoryItemIndex];
 
 	// 이미 있는 슬롯을 재사용
 	if (TargetQuickSlotIndex == -2)
@@ -84,7 +68,7 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 		{
 			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
 			{
-				QuickSlots[i] = FInventorySlot();
+				QuickSlots[i] = FSTItemSlot();
 				InventorySlotIndex[i] = -1;
 				break;
 			}
@@ -140,5 +124,14 @@ void USTQuickSlotComponent::AddToQuickSlot_FromEvent(int32 InventoryItemIndex, U
 
 USTItemDataAssetBase* USTQuickSlotComponent::GetCurrentSelectedQuickSlotItemData() const
 {
-	return QuickSlots[CurrentSelectQuickSlotIndex].ItemData.Get();
+	if(QuickSlots.IsValidIndex(CurrentSelectQuickSlotIndex) && QuickSlots[CurrentSelectQuickSlotIndex].ItemData)
+	{
+		return QuickSlots[CurrentSelectQuickSlotIndex].ItemData.Get();
+	}
+
+	return nullptr;
+}
+
+void USTQuickSlotComponent::AddItem(const FSTItemSlot& ItemSlot, int32 InventoryIndex, int32 QuickSlotIndex)
+{
 }

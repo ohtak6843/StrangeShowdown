@@ -66,3 +66,21 @@ enum class ESheriffState : uint8
 	Dead		= 1 << 3		UMETA(DisplayName = "Dead"),
 };
 ENUM_CLASS_FLAGS(ESheriffState)
+
+UENUM(BlueprintType)
+enum class EItemUseType : uint8
+{
+	CanUse,
+	NotEnoughStaminaCost,
+	NoEffect,
+	Exception,
+	UnValid
+};
+
+UENUM(BlueprintType)
+enum class EHUDWidgetType : uint8
+{
+	Player,
+	Ghost,
+	Sheriff
+};

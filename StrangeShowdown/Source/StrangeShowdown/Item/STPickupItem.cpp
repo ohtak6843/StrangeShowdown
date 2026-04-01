@@ -28,6 +28,15 @@ ASTPickupItem::ASTPickupItem()
 	PickupWidgetComponent->SetVisibility(false);
 
 	PickupWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> IconRef(
+		TEXT("/Script/Engine.Texture2D'/Game/StrangeShowdown/UI/Texture/T_ItemIcon.T_ItemIcon'")
+	);
+
+	if (IconRef.Succeeded())
+	{
+		MiniMapIcon = IconRef.Object;
+	}
 }
 
 void ASTPickupItem::OnConstruction(const FTransform& Transform)
@@ -59,12 +68,12 @@ void ASTPickupItem::BeginPlay()
 
 		if (LocalPlayer && LocalPlayer->MiniMapActor)
 		{
-			LocalPlayer->MiniMapActor->RegisterItem(this);
+			LocalPlayer->MiniMapActor->RegisterMiniMapTarget(this);
 		}
 
 		if (LocalPlayer && LocalPlayer->BigMapActor)
 		{
-			LocalPlayer->BigMapActor->RegisterItem(this);
+			LocalPlayer->BigMapActor->RegisterBigMapTarget(this);
 		}
 	}
 }
@@ -101,6 +110,16 @@ void ASTPickupItem::HandleEndOverlap(
 		if (PickupWidgetComponent)
 			PickupWidgetComponent->SetVisibility(false);
 	}
+}
+
+FVector ASTPickupItem::GetMiniMapLocation_Implementation()
+{
+	return GetActorLocation();
+}
+
+UTexture2D* ASTPickupItem::GetMiniMapIcon_Implementation()
+{
+	return MiniMapIcon;
 }
 
 void ASTPickupItem::Tick(float DeltaTime)

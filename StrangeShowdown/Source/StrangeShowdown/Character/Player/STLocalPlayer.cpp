@@ -2,16 +2,30 @@
 
 
 #include "Character/Player/STLocalPlayer.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Item/STPickupItem.h"
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
+#include "Component/STMissionComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
+#include "Engine/DamageEvents.h"
+#include "Actor/STSliceableActor.h"
+#include "Particles/ParticleSystem.h"
+#include "StrangeShowdown.h"
+#include "UI/STHUDWidget.h"
+#include "UI/Stat/STStatWidget.h"
+#include "UI/Inventory/STInventoryMenuWidget.h"
+#include "UI/STQuickSlotWidget.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "Protocol.h"
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -29,6 +43,17 @@ ASTLocalPlayer::ASTLocalPlayer()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
+	// Stat Component
+	StatComp->CurrentHp = StatComp->MaxHp;
+	StatComp->Gold = 0;
+	StatComp->Kill = 0;
+	StatComp->CurrentArmor = 0;
+	StatComp->MoveSpeed = 500;
+	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
+	StatComp->CurrentAction = StatComp->UseAbleAction;
+	StatComp->Prize = 0;
+	StatComp->bAlive = true;
+
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 
@@ -41,10 +66,51 @@ ASTLocalPlayer::ASTLocalPlayer()
 	// Attack Trace Component
 	AttackTraceComp = CreateDefaultSubobject<USTAttackTraceComponent>(TEXT("AttackTraceComp"));
 
+	// Mission Component
+	MissionComponent = CreateDefaultSubobject<USTMissionComponent>(TEXT("MissionComponent"));
+
+	// Input Mapping Context
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_TestPlayerInput.IMC_TestPlayerInput"));
+	if (nullptr != InputMappingContextRef.Object)
+	{
+		DefaultMappingContext = InputMappingContextRef.Object;
+	}
+
+	// Input Actions
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
+	if (nullptr != InputActionShoulderMoveRef.Object)
+	{
+		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
+	if (nullptr != InputActionShoulderLookRef.Object)
+	{
+		ShoulderLookAction = InputActionShoulderLookRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolAim.IA_PistolAim'"));
+	if (nullptr != InputActionPistolAimRef.Object)
+	{
+		PistolAimAction = InputActionPistolAimRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolFireRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolFire.IA_PistolFire'"));
+	if (nullptr != InputActionPistolFireRef.Object)
+	{
+		PistolFireAction = InputActionPistolFireRef.Object;
+	}
+
 	// Camera Pose Settings
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> EffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Prop/SmashFX/NS_Smash.NS_Smash'"));
+	if (EffectRef.Object)
+	{
+		HitEffect = EffectRef.Object;
+	}
 
 	// MiniMap 검색
 	TArray<AActor*> WorldMiniMapActors;
@@ -81,6 +147,145 @@ ASTLocalPlayer::ASTLocalPlayer()
 	}
 }
 
+void ASTLocalPlayer::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Set Weapon and Hammer Data
+	if (1 < QuickSlotComp->QuickSlots.Num())
+	{
+		// TODO: QuickSlot
+		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
+		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
+		QuickSlotComp->QuickSlots[0].bIsCountable = false;
+
+		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
+		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
+		QuickSlotComp->QuickSlots[1].bIsCountable = false;
+	}
+}
+
+void ASTLocalPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
+
+	// Send Move Packet to Server
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
+}
+
+void ASTLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderMove);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderLook);
+	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Started, this, &ASTLocalPlayer::PistolAim);
+	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Completed, this, &ASTLocalPlayer::PistolFire);
+	EnhancedInputComponent->BindAction(ChangeQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ChangeQuickSlot);
+}
+
+void ASTLocalPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	HoldItem();
+}
+
+void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
+{
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+
+	if (InHUDWidget)
+	{
+		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->GetInventoryMenuWidget()->SetInventoryComponent(InventoryComp);
+		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
+
+		InHUDWidget->UpdateStat();
+		InHUDWidget->UpdateInventoryMenu();
+		InHUDWidget->UpdateQuickSlots();
+
+		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
+		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
+		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
+
+		// OnDrop 시 업데이트 연결
+		for (int i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
+		{
+			InHUDWidget->GetQuickSlotWidget(i)->OnQuickSlotWidgetDrop.AddUObject(QuickSlotComp, &USTQuickSlotComponent::AddItem);
+		}
+	}
+}
+
+void ASTLocalPlayer::AttackHitCheck()
+{
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * 100;
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	if (!bHit)
+		return;
+
+	AActor* HitActor = Hit.GetActor();
+	if (!HitActor)
+		return;
+
+	ASTSliceableActor* SliceableActor = Cast<ASTSliceableActor>(HitActor);
+	if (!SliceableActor)
+	{
+		return;
+	}
+
+	SliceableActor->Slice(Hit.ImpactPoint, Hit.ImpactNormal, this);
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		HitEffect,
+		Hit.ImpactPoint,
+		Hit.ImpactNormal.Rotation()
+	);
+
+	// 스태미나 감소
+	StatComp->AddStamina(-1.f);
+
+	OnStatUIUpdated();
+
+#if ENABLE_DRAW_DEBUG
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
+#endif
+}
+
 void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 {
 	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
@@ -89,24 +294,6 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	TargetPose = PoseSettings[NewPose];
 
 	PoseElapsedTime = 0.f;
-}
-
-void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
-{
-	switch (NewState)
-	{
-	case ECameraPose::Idle:
-		ChangeToIdle();
-		break;
-	case ECameraPose::Aiming:
-		ChangeToAiming();
-		break;
-	case ECameraPose::LookingUp:
-		ChangeToLookingUp();
-		break;
-	default:
-		break;
-	}
 }
 
 void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
@@ -141,11 +328,13 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 		AddedInventoryIndex
 	);
 
+	// TODO: 인벤토리 위젯 업데이트 하도록 브로드캐스트
+
 	if (bAdded && QuickSlotComp)
 	{
 		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
 		{
-			FInventorySlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+			FSTItemSlot& QuickSlot = QuickSlotComp->QuickSlots[i];
 			if (QuickSlot.ItemData == PickupItem->ItemData)
 			{
 				QuickSlot.Count += 1;
@@ -162,6 +351,36 @@ void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
 	OutAddedInventoryIndex = AddedInventoryIndex;
 
 	PickupItem->Destroy();
+}
+
+void ASTLocalPlayer::UseItem()
+{
+	if (!InventoryComp || !QuickSlotComp)
+		return;
+
+	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
+	if (QuickSlotIndex == INDEX_NONE)
+		return;
+
+	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
+	if (InventorySlotIndex == INDEX_NONE)
+		return;
+
+	// 결과
+	FSTItemSlot OutSlot;
+
+	// 아이템 사용
+	EItemUseType Result = InventoryComp->UseItem(
+		InventorySlotIndex,
+		this,
+		0,
+		OutSlot
+	);
+
+	// 사용 결과에 따른 분기 효과(Implement)
+	UseItemEffect(OutSlot, Result);
+
+	HoldItem();
 }
 
 void ASTLocalPlayer::HoldItem()
@@ -191,6 +410,7 @@ void ASTLocalPlayer::HoldItem()
 	case EItemType::Meat:
 	case EItemType::Whiskey:
 	case EItemType::EnhancePower:
+	case EItemType::Letter:
 		RightHandStaticMesh->SetSimulatePhysics(false);
 		RightHandStaticMesh->SetEnableGravity(false);
 		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -229,47 +449,83 @@ void ASTLocalPlayer::DropItem()
 	}
 }
 
-void ASTLocalPlayer::BeginPlay()
+void ASTLocalPlayer::ShoulderMove(const FInputActionValue& Value)
 {
-	Super::BeginPlay();
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	// Set Weapon and Hammer Data
-	if (1 < QuickSlotComp->QuickSlots.Num())
-	{
-		USTItemDataAssetBase* PistolData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Pistol.DA_Pistol"));
-		QuickSlotComp->QuickSlots[0].ItemData = PistolData;
-		QuickSlotComp->QuickSlots[0].bIsInfinite = true;
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		USTItemDataAssetBase* HammerData = LoadObject<USTItemDataAssetBase>(nullptr, TEXT("/Game/StrangeShowdown/Item/DataAsset/DA_Hammer.DA_Hammer"));
-		QuickSlotComp->QuickSlots[1].ItemData = HammerData;
-		QuickSlotComp->QuickSlots[1].bIsInfinite = true;
-	}
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	UpdateQuickslotForCpp();
-
-	HoldItem();
+	AddMovementInput(ForwardDirection, MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.Y);
 }
 
-void ASTLocalPlayer::Tick(float DeltaTime)
+void ASTLocalPlayer::ShoulderLook(const FInputActionValue& Value)
 {
-	Super::Tick(DeltaTime);
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	// Camera Pose Blending
-	PoseElapsedTime += DeltaTime;
-	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+	AddControllerYawInput(LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);
+}
 
-	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+void ASTLocalPlayer::PistolAim(const FInputActionValue& Value)
+{
+	bool bIsAiming = HasAnyState(EPlayerState::Aiming);
+	if (bIsAiming)
+	{
+		RemoveState(EPlayerState::Aiming);
+		ApplyStateSettings(ECameraPose::Idle);
+		bUseControllerRotationYaw = false;
+	}
+	else
+	{
+		AddState(EPlayerState::Aiming);
+		ApplyStateSettings(ECameraPose::Aiming);
+		bUseControllerRotationYaw = true;
+	}
+}
 
-	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+void ASTLocalPlayer::PistolFire(const FInputActionValue& Value)
+{
+	// TODO: 좌클릭 처리를 여기서 분기하기, 함수 이름 변경하기
+	bool bIsAiming = HasAnyState(EPlayerState::Aiming);
+	if (bIsAiming)
+	{
+		//TODO: 파티클 애니메이션 재생
+	}
+}
 
-	FVector Rel = CameraComp->GetRelativeLocation();
-	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
-	CameraComp->SetRelativeLocation(Rel);
+void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
+{
+	int32 SlotIndex = FMath::RoundToInt(Value.Get<float>());
 
-	// Send Move Packet to Server
-#if NETWORK_ENABLED
-	SendMovePacket(DeltaTime);
-#endif
+	// TODO: 퀵슬롯 변경 로직 작성
+}
+
+void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
+{
+	// TODO: 스크롤로 퀵슬롯 번호 변경
+}
+
+void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+	case ECameraPose::Idle:
+		ChangeToIdle();
+		break;
+	case ECameraPose::Aiming:
+		ChangeToAiming();
+		break;
+	case ECameraPose::LookingUp:
+		ChangeToLookingUp();
+		break;
+	default:
+		break;
+	}
 }
 
 void ASTLocalPlayer::ChangeToIdle()

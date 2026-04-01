@@ -16,10 +16,11 @@ class STRANGESHOWDOWN_API USTMiniMapWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	void UpdateItemIcon(class ASTPickupItem* Item, const FVector2D& MiniMapPos);
-	void HideItemIcon(class ASTPickupItem* Item);
+	void UpdateTargetIcon(class AActor* Target, const FVector2D& MiniMapPos);
+	void HideTargetIcon(class AActor* Target);
 
 	// BigMap¿ë ÇÔ¼ö
 	void UpdatePlayerIcon(const FVector2D& MiniMapPos);
@@ -30,15 +31,20 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* PlayerTexture;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TMap<ASTPickupItem*, UUserWidget*> ItemIconMap;
+	UPROPERTY()
+	TMap<TWeakObjectPtr<AActor>, UUserWidget*> IconMap;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
-	TSubclassOf<USTMiniMapItemIconWidget> ItemIconClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mini Map")
+	TSubclassOf<class USTMiniMapItemIconWidget> IconClass;
 
 	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* ItemLayer;
+	class UCanvasPanel* IconLayer;
 
 private:
 	bool IsRotationAble = true;
+	
+	// Ä³½Ì
+	APlayerController* PlayerController;
+	APawn* PlayerPawn;
+	USkeletalMeshComponent* PlayerMesh;
 };

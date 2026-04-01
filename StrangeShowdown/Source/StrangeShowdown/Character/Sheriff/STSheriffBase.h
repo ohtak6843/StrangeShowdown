@@ -19,6 +19,8 @@ class STRANGESHOWDOWN_API ASTSheriffBase : public ASTCharacter
 public:
 	ASTSheriffBase();
 
+// State Section
+public:
 	FORCEINLINE void AddState(ESheriffState NewState) { SheriffStateFlag |= static_cast<uint8>(NewState); }
 	FORCEINLINE void RemoveState(ESheriffState RemoveState) { SheriffStateFlag &= ~static_cast<uint8>(RemoveState); }
 	FORCEINLINE bool HasAnyState(ESheriffState CheckState) const { return (SheriffStateFlag & static_cast<uint8>(CheckState)) != 0; }
@@ -38,13 +40,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, meta = (Bitmask, BitmaskEnum = "ESheriffState"))
 	uint8 SheriffStateFlag;
 
+// Mesh
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USkeletalMeshComponent> PistolMesh;
 
-	// Stat Component
+// Stat Component
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<USTStatComponent> StatComp;
-
-private:
 	
 };

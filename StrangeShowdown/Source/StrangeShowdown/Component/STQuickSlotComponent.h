@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "STInventoryComponent.h"
+#include "Component/STInventoryComponent.h"
+#include "GameData/STItemSlot.h"
 #include "STQuickSlotComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuickSlotUpdated);
+DECLARE_MULTICAST_DELEGATE(FOnQuickSlotUpdated);
 
 // MouseDrop 이벤트 디스패처
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
@@ -27,14 +28,9 @@ public:
 	// Sets default values for this component's properties
 	USTQuickSlotComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+public:
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	bool AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex);
@@ -50,18 +46,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	class USTItemDataAssetBase* GetCurrentSelectedQuickSlotItemData() const;
 
+	void AddItem(const FSTItemSlot& ItemSlot, int32 InventoryIndex, int32 QuickSlotIndex);
+
 public:
 	// MouseDropToQuickSlot 이벤트 디스패처
 	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
 	FMouseDropToQuickSlotEvent MouseDropToQuickSlot;
 
-	// OnQuickSlotUpdated 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "QuickSlot")
 	FOnQuickSlotUpdated OnQuickSlotUpdated;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
-	TArray<FInventorySlot> QuickSlots;
+	TArray<FSTItemSlot> QuickSlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuickSlot")
 	TArray<int32> InventorySlotIndex;
