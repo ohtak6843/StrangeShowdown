@@ -4,10 +4,16 @@
 #include "Widget/STChatManagerWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
+#include "Components/EditableTextBox.h"
+#include "Misc/DateTime.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Character/STCharacter.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+
+USTChatManagerWidget::USTChatManagerWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+}
 
 void USTChatManagerWidget::NativeConstruct()
 {
@@ -106,4 +112,6 @@ void USTChatManagerWidget::SetChatInputFocus()
 	{
 		ChatInputTextBox->SetKeyboardFocus();
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Chat input focused"));
 }

@@ -6,6 +6,10 @@
 #include "Interface/STMiniMapTargetInterface.h"
 #include "Widget/STMiniMapItemIconWidget.h"
 
+USTMiniMapWidget::USTMiniMapWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+}
+
 void USTMiniMapWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -29,12 +33,12 @@ void USTMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	Super::NativeTick(MyGeometry, DeltaTime);
 
 	if (!PlayerTexture) return;
-	if (!PlayerController) return;
-	if (!PlayerPawn) return;
-	if (!PlayerMesh) return;
+	if (!PlayerController.IsValid()) return;
+	if (!PlayerPawn.IsValid()) return;
+	if (!PlayerMesh.IsValid()) return;
 
-	float MeshYaw = PlayerMesh->GetComponentRotation().Yaw;
-	float ControllerYaw = PlayerController->GetControlRotation().Yaw;
+	float MeshYaw = PlayerMesh.Get()->GetComponentRotation().Yaw;
+	float ControllerYaw = PlayerController.Get()->GetControlRotation().Yaw;
 
 	if (IsRotationAble)
 	{

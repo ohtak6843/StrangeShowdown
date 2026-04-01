@@ -68,38 +68,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 	// Mission Component
 	MissionComponent = CreateDefaultSubobject<USTMissionComponent>(TEXT("MissionComponent"));
 
-	// Input Mapping Context
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_TestPlayerInput.IMC_TestPlayerInput"));
-	if (nullptr != InputMappingContextRef.Object)
-	{
-		DefaultMappingContext = InputMappingContextRef.Object;
-	}
-
-	// Input Actions
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
-	if (nullptr != InputActionShoulderMoveRef.Object)
-	{
-		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
-	if (nullptr != InputActionShoulderLookRef.Object)
-	{
-		ShoulderLookAction = InputActionShoulderLookRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolAim.IA_PistolAim'"));
-	if (nullptr != InputActionPistolAimRef.Object)
-	{
-		PistolAimAction = InputActionPistolAimRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolFireRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolFire.IA_PistolFire'"));
-	if (nullptr != InputActionPistolFireRef.Object)
-	{
-		PistolFireAction = InputActionPistolFireRef.Object;
-	}
-
 	// Camera Pose Settings
 	PoseSettings.Add(ECameraPose::Idle, FCameraPoseSetting{ 300.f, 0.f });
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
@@ -193,9 +161,10 @@ void ASTLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderLook);
-	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Started, this, &ASTLocalPlayer::PistolAim);
-	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Completed, this, &ASTLocalPlayer::PistolFire);
+	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PistolAim);
+	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PistolFire);
 	EnhancedInputComponent->BindAction(ChangeQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ChangeQuickSlot);
+	EnhancedInputComponent->BindAction(ScrollQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ScrollQuickSlot);
 }
 
 void ASTLocalPlayer::BeginPlay()
@@ -208,6 +177,13 @@ void ASTLocalPlayer::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 
+	// Set Local Player Mesh
+	if(PlayerMeshes[static_cast<int>(PlayerMeshType)].IsValid())
+	{
+		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<int>(PlayerMeshType)].LoadSynchronous();
+		GetMesh()->SetSkeletalMesh(PlayerMesh);
+	}
+
 	HoldItem();
 }
 
@@ -218,11 +194,9 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 	if (InHUDWidget)
 	{
 		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
-		InHUDWidget->GetInventoryMenuWidget()->SetInventoryComponent(InventoryComp);
 		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
 
 		InHUDWidget->UpdateStat();
-		InHUDWidget->UpdateInventoryMenu();
 		InHUDWidget->UpdateQuickSlots();
 
 		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
@@ -507,6 +481,19 @@ void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
 void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
 {
 	// TODO: 스크롤로 퀵슬롯 번호 변경
+	int32 ScrollValue = FMath::RoundToInt(Value.Get<float>());
+	int32 CurrentIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
+
+	if(ScrollValue > 0)
+	{
+		//CurrentIndex = (CurrentIndex + 1) % QuickSlotComp->QuickSlots.Num();
+		UE_LOG(LogTemp, Log, TEXT("Scroll Up"));
+	}
+	else if(ScrollValue < 0)
+	{
+		//CurrentIndex = (CurrentIndex - 1 + QuickSlotComp->QuickSlots.Num()) % QuickSlotComp->QuickSlots.Num();
+		UE_LOG(LogTemp, Log, TEXT("Scroll Down"));
+	}
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

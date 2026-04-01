@@ -25,10 +25,6 @@ protected:
 public:
 	class USTStatWidget* GetStatWidget() const { return StatWidget; }
 
-	void UpdateMission();
-	void UpdateMiniMap();
-	void UpdateWorldMap();
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	EHUDWidgetType HUDWidgetType = EHUDWidgetType::Player;
@@ -48,7 +44,7 @@ protected:
 
 #pragma region Inventory Section
 public:
-	class USTInventoryMenuWidget* GetInventoryMenuWidget() const { return InventoryMenuWidget; }
+	class USTInventoryMenuWidget* GetInventoryMenuWidget() { return InventoryMenuWidget; }
 
 	void OpenInventoryMenu();
 	void UpdateInventoryMenu();
@@ -93,8 +89,14 @@ protected:
 
 #pragma region Chat Section
 public:
+	class USTChatManagerWidget* GetChatManagerWidget() const { return ChatManagerWidget; }
+
+	void FocusChatManager();
+	void UpdateChatManager();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTChatManagerWidget> ChatManagerWidget;
 
 #pragma endregion
 
@@ -107,8 +109,18 @@ protected:
 
 #pragma region Map Section
 public:
+	class USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }
+	class USTMiniMapWidget* GetBigMapWidget() const { return BigMapWidget; }
+
+	void UpdateMiniMap();
+	void UpdateBigMap();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTMiniMapWidget> MiniMapWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTMiniMapWidget> BigMapWidget;
 
 #pragma endregion
 };

@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
+#include "Components/EditableTextBox.h"
 #include "Widget/STLobbyHUD.h"
 
 ASTLobbyController::ASTLobbyController()
@@ -85,5 +86,5 @@ void ASTLobbyController::FocusChatManager()
 {
 	SetInputMode(FInputModeGameAndUI());
 
-	LobbyHUDWidget->ChatManagerWidget->ChatInputTextBox->SetKeyboardFocus();
+	LobbyHUDWidget->ChatManagerWidget->GetChatInputTextBox()->SetKeyboardFocus();
 }

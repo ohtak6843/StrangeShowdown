@@ -16,8 +16,16 @@ class STRANGESHOWDOWN_API USTMiniMapWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	USTMiniMapWidget(const FObjectInitializer& ObjectInitializer);
+
+protected:
 	virtual void NativeConstruct() override;
+
+public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+public:
+	class UImage* GetRenderTargetTexture() const { return RenderTargetTexture; }
 
 	void UpdateTargetIcon(class AActor* Target, const FVector2D& MiniMapPos);
 	void HideTargetIcon(class AActor* Target);
@@ -28,14 +36,17 @@ public:
 	void SetIsRotationAble(bool RotationAble) { IsRotationAble = RotationAble; }
 
 public:
-	UPROPERTY(meta = (BindWidget))
-	class UImage* PlayerTexture;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Map, meta = (BindWidget))
+	TObjectPtr<class UImage> PlayerTexture;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Map, meta = (BindWidget))
+	TObjectPtr<class UImage> RenderTargetTexture;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Map)
+	TSubclassOf<class USTMiniMapItemIconWidget> IconClass;
 
 	UPROPERTY()
 	TMap<TWeakObjectPtr<AActor>, UUserWidget*> IconMap;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mini Map")
-	TSubclassOf<class USTMiniMapItemIconWidget> IconClass;
 
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* IconLayer;
@@ -44,7 +55,7 @@ private:
 	bool IsRotationAble = true;
 	
 	// Ä³½Ì
-	APlayerController* PlayerController;
-	APawn* PlayerPawn;
-	USkeletalMeshComponent* PlayerMesh;
+	TWeakObjectPtr<class APlayerController> PlayerController;
+	TWeakObjectPtr<class APawn> PlayerPawn;
+	TWeakObjectPtr<class USkeletalMeshComponent> PlayerMesh;
 };

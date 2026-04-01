@@ -9,20 +9,10 @@
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "Component/STInventoryComponent.h"
 #include "Interface/STCharacterHUDInterface.h"
+#include "Widget/STChatManagerWidget.h"
 
 USTHUDWidget::USTHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FClassFinder<USTInventoryMenuWidget> InventoryMenuWidgetRef(TEXT("/Game/StrangeShowdown/UITest/Inventory/WBP_InventoryMenu.WBP_InventoryMenu_C"));
-	if (InventoryMenuWidgetRef.Class)
-	{
-		InventoryMenuClass = InventoryMenuWidgetRef.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<USTQuickSlotWidget> QuickSlotWidgetRef(TEXT("/Game/StrangeShowdown/UITest/WBP_QuickSlot.WBP_QuickSlot_C"));
-	if (QuickSlotWidgetRef.Class)
-	{
-		QuickSlotWidgetClass = QuickSlotWidgetRef.Class;
-	}
 }
 
 void USTHUDWidget::NativeConstruct()
@@ -40,18 +30,6 @@ void USTHUDWidget::NativeConstruct()
 	{
 		StatWidget->SetWidgetType(HUDWidgetType);
 	}
-}
-
-void USTHUDWidget::UpdateMission()
-{
-}
-
-void USTHUDWidget::UpdateMiniMap()
-{
-}
-
-void USTHUDWidget::UpdateWorldMap()
-{
 }
 
 void USTHUDWidget::UpdateStat()
@@ -114,26 +92,25 @@ void USTHUDWidget::SetupQuickSlots(int32 QuickSlotCount)
 
 void USTHUDWidget::UpdateQuickSlots()
 {
-	int32 QuickSlotWidgetCount = QuickSlotWrapBox->GetChildrenCount();
-	int32 QuickSlotItemCount = 0;
 	if (SourceQuickSlotComp.IsValid())
 	{
-		QuickSlotItemCount = SourceQuickSlotComp->QuickSlots.Num();
-	}
+		int32 QuickSlotWidgetCount = QuickSlotWrapBox->GetChildrenCount();
+		int32 QuickSlotItemCount = SourceQuickSlotComp->QuickSlots.Num();
 
-	// QuickSlot 개수와 QuickSlotComponent의 Item 개수가 다르면 새로 세팅
-	if (QuickSlotWidgetCount != QuickSlotItemCount)
-	{
-		QuickSlotWrapBox->ClearChildren();
-		SetupQuickSlots(QuickSlotItemCount);
-	}
-
-	for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
-	{
-		USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
-		if (QuickSlotWidget)
+		// QuickSlot 개수와 QuickSlotComponent의 Item 개수가 다르면 새로 세팅
+		if (QuickSlotWidgetCount != QuickSlotItemCount)
 		{
-			QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp->QuickSlots[i], SourceQuickSlotComp->CurrentSelectQuickSlotIndex);
+			QuickSlotWrapBox->ClearChildren();
+			SetupQuickSlots(QuickSlotItemCount);
+		}
+
+		for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
+		{
+			USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
+			if (QuickSlotWidget)
+			{
+				QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp->QuickSlots[i], SourceQuickSlotComp->CurrentSelectQuickSlotIndex);
+			}
 		}
 	}
 }
@@ -143,5 +120,36 @@ void USTHUDWidget::OpenStoreMenu()
 }
 
 void USTHUDWidget::UpdateStoreMenu()
+{
+}
+
+void USTHUDWidget::FocusChatManager()
+{
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (PlayerController)
+	{
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputMode.SetHideCursorDuringCapture(true);
+
+		PlayerController->SetInputMode(InputMode);
+		PlayerController->bShowMouseCursor = true;
+	}
+
+	if (ChatManagerWidget)
+	{
+		ChatManagerWidget->SetChatInputFocus();
+	}
+}
+
+void USTHUDWidget::UpdateChatManager()
+{
+}
+
+void USTHUDWidget::UpdateMiniMap()
+{
+}
+
+void USTHUDWidget::UpdateBigMap()
 {
 }
