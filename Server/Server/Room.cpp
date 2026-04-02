@@ -9,7 +9,7 @@ void Room::PushJob(Job& job)
 	_jobQueue.push(job);
 }
 
-void Room::Init(const uint32 roomID, const Common::CSCreateRoom& packet)
+void Room::HandleCreateRoom(const uint32 roomID, const Common::CSCreateRoom& packet)
 {
 	_roomID = roomID;
 	_name = packet.name;
@@ -17,7 +17,7 @@ void Room::Init(const uint32 roomID, const Common::CSCreateRoom& packet)
 	_password = packet.password;
 }
 
-void Room::JoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
+void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
 {
 	// 입력한 비밀번호 비교
 	if (true == _hasPassword && _password != packet.password)
@@ -42,6 +42,12 @@ void Room::JoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
 	session->SetPlayer(player);
 	_players[id] = player;
 
+	Common::SCSpawnObject move_object_packet{
+		id,
+		player->GetPosition(),
+		player->GetDirection(),
+	};
+
 	// 스폰 패킷 전달
 	for (const auto& [other_id, other_player] : _players)
 	{
@@ -51,19 +57,14 @@ void Room::JoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
 		}
 
 		// 다른 플레이어에게 내 위치 전달
-		Common::SCSpawnObject move_object_packet{
-			id,
-			player->GetPosition(),
-			player->GetDirection(),
-		};
 		other_player->GetOwnerSession()->DoSend(move_object_packet);
 
-		// 현재 클라이언트에 기존 플레이어 정보 전달
 		Common::SCSpawnObject other_spawn_packet{
 			other_id,
 			other_player->GetPosition(),
 			other_player->GetDirection()
 		};
+		// 현재 클라이언트에 기존 플레이어 정보 전달
 		session->DoSend(other_spawn_packet);
 	}
 }
@@ -82,16 +83,17 @@ void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 	// 모든 플레이어에게 해당 플레이어의 준비 상태 전달
 	// todo: 나중에 session id대신 player id로 변경할 필요 있음
 	auto id{ session->GetSessionID() };
+	Common::SCReady ready_packet{
+		id,
+		packet.ready
+	};
+
 	for (const auto& [other_id, other_player] : _players)
 	{
 		if (other_id == id)
 		{
 			continue;
 		}
-		Common::SCReady ready_packet{
-			id,
-			packet.ready
-		};
 		other_player->GetOwnerSession()->DoSend(ready_packet);
 	}
 }

@@ -41,6 +41,9 @@ enum class PacketType : uint16
 	SC_START_GAME,
 	CS_START_GAME,
 
+	SC_CHAT,
+	CS_CHAT,
+
 	// --
 	// object
 	// --
@@ -77,33 +80,39 @@ struct Header
 	Header(const uint16 size, const PacketType type) :
 		size{ size },
 		type{ type }
-	{}
+	{
+	}
 };
 
-
-// 서버 로그인 승인 패킷
+// Brief:
+//  서버 로그인 승인 패킷
 struct SCLogin : Header
 {
 	SCLogin() :
 		Header{ sizeof(SCLogin), PacketType::SC_LOGIN }
-	{}
+	{
+	}
 };
 
 
 // No Param
-// 클라이언트 로그인 요청
+// Brief:
+//  클라이언트 로그인 요청
 struct CSLogin : Header
 {
 	CSLogin() :
 		Header{ sizeof(CSLogin), PacketType::CS_LOGIN }
-	{}
+	{
+	}
 };
 
-// [ 가변 크기 패킷 ]
+// SCGiveRoomList
 // Param:
-//		uint16 roomCount
-// 서버 방 리스트 제공
-// 방의 갯수만큼 크기를 조절해 RoomInfo를 이어 보낸다.
+//	uint16 roomCount
+// Brief:
+//	[ 가변 크기 패킷 ]
+//	서버 방 리스트 제공
+//	방의 갯수만큼 크기를 조절해 RoomInfo를 이어 보낸다.
 struct SCGiveRoomList : Header
 {
 	uint16 roomCount{};
@@ -117,7 +126,8 @@ struct SCGiveRoomList : Header
 };
 
 // No Param
-// 클라이언트 방 리스트 제공 요청
+// Brief:
+//  클라이언트 방 리스트 제공 요청
 struct CSGetRoomList : Header
 {
 	CSGetRoomList() :
@@ -128,8 +138,9 @@ struct CSGetRoomList : Header
 
 
 // Param:
-//	bool success
-// 서버 방 생성 여부
+//  bool success
+// Brief:
+//  서버 방 생성 여부
 struct SCCreateRoom : Header
 {
 	bool success{ false };
@@ -144,7 +155,8 @@ struct SCCreateRoom : Header
 
 // CSCreateRoom
 // No Param
-// 클라이언트 방 생성 요청
+// Brief:
+//  클라이언트 방 생성 요청
 struct CSCreateRoom : Header
 {
 	char name[100]{};
@@ -166,8 +178,8 @@ struct CSCreateRoom : Header
 
 // SCJoinRoom
 // Param:
-// 
-// 서버 방 입장 승인
+// Brief:
+//  서버 방 입장 승인
 struct SCJoinRoom : Header
 {
 	bool success{ false };
@@ -198,8 +210,8 @@ struct CSJoinRoom : Header
 
 // SCReady
 // Param:
-//		uint64 id
-//		bool ready
+//  uint64 id
+//  bool ready
 struct SCReady : Header
 {
 	uint64 id{};
@@ -209,13 +221,14 @@ struct SCReady : Header
 		Header{ sizeof(SCReady), PacketType::SC_READY },
 		id{ _id },
 		ready{ _ready }
-	{}
+	{
+	}
 };
 
 
 // CSReady
 // Param:
-//		bool ready
+//  bool ready
 // 
 struct CSReady : Header
 {
@@ -224,13 +237,14 @@ struct CSReady : Header
 	CSReady(const bool _ready) :
 		Header{ sizeof(CSReady), PacketType::CS_READY },
 		ready{ _ready }
-	{}
+	{
+	}
 };
 
 
 // SCStartGame
 // param:
-//		bool start
+//  bool start
 // brief:
 //  게임 시작 여부를 알리는 패킷. start가 true면 게임이 시작되고 false면 게임이 취소됨.
 struct SCStartGame : Header
@@ -240,7 +254,8 @@ struct SCStartGame : Header
 	SCStartGame(const bool _start) :
 		Header{ sizeof(SCStartGame), PacketType::SC_START_GAME },
 		start{ _start }
-	{}
+	{
+	}
 };
 
 // CSStartGame
@@ -249,12 +264,43 @@ struct CSStartGame : Header
 {
 	CSStartGame() :
 		Header{ sizeof(CSStartGame), PacketType::CS_START_GAME }
-	{}
+	{
+	}
 };
 
+// SCChat
+// Param:
+//  uint64 보낸 사람의 id
+// Brief:
+//  [ 가변 크기 패킷 ]
+//  각 클라이언트에 채팅 메시지를 전달하는 패킷. 채팅 메시지를 뒤에 이어붙인다.
+struct SCChat : Header
+{
+	uint64 id{};
+	SCChat() = default;
+	SCChat(const uint64 _id, const char* _message) :
+		Header{ static_cast<uint16>(sizeof(SCChat) + strlen(_message)), PacketType::SC_CHAT },
+		id{ _id }
+	{
+	}
+};
+
+// CSChat
+// no param
+// Brief:
+//  [ 가변 크기 패킷 ]
+//  서버로 채팅 메시지를 보내는 패킷. 채팅 메시지를 뒤에 이어붙인다.
+struct CSChat : Header
+{
+	CSChat() = default;
+	CSChat(const char* _message) :
+		Header{ static_cast<uint16>(sizeof(CSChat) + strlen(_message)), PacketType::CS_CHAT }
+	{
+	}
+};
 
 // Param:
-//		Vec3f dir
+//	Vec3f dir
 // 클라이언트 로그인 요청
 struct SCSpawnObject : Header
 {
@@ -268,14 +314,15 @@ struct SCSpawnObject : Header
 		objectID{ _objectID },
 		pos{ _pos },
 		dir{ _dir }
-	{}
+	{
+	}
 };
 
 
 // Param:
-//		uint64 id
-//		Vec3f pos
-//		Vec3f dir
+//  uint64 id
+//  Vec3f pos
+//  Vec3f dir
 struct SCMovePlayer : Header
 {
 	uint64 id{};
@@ -290,13 +337,14 @@ struct SCMovePlayer : Header
 		pos{ _pos },
 		dir{ _dir },
 		state{ _state }
-	{}
+	{
+	}
 };
 
 // Param:
-//		Vec3f pos
-//		Vec3f dir
-//		uint8 state
+//  Vec3f pos
+//  Vec3f dir
+//  uint8 state
 // 
 struct CSMovePlayer : Header
 {
@@ -310,7 +358,8 @@ struct CSMovePlayer : Header
 		pos{ _pos },
 		dir{ _dir },
 		state{ _state }
-	{}
+	{
+	}
 };
 
 

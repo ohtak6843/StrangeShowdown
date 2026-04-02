@@ -14,7 +14,7 @@ void RoomManager::HandleCreateRoom(SessionPtr session, const Common::CSCreateRoo
 	// 방 생성 및 초기화
 	auto id{ _roomCounter++ };
 	_rooms[id] = GET_SINGLE(ObjectManager)->Pop<Room>();
-	_rooms[id]->Init(id, packet);
+	_rooms[id]->HandleCreateRoom(id, packet);
 
 	// 방을 성공적으로 만들었으면 패킷을 보내준다
 	Common::SCCreateRoom room_packet{ true };
@@ -44,7 +44,7 @@ void RoomManager::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& p
 	session->SetRoom(room);
 
 	// todo: 나중에 cas로 변경 필요 한지 확인
-	room->JoinRoom(session, packet);
+	room->HandleJoinRoom(session, packet);
 }
 
 std::vector<Common::RoomInfo> RoomManager::GetRoomList()

@@ -29,7 +29,8 @@ void OverlappedEx::PrepareRecv()
 	if (auto session{ _session.lock() })
 	{
 		_wsabuf.len = BUFFER_SIZE - session->GetCurrentDataSize();
-		_wsabuf.buf = session->GetRecvBuffer().data() + session->GetCurrentDataSize();
+		_wsabuf.buf = reinterpret_cast<CHAR*>(session->GetRecvBuffer().data())
+			+ session->GetCurrentDataSize();
 	}
 	else
 	{
@@ -38,7 +39,7 @@ void OverlappedEx::PrepareRecv()
 	_operation = IOOperation::RECV;
 }
 
-void OverlappedEx::PrepareSend(const std::vector<char>& packet, const int index)
+void OverlappedEx::PrepareSend(const SendBuffer& packet, const int index)
 {
 	Clear();
 	_sendIndex = index;

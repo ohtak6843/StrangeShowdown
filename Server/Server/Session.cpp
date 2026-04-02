@@ -80,7 +80,7 @@ void Session::OnRecvCompleted(const uint32 recieved_bytes)
 	ReleaseRef();
 }
 
-void Session::DoSend(const std::vector<char>& data)
+void Session::DoSend(const SendBuffer& data)
 {
 	if (_ioState == IOState::DISCONNECT)
 	{
