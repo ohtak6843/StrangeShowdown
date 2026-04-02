@@ -4,12 +4,15 @@
 #include "UI/STHUDWidget.h"
 #include "Components/WrapBox.h"
 #include "UI/Stat/STStatWidget.h"
-#include "UI/STQuickSlotWidget.h"
+#include "UI/QuickSlot/STQuickSlotWidget.h"
 #include "Component/STQuickSlotComponent.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "Component/STInventoryComponent.h"
 #include "Interface/STCharacterHUDInterface.h"
 #include "Widget/STChatManagerWidget.h"
+#include "Widget/STMiniMapWidget.h"
+
+DEFINE_LOG_CATEGORY(LogSTHUDWidget);
 
 USTHUDWidget::USTHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,26 +43,73 @@ void USTHUDWidget::UpdateStat()
 	}
 }
 
-void USTHUDWidget::OpenInventoryMenu()
+void USTHUDWidget::SetInventoryComponent(USTInventoryComponent* InInventoryComp)
+{
+	if (InInventoryComp)
+	{
+		SourceInventoryComp = InInventoryComp;
+	}
+}
+
+bool USTHUDWidget::OpenInventoryMenu()
 {
 	if (nullptr == InventoryMenuWidget)
 	{
 		InventoryMenuWidget = CreateWidget<USTInventoryMenuWidget>(this, InventoryMenuClass);
 		InventoryMenuWidget->AddToViewport();
-		InventoryMenuWidget->UpdateInventory();
+		InventoryMenuWidget->UpdateInventory(SourceInventoryComp.Get()->Slots);
+
+		APlayerController* PC = GetOwningPlayer();
+		if (PC)
+		{
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(InventoryMenuWidget->TakeWidget());
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			InputMode.SetHideCursorDuringCapture(true);
+
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+
+			return true;
+		}
+
+		UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Inventory Menu: PlayerController is null"));
+		return false;
 	}
-	else
+
+	UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Inventory Menu: InventoryMenuWidget is already open"));
+	return false;
+}
+
+bool USTHUDWidget::CloseInventoryMenu()
+{
+	if(InventoryMenuWidget)
 	{
 		InventoryMenuWidget->RemoveFromParent();
 		InventoryMenuWidget = nullptr;
+
+		APlayerController* PC = GetOwningPlayer();
+		if (PC)
+		{
+			FInputModeGameOnly GameOnlyInputMode;
+			PC->SetInputMode(GameOnlyInputMode);
+
+			return true;
+		}
+
+		UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to close Inventory Menu: PlayerController is null"));
+		return false;
 	}
+
+	UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to close Inventory Menu: InventoryMenuWidget is not open"));
+	return false;
 }
 
 void USTHUDWidget::UpdateInventoryMenu()
 {
 	if (InventoryMenuWidget)
 	{
-		InventoryMenuWidget->UpdateInventory();
+		InventoryMenuWidget->UpdateInventory(SourceInventoryComp.Get()->Slots);
 	}
 }
 
@@ -95,7 +145,7 @@ void USTHUDWidget::UpdateQuickSlots()
 	if (SourceQuickSlotComp.IsValid())
 	{
 		int32 QuickSlotWidgetCount = QuickSlotWrapBox->GetChildrenCount();
-		int32 QuickSlotItemCount = SourceQuickSlotComp->QuickSlots.Num();
+		int32 QuickSlotItemCount = SourceQuickSlotComp.Get()->QuickSlots.Num();
 
 		// QuickSlot 개수와 QuickSlotComponent의 Item 개수가 다르면 새로 세팅
 		if (QuickSlotWidgetCount != QuickSlotItemCount)
@@ -109,14 +159,26 @@ void USTHUDWidget::UpdateQuickSlots()
 			USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
 			if (QuickSlotWidget)
 			{
-				QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp->QuickSlots[i], SourceQuickSlotComp->CurrentSelectQuickSlotIndex);
+				QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp.Get()->QuickSlots[i], SourceQuickSlotComp.Get()->CurrentSelectQuickSlotIndex);
 			}
 		}
 	}
 }
 
-void USTHUDWidget::OpenStoreMenu()
+bool USTHUDWidget::OpenStoreMenu()
 {
+	// 상점 열었을 때, 다른 UI Remove
+
+	// 상점 Update 하고
+
+	// 플레이어 움직이지 못하게 하기
+
+	return true;
+}
+
+bool USTHUDWidget::CloseStoreMenu()
+{
+	return true;
 }
 
 void USTHUDWidget::UpdateStoreMenu()
@@ -144,6 +206,29 @@ void USTHUDWidget::FocusChatManager()
 
 void USTHUDWidget::UpdateChatManager()
 {
+}
+
+bool USTHUDWidget::OpenBigMap()
+{
+	if (BigMapWidget)
+	{
+		// TODO: RemoveAllUI 할건가?
+		BigMapWidget->SetVisibility(ESlateVisibility::Visible);
+		return true;
+	}
+
+	return false;
+}
+
+bool USTHUDWidget::CloseBigMap()
+{
+	if (BigMapWidget)
+	{
+		BigMapWidget->SetVisibility(ESlateVisibility::Hidden);
+		return true;
+	}
+
+	return false;
 }
 
 void USTHUDWidget::UpdateMiniMap()

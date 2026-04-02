@@ -8,6 +8,8 @@
 #include "Types/PlayerTypes.h"
 #include "STHUDWidget.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogSTHUDWidget, Log, All);
+
 /**
  * 
  */
@@ -44,12 +46,15 @@ protected:
 
 #pragma region Inventory Section
 public:
-	class USTInventoryMenuWidget* GetInventoryMenuWidget() { return InventoryMenuWidget; }
+	void SetInventoryComponent(class USTInventoryComponent* InInventoryComp);
 
-	void OpenInventoryMenu();
+	bool OpenInventoryMenu();
+	bool CloseInventoryMenu();
 	void UpdateInventoryMenu();
 
 protected:
+	TWeakObjectPtr<class USTInventoryComponent> SourceInventoryComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
 	TSubclassOf<class USTInventoryMenuWidget> InventoryMenuClass;
 
@@ -77,7 +82,8 @@ protected:
 
 #pragma region Store Section
 public:
-	void OpenStoreMenu();
+	bool OpenStoreMenu();
+	bool CloseStoreMenu();
 	void UpdateStoreMenu();
 
 protected:
@@ -112,6 +118,8 @@ public:
 	class USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }
 	class USTMiniMapWidget* GetBigMapWidget() const { return BigMapWidget; }
 
+	bool OpenBigMap();
+	bool CloseBigMap();
 	void UpdateMiniMap();
 	void UpdateBigMap();
 
@@ -121,6 +129,5 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class USTMiniMapWidget> BigMapWidget;
-
 #pragma endregion
 };

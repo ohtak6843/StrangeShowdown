@@ -112,6 +112,4 @@ void USTChatManagerWidget::SetChatInputFocus()
 	{
 		ChatInputTextBox->SetKeyboardFocus();
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("Chat input focused"));
 }

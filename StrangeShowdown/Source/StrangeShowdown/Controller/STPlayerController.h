@@ -40,6 +40,7 @@ protected:
 	void OpenInventory(const FInputActionValue& Value);
 	void OpenStore(const FInputActionValue& Value);
 	void FocusChatManager(const FInputActionValue& Value);
+	void OpenBigMap(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenInventoryAction;
@@ -49,4 +50,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> FocusChatManagerAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> OpenBigMapAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 bIsInventoryOpen : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 bIsStoreOpen : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 bIsBigMapOpen : 1;
 };

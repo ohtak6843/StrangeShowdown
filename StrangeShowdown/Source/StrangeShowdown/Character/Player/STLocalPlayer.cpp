@@ -23,7 +23,7 @@
 #include "UI/STHUDWidget.h"
 #include "UI/Stat/STStatWidget.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
-#include "UI/STQuickSlotWidget.h"
+#include "UI/QuickSlot/STQuickSlotWidget.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Protocol.h"
@@ -195,6 +195,7 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 	if (InHUDWidget)
 	{
 		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->SetInventoryComponent(InventoryComp);
 		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
 
 		InHUDWidget->UpdateStat();

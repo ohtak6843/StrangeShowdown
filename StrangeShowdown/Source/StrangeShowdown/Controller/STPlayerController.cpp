@@ -21,6 +21,7 @@ void ASTPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenInventory);
 	EnhancedInputComponent->BindAction(OpenStoreAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenStore);
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTPlayerController::FocusChatManager);
+	EnhancedInputComponent->BindAction(OpenBigMapAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBigMap);
 }
 
 void ASTPlayerController::BeginPlay()
@@ -42,13 +43,34 @@ void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 {
 	if (HUDWidget)
 	{
-		//HUDWidget->OpenInventoryMenu();
+		if(bIsInventoryOpen)
+		{
+			bool Result = HUDWidget->CloseInventoryMenu();
+			bIsInventoryOpen = !Result;
+		}
+		else
+		{
+			bool Result = HUDWidget->OpenInventoryMenu();
+			bIsInventoryOpen = Result;
+		}
 	}
 }
 
 void ASTPlayerController::OpenStore(const FInputActionValue& Value)
 {
-
+	if (HUDWidget)
+	{
+		if (bIsStoreOpen)
+		{
+			bool Result = HUDWidget->CloseStoreMenu();
+			bIsStoreOpen = !Result;
+		}
+		else
+		{
+			bool Result = HUDWidget->OpenStoreMenu();
+			bIsStoreOpen = Result;
+		}
+	}
 }
 
 void ASTPlayerController::FocusChatManager(const FInputActionValue& Value)
@@ -56,5 +78,22 @@ void ASTPlayerController::FocusChatManager(const FInputActionValue& Value)
 	if (HUDWidget)
 	{
 		HUDWidget->FocusChatManager();
+	}
+}
+
+void ASTPlayerController::OpenBigMap(const FInputActionValue& Value)
+{
+	if (HUDWidget)
+	{
+		if (bIsBigMapOpen)
+		{
+			bool result = HUDWidget->CloseBigMap();
+			bIsBigMapOpen = !result;
+		}
+		else
+		{
+			bool result = HUDWidget->OpenBigMap();
+			bIsBigMapOpen = result;
+		}
 	}
 }
