@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Interface/STCharacterHUDInterface.h"
 #include "STLobbyLocalPlayer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTLobbyLocalPlayer : public ASTPlayerBase
+class STRANGESHOWDOWN_API ASTLobbyLocalPlayer : public ASTPlayerBase, public ISTCharacterHUDInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +38,9 @@ protected:
 	// Camera Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
+
+protected:
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
 
 private:
 	// Change Camera Settings with State

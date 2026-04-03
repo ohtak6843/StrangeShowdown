@@ -79,6 +79,7 @@ void ASTLobbyLocalPlayer::BeginPlay()
 
 	// Add Player 델리게이트
 	// 어디서 호출할지 정해야함(Instance?)
+
 }
 
 void ASTLobbyLocalPlayer::Tick(float DeltaTime)
@@ -101,6 +102,13 @@ void ASTLobbyLocalPlayer::Tick(float DeltaTime)
 #if NETWORK_ENABLED
 	SendMovePacket(DeltaTime);
 #endif
+}
+
+void ASTLobbyLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
+{
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+
+
 }
 
 void ASTLobbyLocalPlayer::ChangeToIdle()

@@ -4,66 +4,85 @@
 #include "Widget/STLobbyStatusWidget.h"
 #include "Game/STGameState.h"
 #include "GameFramework/PlayerState.h"
-#include "Widget/STLobbyStatusSlotWidget.h"
 
 void USTLobbyStatusWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	WrapBox->ClearChildren();
-
-	// 초기화 단계
-	// 자신이 방장일 경우 초기화 시 본인 슬롯을 추가
-	// 아래 함수에 방장 ID 넣으면 됨
-	
-	// if 방장
-	// 닉네임도 설정
-	AddRoomOwnerSlot(0, TEXT("RoomOwner"));
-
-	// else if 방장이 아닌 경우 현재 방에 있는 모든 플레이어의 슬롯 추가
-	// 닉네임도 설정
-	AddPlayerSlot(1, TEXT("Player1"));
+	// 테스트용
+	EnterPlayer(0, TEXT("RoomOwner"));
 }
 
-void USTLobbyStatusWidget::AddPlayerSlot(uint64 PlayerID, const FString& NickName)
+void USTLobbyStatusWidget::EnterPlayer(uint64 PlayerID, const FString& NickName)
 {
-	// WrapBox에 슬롯 추가
-	if (SlotWidgetClass)
-	{
-		if (USTLobbyStatusSlotWidget* SlotWidget = CreateWidget<USTLobbyStatusSlotWidget>(GetWorld(), SlotWidgetClass))
-		{
-			SlotWidget->Init(PlayerID, NickName);
-			WrapBox->AddChild(SlotWidget);
-			SlotMap.Add(PlayerID, SlotWidget);
-		}
-	}
-}
+	// 이미 존재하면 무시
+	if (PlayerIDMap.Contains(PlayerID))
+		return;
 
-void USTLobbyStatusWidget::AddRoomOwnerSlot(uint64 PlayerID, const FString& NickName)
-{
-	// WrapBox에 슬롯 추가
-	if (SlotWidgetClass)
+	// 방장 처리 (ID = 0 가정)
+	if (PlayerID == 0)
 	{
-		if (USTLobbyStatusSlotWidget* SlotWidget = CreateWidget<USTLobbyStatusSlotWidget>(GetWorld(), SlotWidgetClass))
-		{
-			SlotWidget->Init(PlayerID, NickName);
-			SlotWidget->ReadyIcon->SetBrushFromTexture(LoadObject<UTexture2D>(nullptr, TEXT("/Script/Engine.Texture2D'/Game/StrangeShowdown/UI/Texture/T_RoomOwnerIcon.T_RoomOwnerIcon'")));
-			WrapBox->AddChild(SlotWidget);
-			SlotMap.Add(PlayerID, SlotWidget);
-		}
+		PlayerIDMap.Add(PlayerID, 0);
+
+		RoomOwnerNickName->SetText(FText::FromString(NickName));
+		RoomOwnerNickName->SetVisibility(ESlateVisibility::Visible);
+
+		return;
 	}
 
-	// 방장은 항상 Ready
-	SetPlayerReady(PlayerID, true);
+	// 일반 플레이어
+	if (NextSlotIndex >= MaxPlayerCount)
+		return;
+
+	PlayerIDMap.Add(PlayerID, NextSlotIndex);
+
+	switch (NextSlotIndex)
+	{
+	case 1:
+		Player1NickName->SetText(FText::FromString(NickName));
+		Player1NickName->SetVisibility(ESlateVisibility::Visible);
+		break;
+	case 2:
+		Player2NickName->SetText(FText::FromString(NickName));
+		Player2NickName->SetVisibility(ESlateVisibility::Visible);
+		break;
+	case 3:
+		Player3NickName->SetText(FText::FromString(NickName));
+		Player3NickName->SetVisibility(ESlateVisibility::Visible);
+		break;
+	case 4:
+		Player4NickName->SetText(FText::FromString(NickName));
+		Player4NickName->SetVisibility(ESlateVisibility::Visible);
+		break;
+	}
+
+	NextSlotIndex++;
 }
 
 void USTLobbyStatusWidget::SetPlayerReady(uint64 PlayerID, bool bReady)
 {
-	if (USTLobbyStatusSlotWidget** SlotWidgetPtr = SlotMap.Find(PlayerID))
+	int32* SlotNum = PlayerIDMap.Find(PlayerID);
+
+	if (!SlotNum)
+		return;
+
+	// 방장 제외
+	if (*SlotNum == 0)
+		return;
+
+	switch (*SlotNum)
 	{
-		if (USTLobbyStatusSlotWidget* SlotWidget = *SlotWidgetPtr)
-		{
-			SlotWidget->Ready(bReady);
-		}
+	case 1:
+		Player1ReadyIcon->SetVisibility(bReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		break;
+	case 2:
+		Player2ReadyIcon->SetVisibility(bReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		break;
+	case 3:
+		Player3ReadyIcon->SetVisibility(bReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		break;
+	case 4:
+		Player4ReadyIcon->SetVisibility(bReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		break;
 	}
 }
