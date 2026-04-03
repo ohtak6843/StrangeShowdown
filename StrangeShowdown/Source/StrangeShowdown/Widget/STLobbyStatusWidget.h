@@ -6,6 +6,14 @@
 #include "Components/Image.h"
 #include "STLobbyStatusWidget.generated.h"
 
+struct FPlayerLobbyData
+{
+	uint64 PlayerID;
+	FString NickName;
+	bool bReady;
+	bool bIsHost;
+};
+
 UCLASS()
 class STRANGESHOWDOWN_API USTLobbyStatusWidget : public UUserWidget
 {
@@ -14,14 +22,17 @@ class STRANGESHOWDOWN_API USTLobbyStatusWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	void EnterPlayer(uint64 PlayerID, const FString& NickName);
+	void EnterPlayer(uint64 PlayerID, const FString& NickName, bool bReady);
+	void LeavePlayer(uint64 PlayerID);
+	void RebuildSlots();
+	uint64 GetSlotIndex(uint64 PlayerID);
 	void SetPlayerReady(uint64 PlayerID, bool bReady);
 
 private:
 	const int MaxPlayerCount = 5;
 
 	// PlayerID → 슬롯 번호 (0 = 방장)
-	TMap<uint64, int32> PlayerIDMap;
+	TMap<uint64, FPlayerLobbyData> PlayerMap;
 
 	// 다음 슬롯 (1부터 시작)
 	int32 NextSlotIndex = 1;

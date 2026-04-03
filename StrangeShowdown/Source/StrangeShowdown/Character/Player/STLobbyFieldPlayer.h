@@ -11,7 +11,8 @@
  * 
  */
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFieldPlayerSpawned, uint64, const FString&);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnFieldPlayerSpawned, uint64, const FString&, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFieldPlayerRemoved, uint64);
 
 UCLASS()
 class STRANGESHOWDOWN_API ASTLobbyFieldPlayer : public ASTPlayerBase
@@ -23,6 +24,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void Move(const FVector& Location, const FRotator& Rotator);
 
@@ -30,8 +32,10 @@ public:
 	UWidgetComponent* StatWidgetComponent;
 
 	static FOnFieldPlayerSpawned OnFieldPlayerSpawned;
+	static FOnFieldPlayerRemoved OnFieldPlayerRemoved;
 
 private:
+	uint64 PlayerID{};
 	FVector TargetLocation{};
 	FRotator TargetRotation{};
 	const float SendMoveMaxTime{ 0.1f };

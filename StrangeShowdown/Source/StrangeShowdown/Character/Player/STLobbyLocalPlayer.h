@@ -50,7 +50,8 @@ private:
 	void ChangeToLookingUp();
 
 	void SendMovePacket(const float DeltaTime);
-	void AddFieldPlayer(uint64 PlayerID, const FString& NickName);
+	void AddPlayerInWidget(uint64 PlayerID, const FString& NickName, bool bReady);
+	void RemovePlayerFromWidget(uint64 PlayerID);
 
 	TMap<ECameraPose, FCameraPoseSetting> PoseSettings;
 

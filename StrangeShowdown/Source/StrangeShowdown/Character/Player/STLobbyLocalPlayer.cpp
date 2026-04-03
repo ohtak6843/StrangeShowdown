@@ -77,13 +77,23 @@ void ASTLobbyLocalPlayer::BeginPlay()
 		}
 	}
 
+	// 자기 자신 AddPlayerInWidget() 호출
+	// TODO: 캐릭터도 ID를 가지고 있도록 해야함
+	AddPlayerInWidget(0, PlayerNickName, false);
+
 	// Add Player 델리게이트
 	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.AddUObject(
 		this,
-		&ASTLobbyLocalPlayer::AddFieldPlayer
+		&ASTLobbyLocalPlayer::AddPlayerInWidget
 	);
 
-	// TODO: 기존 플레이어 가져와서 AddFieldPlayer() 호출
+	// TODO: 기존 플레이어 가져와서 AddPlayerInWidget() 호출
+
+	// Remove Player 델리게이트
+	ASTLobbyFieldPlayer::OnFieldPlayerRemoved.AddUObject(
+		this,
+		&ASTLobbyLocalPlayer::RemovePlayerFromWidget
+	);
 }
 
 void ASTLobbyLocalPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -91,6 +101,7 @@ void ASTLobbyLocalPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.RemoveAll(this);
+	ASTLobbyFieldPlayer::OnFieldPlayerRemoved.RemoveAll(this);
 }
 
 void ASTLobbyLocalPlayer::Tick(float DeltaTime)
@@ -179,10 +190,18 @@ void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
 	}
 }
 
-void ASTLobbyLocalPlayer::AddFieldPlayer(uint64 PlayerID, const FString& NickName)
+void ASTLobbyLocalPlayer::AddPlayerInWidget(uint64 PlayerID, const FString& NickName, bool bReady)
 {
 	if (LobbyHUDWidget)
 	{
-		LobbyHUDWidget->LobbyStatusWidget->EnterPlayer(PlayerID, NickName);
+		LobbyHUDWidget->LobbyStatusWidget->EnterPlayer(PlayerID, NickName, bReady);
+	}
+}
+
+void ASTLobbyLocalPlayer::RemovePlayerFromWidget(uint64 PlayerID)
+{
+	if (LobbyHUDWidget)
+	{
+		LobbyHUDWidget->LobbyStatusWidget->LeavePlayer(PlayerID);
 	}
 }

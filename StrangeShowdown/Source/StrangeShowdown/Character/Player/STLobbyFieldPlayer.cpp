@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 
 FOnFieldPlayerSpawned ASTLobbyFieldPlayer::OnFieldPlayerSpawned;
+FOnFieldPlayerRemoved ASTLobbyFieldPlayer::OnFieldPlayerRemoved;
 
 ASTLobbyFieldPlayer::ASTLobbyFieldPlayer()
 {
@@ -57,7 +58,15 @@ void ASTLobbyFieldPlayer::BeginPlay()
 
 	// TODO: 서버에서 받은 ID와 NickName으로
 	static uint64 TempID = 1; // 임시 ID
-	OnFieldPlayerSpawned.Broadcast(TempID++, FString("TempFieldPlayer" + FString::FromInt(TempID)));
+	PlayerID = TempID++;
+	OnFieldPlayerSpawned.Broadcast(PlayerID, FString("Temp" + FString::FromInt(PlayerID)), false);
+}
+
+void ASTLobbyFieldPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	OnFieldPlayerRemoved.Broadcast(PlayerID);
 }
 
 void ASTLobbyFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
