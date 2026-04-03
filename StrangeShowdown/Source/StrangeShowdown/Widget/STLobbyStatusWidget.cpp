@@ -8,9 +8,6 @@
 void USTLobbyStatusWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	// 테스트용
-	EnterPlayer(0, TEXT("RoomOwner"));
 }
 
 void USTLobbyStatusWidget::EnterPlayer(uint64 PlayerID, const FString& NickName)

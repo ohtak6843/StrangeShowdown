@@ -2,7 +2,7 @@
 
 
 #include "Character/Player/STLobbyLocalPlayer.h"
-#include "STLobbyLocalPlayer.h"
+#include "Character/Player/STLobbyFieldPlayer.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Controller/STLobbyController.h"
@@ -78,8 +78,19 @@ void ASTLobbyLocalPlayer::BeginPlay()
 	}
 
 	// Add Player 델리게이트
-	// 어디서 호출할지 정해야함(Instance?)
+	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.AddUObject(
+		this,
+		&ASTLobbyLocalPlayer::AddFieldPlayer
+	);
 
+	// TODO: 기존 플레이어 가져와서 AddFieldPlayer() 호출
+}
+
+void ASTLobbyLocalPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.RemoveAll(this);
 }
 
 void ASTLobbyLocalPlayer::Tick(float DeltaTime)
@@ -170,5 +181,8 @@ void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
 
 void ASTLobbyLocalPlayer::AddFieldPlayer(uint64 PlayerID, const FString& NickName)
 {
-	LobbyHUDWidget->LobbyStatusWidget->AddPlayerSlot(PlayerID, NickName);
+	if (LobbyHUDWidget)
+	{
+		LobbyHUDWidget->LobbyStatusWidget->EnterPlayer(PlayerID, NickName);
+	}
 }

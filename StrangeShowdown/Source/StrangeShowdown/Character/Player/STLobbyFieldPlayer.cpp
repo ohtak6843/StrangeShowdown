@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+FOnFieldPlayerSpawned ASTLobbyFieldPlayer::OnFieldPlayerSpawned;
+
 ASTLobbyFieldPlayer::ASTLobbyFieldPlayer()
 {
 	// Stat Widget Component
@@ -52,6 +54,10 @@ void ASTLobbyFieldPlayer::BeginPlay()
 	{
 		CachedCameraManager = PC->PlayerCameraManager;
 	}
+
+	// TODO: 서버에서 받은 ID와 NickName으로
+	static uint64 TempID = 1; // 임시 ID
+	OnFieldPlayerSpawned.Broadcast(TempID++, FString("TempFieldPlayer" + FString::FromInt(TempID)));
 }
 
 void ASTLobbyFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)

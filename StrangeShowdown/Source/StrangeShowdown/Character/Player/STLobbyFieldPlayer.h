@@ -10,23 +10,26 @@
 /**
  * 
  */
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFieldPlayerSpawned, uint64, const FString&);
+
 UCLASS()
 class STRANGESHOWDOWN_API ASTLobbyFieldPlayer : public ASTPlayerBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	ASTLobbyFieldPlayer();
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void BeginPlay() override;
 
 	void Move(const FVector& Location, const FRotator& Rotator);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* StatWidgetComponent;
+
+	static FOnFieldPlayerSpawned OnFieldPlayerSpawned;
 
 private:
 	FVector TargetLocation{};
