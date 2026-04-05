@@ -127,6 +127,34 @@ void Room::HandleStart(const SessionPtr session)
 
 }
 
+void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size)
+{
+
+	auto id{ session->GetSessionID() };
+	
+	// message
+	std::vector<uint8> additional_data(payload, payload + payload_size);
+
+	// packet
+	Common::SCChat chat_packet{
+		id,
+		payload_size
+	};
+
+	// 직렬화
+	auto buffer{ Serializer::Serialize(chat_packet, additional_data) };
+
+	// 모든 다른 플레이어에게 직렬화된 데이터 전송
+	for (const auto& [other_id, other_player] : _players)
+	{
+		if (other_id == id)
+		{
+			continue;
+		}
+		other_player->GetOwnerSession()->DoSend(buffer);
+	}
+}
+
 
 void Room::Update()
 {

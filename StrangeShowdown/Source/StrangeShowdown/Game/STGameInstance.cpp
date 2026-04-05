@@ -9,6 +9,8 @@
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "SocketSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interface/STControllerHUDInterface.h"
+#include "Widget/STChatManagerWidget.h"
 
 #include "Network/SocketIO.h"
 #include "Network/STSerializer.h"
@@ -252,12 +254,27 @@ void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, c
 	OnRoomListUpdated.Broadcast();
 }
 
+void USTGameInstance::HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+{
+	FString Message{ UTF8_TO_TCHAR(reinterpret_cast<const char*>(PayloadPtr)) };
+	UE_LOG(LogTemp, Log, TEXT("Chat Message Received By %d: %s"), Packet.id, *Message);
+
+	APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
+	ISTControllerHUDInterface* HUDInterface{ Cast<ISTControllerHUDInterface>(PlayerController) };
+	if (nullptr == HUDInterface)
+	{
+		return;
+	}
+
+	HUDInterface->GetChatManagerWidget()->AddChatMessage("Player", Message);
+}
+
 void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
 	if (true == Packet.success)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Successfully joined the room"));
-		ChangeWorld();
+		ChangeWorld(INVTEXT("L_Lobby"));
 	}
 	else
 	{
@@ -307,12 +324,29 @@ void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 	UE_LOG(LogTemp, Log, TEXT("CreateRoom called"));
 }
 
-void USTGameInstance::ChangeWorld()
+void USTGameInstance::ChangeWorld(const FText& Level)
 {
 	IsLoadingLevel = true;
 	//PlayerMap.Empty();
-	UGameplayStatics::OpenLevel(this, FName(TEXT("L_NetworkTestLevel")));
+
+	FName LevelName(*Level.ToString());
+	UGameplayStatics::OpenLevel(this, LevelName);
 	UE_LOG(LogTemp, Log, TEXT("ChangeWorld called"));
+}
+
+void USTGameInstance::Chat(const FText& Message)
+{
+	FString MessageStr{ Message.ToString() };
+	FTCHARToUTF8 Utf8String(*MessageStr);
+
+	TArray<uint8> AdditionalData;
+	AdditionalData.Append(reinterpret_cast<const uint8*>(Utf8String.Get()), Utf8String.Length());
+
+	Common::CSChat ChatPacket{ static_cast<uint16>(AdditionalData.Num()) };
+	auto Buffer{ STSerializer::Serialize(ChatPacket, AdditionalData) };
+	
+	SendPacket(Buffer);
+	UE_LOG(LogTemp, Log, TEXT("Chat called: Message=%s"), *Message.ToString());
 }
 
 void USTGameInstance::DevGetRoomList()
@@ -333,9 +367,15 @@ void USTGameInstance::DevCreateRoom(const FString& RoomName, const FString& Pass
 	CreateRoom(TextRoomName, TextPassword);
 }
 
-void USTGameInstance::DevChangeWorld()
+void USTGameInstance::DevChangeWorld(const FString& Level)
 {
-	ChangeWorld();
+	ChangeWorld(FText::FromString(Level));
+}
+
+void USTGameInstance::DevChat(const FString& Message)
+{
+	FText TextMessage = FText::FromString(Message);
+	Chat(TextMessage);
 }
 
 

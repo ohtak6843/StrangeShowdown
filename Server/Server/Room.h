@@ -26,7 +26,8 @@ public:
 	void HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
 	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
 	void HandleStart(const SessionPtr session);
-	// void HandleChat(const SessionPtr session, const Common::CSChat& packet, const char* message);
+	void HandleChat(const SessionPtr session, const Common::CSChat& packet,
+		const uint8* payload, const uint16 payload_size);
 
 
 

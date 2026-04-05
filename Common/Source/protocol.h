@@ -278,8 +278,8 @@ struct SCChat : Header
 {
 	uint64 id{};
 	SCChat() = default;
-	SCChat(const uint64 _id, const char* _message) :
-		Header{ static_cast<uint16>(sizeof(SCChat) + strlen(_message)), PacketType::SC_CHAT },
+	SCChat(const uint64 _id, const uint16 _size) :
+		Header{ static_cast<uint16>(sizeof(SCChat) + _size), PacketType::SC_CHAT },
 		id{ _id }
 	{
 	}
@@ -293,8 +293,8 @@ struct SCChat : Header
 struct CSChat : Header
 {
 	CSChat() = default;
-	CSChat(const char* _message) :
-		Header{ static_cast<uint16>(sizeof(CSChat) + strlen(_message)), PacketType::CS_CHAT }
+	CSChat(const uint16 _size) :
+		Header{ static_cast<uint16>(sizeof(CSChat) + _size), PacketType::CS_CHAT }
 	{
 	}
 };

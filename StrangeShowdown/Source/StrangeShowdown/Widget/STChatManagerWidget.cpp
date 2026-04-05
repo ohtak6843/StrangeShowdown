@@ -10,6 +10,7 @@
 #include "Character/STCharacter.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Game/STGameInstance.h"
 
 USTChatManagerWidget::USTChatManagerWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -102,6 +103,15 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 
 			UWidgetBlueprintLibrary::SetFocusToGameViewport();
 			PC->FlushPressedKeys();
+
+#ifdef NETWORK_ENABLED
+
+			// 인스턴스 가져오기
+			USTGameInstance* GameInstance{ Cast<USTGameInstance>(GetWorld()->GetGameInstance()) };
+			GameInstance->Chat(Text);
+
+#endif // NETWORK_ENABLED
+
 		}
 	}
 }

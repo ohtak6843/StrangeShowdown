@@ -8,7 +8,8 @@ std::unordered_map<Common::PacketType, PacketHandler::HandlerFunc> PacketHandler
 
 void PacketHandler::Init()
 {
-	// 핸들러 등록
+	// static 핸들러 등록
+
 	RegisterHandler<Common::CSLogin>(
 		Common::PacketType::CS_LOGIN,
 		[](SessionPtr session, const auto& packet)
@@ -62,6 +63,16 @@ void PacketHandler::Init()
 		[](SessionPtr session, const auto& packet)
 		{
 			HandleStartGame(session, packet);
+		}
+	);
+
+	// dynamic handler 등록
+
+	RegisterDynamicHandler<Common::CSChat>(
+		Common::PacketType::CS_CHAT,
+		[](SessionPtr session, const auto& packet, const uint8* payload, const uint16 payload_size)
+		{
+			HandleChat(session, packet, payload, payload_size);
 		}
 	);
 }
@@ -172,5 +183,13 @@ void PacketHandler::HandleStartGame(SessionPtr session, const Common::CSStartGam
 	if (auto room{ session->GetRoom() }; nullptr != room)
 	{
 		room->HandleStart(session);
+	}
+}
+
+void PacketHandler::HandleChat(SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size)
+{
+	if (auto room{ session->GetRoom() }; nullptr != room)
+	{
+		room->HandleChat(session, packet, payload, payload_size);
 	}
 }

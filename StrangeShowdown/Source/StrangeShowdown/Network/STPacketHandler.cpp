@@ -58,6 +58,14 @@ STPacketHandler::STPacketHandler()
 			HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
 		}
 	);
+
+	RegisterHandlerDynamic<Common::SCChat>(
+		Common::PacketType::SC_CHAT,
+		[this](const auto& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+		{
+			HandleChat(Packet, PayloadPtr, PayloadSize);
+		}
+	);
 }
 
 STPacketHandler::~STPacketHandler()
@@ -110,6 +118,15 @@ void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, c
 		return;
 	}
 	GameInstance->HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
+}
+
+void STPacketHandler::HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	GameInstance->HandleChat(Packet, PayloadPtr, PayloadSize);	
 }
 
 void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)

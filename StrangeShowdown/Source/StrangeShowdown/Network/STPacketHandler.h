@@ -30,7 +30,7 @@ private:
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
-
+	void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
 	// 핸들러 맵에 함수 등록

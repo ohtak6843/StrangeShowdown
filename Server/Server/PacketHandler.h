@@ -33,28 +33,22 @@ private:
 	template <typename T>
 	static void RegisterDynamicHandler(
 		Common::PacketType type,
-		std::function<void(const T&, const uint8*, const uint16)> logic_func)
+		std::function<void(SessionPtr, const T&, const uint8*, const uint16)> logic_func)
 	{
 		_handlerMap.emplace(
 			type,
-			[logic_func](const std::vector<uint8>& Data)
+			[logic_func](SessionPtr session, const RecvBuffer& Data)
 			{
-				// 방어: 버퍼 크기가 최소 헤더 크기도 안 되면 무시
-				const uint16 PacketSize{ sizeof(T) };
-				if (Data.size() < sizeof(T))
-				{
-					return;
-				}
-
 				// 고정 데이터 파싱
 				T Packet{ Serializer::Deserialize<T>(Data) };
 				const uint16 TotalSize{ Packet.size };
 
 				// 가변 데이터 파싱
+				const uint16 PacketSize{ sizeof(T) };
 				const uint8* PayloadPtr{ Data.data() + PacketSize };
 				const uint16 PayloadSize{ static_cast<uint16>(TotalSize - PacketSize) };
 
-				logic_func(Packet, PayloadPtr, PayloadSize);
+				logic_func(session, Packet, PayloadPtr, PayloadSize);
 			}
 		);
 	}
@@ -75,7 +69,8 @@ private:
 	// --
 	// dynamic handler
 	// --
-	
+	static void HandleChat(SessionPtr session, const Common::CSChat& packet,
+		const uint8* payload, const uint16 payload_size);
 
 
 	using HandlerFunc = std::function<void(SessionPtr, const RecvBuffer&)>;
