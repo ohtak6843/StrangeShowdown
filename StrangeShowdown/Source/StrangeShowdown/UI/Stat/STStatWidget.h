@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "STStatWidget.generated.h"
 
 /**

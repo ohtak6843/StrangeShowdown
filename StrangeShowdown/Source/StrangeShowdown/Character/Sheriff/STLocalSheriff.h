@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Sheriff/STSheriffBase.h"
 #include "InputActionValue.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "STLocalSheriff.generated.h"
 
 /**

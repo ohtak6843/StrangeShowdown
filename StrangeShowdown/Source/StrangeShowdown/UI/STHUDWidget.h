@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GameData/STItemSlot.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "STHUDWidget.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogSTHUDWidget, Log, All);

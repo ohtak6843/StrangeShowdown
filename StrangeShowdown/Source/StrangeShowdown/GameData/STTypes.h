@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "CommonEnum.h"
-#include "PlayerTypes.generated.h"
+#include "STTypes.generated.h"
 
 UENUM(BlueprintType)
 enum class ECameraPose : uint8

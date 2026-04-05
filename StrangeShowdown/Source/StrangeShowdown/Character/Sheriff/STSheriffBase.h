@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/STCharacter.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "Component/STStatComponent.h"
 #include "STSheriffBase.generated.h"
 

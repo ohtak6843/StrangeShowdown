@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "InputActionValue.h"
 #include "GameData/STItemSlot.h"
 #include "Interface/STCharacterHUDInterface.h"

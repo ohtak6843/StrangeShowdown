@@ -7,7 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Component/STStatComponent.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "STPlayerBase.generated.h"
 
 UCLASS()

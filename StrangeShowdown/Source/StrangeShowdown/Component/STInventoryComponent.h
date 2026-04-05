@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameData/STItemSlot.h"
-#include "Types/PlayerTypes.h"
+#include "GameData/STTypes.h"
 #include "STInventoryComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
