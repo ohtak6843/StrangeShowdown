@@ -1,15 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/WrapBox.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "STLobbyStatusWidget.generated.h"
 
-/**
- * 
- */
+struct FPlayerLobbyData
+{
+	uint64 PlayerID;
+	FString NickName;
+	bool bReady;
+	bool bIsHost;
+};
+
 UCLASS()
 class STRANGESHOWDOWN_API USTLobbyStatusWidget : public UUserWidget
 {
@@ -18,20 +22,49 @@ class STRANGESHOWDOWN_API USTLobbyStatusWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	// 새로운 플레이어가 들어오면 ID를 받아 슬롯 추가
-	void AddPlayerSlot(uint64 PlayerID, const FString& NickName);
-	void AddRoomOwnerSlot(uint64 PlayerID, const FString& NickName);
-
-	// ID를 받아 플레이어 Ready 상태를 업데이트
+	void EnterPlayer(uint64 PlayerID, const FString& NickName, bool bReady);
+	void LeavePlayer(uint64 PlayerID);
+	void RebuildSlots();
+	uint64 GetSlotIndex(uint64 PlayerID);
 	void SetPlayerReady(uint64 PlayerID, bool bReady);
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class USTLobbyStatusSlotWidget> SlotWidgetClass;
+private:
+	const int MaxPlayerCount = 5;
+
+	// PlayerID → 슬롯 번호 (0 = 방장)
+	TMap<uint64, FPlayerLobbyData> PlayerMap;
+
+	// 다음 슬롯 (1부터 시작)
+	int32 NextSlotIndex = 1;
+
+public:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* RoomOwnerNickName;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UWrapBox* WrapBox;
+	UImage* RoomOwnerReadyIcon;
 
-private:
-	// 이후 레디 참조를 위해 PlayerState를 키로, SlotWidget을 값으로 하는 맵
-	TMap<uint64, USTLobbyStatusSlotWidget*> SlotMap;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* Player1NickName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* Player1ReadyIcon;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* Player2NickName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* Player2ReadyIcon;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* Player3NickName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* Player3ReadyIcon;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* Player4NickName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* Player4ReadyIcon;
 };

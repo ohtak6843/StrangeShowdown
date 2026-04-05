@@ -2,7 +2,7 @@
 
 
 #include "Character/Player/STLobbyLocalPlayer.h"
-#include "STLobbyLocalPlayer.h"
+#include "Character/Player/STLobbyFieldPlayer.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Controller/STLobbyController.h"
@@ -77,8 +77,31 @@ void ASTLobbyLocalPlayer::BeginPlay()
 		}
 	}
 
+	// 자기 자신 AddPlayerInWidget() 호출
+	// TODO: 캐릭터도 ID를 가지고 있도록 해야함
+	AddPlayerInWidget(0, PlayerNickName, false);
+
 	// Add Player 델리게이트
-	// 어디서 호출할지 정해야함(Instance?)
+	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.AddUObject(
+		this,
+		&ASTLobbyLocalPlayer::AddPlayerInWidget
+	);
+
+	// TODO: 기존 플레이어 가져와서 AddPlayerInWidget() 호출
+
+	// Remove Player 델리게이트
+	ASTLobbyFieldPlayer::OnFieldPlayerRemoved.AddUObject(
+		this,
+		&ASTLobbyLocalPlayer::RemovePlayerFromWidget
+	);
+}
+
+void ASTLobbyLocalPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.RemoveAll(this);
+	ASTLobbyFieldPlayer::OnFieldPlayerRemoved.RemoveAll(this);
 }
 
 void ASTLobbyLocalPlayer::Tick(float DeltaTime)
@@ -101,6 +124,13 @@ void ASTLobbyLocalPlayer::Tick(float DeltaTime)
 #if NETWORK_ENABLED
 	SendMovePacket(DeltaTime);
 #endif
+}
+
+void ASTLobbyLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
+{
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+
+
 }
 
 void ASTLobbyLocalPlayer::ChangeToIdle()
@@ -160,7 +190,18 @@ void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
 	}
 }
 
-void ASTLobbyLocalPlayer::AddFieldPlayer(uint64 PlayerID, const FString& NickName)
+void ASTLobbyLocalPlayer::AddPlayerInWidget(uint64 PlayerID, const FString& NickName, bool bReady)
 {
-	LobbyHUDWidget->LobbyStatusWidget->AddPlayerSlot(PlayerID, NickName);
+	if (LobbyHUDWidget)
+	{
+		LobbyHUDWidget->LobbyStatusWidget->EnterPlayer(PlayerID, NickName, bReady);
+	}
+}
+
+void ASTLobbyLocalPlayer::RemovePlayerFromWidget(uint64 PlayerID)
+{
+	if (LobbyHUDWidget)
+	{
+		LobbyHUDWidget->LobbyStatusWidget->LeavePlayer(PlayerID);
+	}
 }
