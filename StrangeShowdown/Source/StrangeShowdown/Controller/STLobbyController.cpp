@@ -24,6 +24,12 @@ void ASTLobbyController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTLobbyController::FocusChatManager);
 }
 
+USTChatManagerWidget* ASTLobbyController::GetChatManagerWidget()
+{
+	ISTControllerHUDInterface::GetChatManagerWidget();
+	return LobbyHUDWidget->ChatManagerWidget;
+}
+
 void ASTLobbyController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -33,8 +33,11 @@
 #include "type.h"
 #include "define.h"
 
-using RecvBuffer = std::array<int8, BUFFER_SIZE>;
-using SendBuffer = std::vector<int8>;
+// 왜 Array를 사용했는가?
+// vector을 사용하면 메모리 재할당이 발생해 비용이 증가.
+// 비용 면에선 array가 더 이득.
+using RecvBuffer = std::array<uint8, BUFFER_SIZE>;
+using SendBuffer = std::vector<uint8>;
 
 using SessionPtr = std::shared_ptr<class Session>;
 using PlayerPtr = std::shared_ptr<class Player>;

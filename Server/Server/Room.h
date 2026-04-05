@@ -17,24 +17,33 @@ public:
 	// jobQueue에 LF로 job을 push
 	void PushJob(Job& job);
 
+
 	// --
-	// content method
+	// handler method
+	// --
+
+	void HandleCreateRoom(const uint32 roomID, const SessionPtr session, const Common::CSCreateRoom& packet);
+	void HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
+	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
+	void HandleStart(const SessionPtr session);
+	void HandleChat(const SessionPtr session, const Common::CSChat& packet,
+		const uint8* payload, const uint16 payload_size);
+
+
+
+
+
+	// --
+	// other method
 	// -- 
 
-	void Init(const uint32 roomID, const Common::CSCreateRoom& packet);
-
-	void JoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
-
+	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }
 	void AddPlayer(const uint64 playerId, const std::shared_ptr<Player>& player)
 	{
 		_players[playerId] = player;
 	}
 
-	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }
-
-	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
 	
-	void HandleStart(const SessionPtr session);
 	
 	
 	// --
@@ -75,6 +84,7 @@ private:
 	std::string _name{};
 	bool _hasPassword{ false };
 	std::string _password{};
+	uint64 _hostID{};
 	
 	// 임시. 이후 enum으로 변경
 	bool _inGame{ false };

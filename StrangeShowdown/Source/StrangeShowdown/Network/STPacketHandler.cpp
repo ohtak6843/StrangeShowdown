@@ -58,6 +58,30 @@ STPacketHandler::STPacketHandler()
 			HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
 		}
 	);
+
+	RegisterHandlerDynamic<Common::SCChat>(
+		Common::PacketType::SC_CHAT,
+		[this](const auto& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+		{
+			HandleChat(Packet, PayloadPtr, PayloadSize);
+		}
+	);
+
+	RegisterHandler<Common::SCReady>(
+		Common::PacketType::SC_READY,
+		[this](const auto& Packet)
+		{
+			HandleReady(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCStartGame>(
+		Common::PacketType::SC_START_GAME,
+		[this](const auto& Packet)
+		{
+			HandleStartGame(Packet);
+		}
+	);
 }
 
 STPacketHandler::~STPacketHandler()
@@ -93,16 +117,6 @@ void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)
 	GameInstance->HandleMove(Packet);
 }
 
-//void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet)
-//{
-//	if (nullptr == GameInstance)
-//	{
-//		return;
-//	}
-//	// GameInstance->HandleGiveRoomList(Packet);
-//	UE_LOG(LogTemp, Log, TEXT("Room Get Success. count: %d"), Packet.roomCount);
-//}
-
 void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
 	if (nullptr == GameInstance)
@@ -110,6 +124,33 @@ void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, c
 		return;
 	}
 	GameInstance->HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
+}
+
+void STPacketHandler::HandleReady(const Common::SCReady& Packet)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	GameInstance->HandleReady(Packet);
+}
+
+void STPacketHandler::HandleStartGame(const Common::SCStartGame& Packet)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	GameInstance->HandleStartGame(Packet);
+}
+
+void STPacketHandler::HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
+{
+	if (nullptr == GameInstance)
+	{
+		return;
+	}
+	GameInstance->HandleChat(Packet, PayloadPtr, PayloadSize);	
 }
 
 void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)

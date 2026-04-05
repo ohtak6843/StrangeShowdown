@@ -3,6 +3,7 @@
 
 #include "Widget/STLobbyStatusSlotWidget.h"
 #include "GameFramework/PlayerState.h"
+#include "Game/STGameInstance.h"
 
 void USTLobbyStatusSlotWidget::Init(uint64 NewPlayerID, const FString& NickName)
 {

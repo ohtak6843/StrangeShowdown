@@ -88,10 +88,12 @@ public:
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+	void HandleReady(const Common::SCReady& Packet);
+	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
-
+	void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
 	// blueprint 명령어
@@ -99,7 +101,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void GetRoomList();
 
-	
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void JoinRoom(const int64 RoomID, const FText& Password = FText::GetEmpty());
 
@@ -107,7 +108,18 @@ public:
 	void CreateRoom(const FText& Name, const FText& Password);
 
 	UFUNCTION(BlueprintCallable, Category = "Network")
-	void ChangeWorld();
+	void ChangeWorld(const FText& Level);
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void Chat(const FText& Message);
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void Ready(bool Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void StartGame();
+
+
 
 
 	// Exec 명령어
@@ -122,7 +134,16 @@ public:
 	void DevCreateRoom(const FString& RoomName, const FString& Password);
 
 	UFUNCTION(Exec)
-	void DevChangeWorld();
+	void DevChangeWorld(const FString& Level);
+
+	UFUNCTION(Exec)
+	void DevChat(const FString& Message);
+
+	UFUNCTION(Exec)
+	void DevReady(bool Ready);
+
+	UFUNCTION(Exec)
+	void DevStartGame();
 
 
 	// util

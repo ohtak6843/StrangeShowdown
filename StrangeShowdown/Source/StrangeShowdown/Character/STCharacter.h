@@ -26,6 +26,8 @@ public:
 	// Character Name
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
 	FString PlayerNickName = TEXT("NoName");
+	// todo: cham
+	// uint64 PlayerID = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	TObjectPtr<class ASTMiniMapActor> MiniMapActor;

@@ -34,7 +34,7 @@ public:
 	// 클라이언트 종료 처리는 함수가 오기 전 처리되어야 함.
 	void OnRecvCompleted(const uint32 bytesTransferred);
 
-	void DoSend(const std::vector<char>& data);
+	void DoSend(const SendBuffer& data);
 
 	template<typename T>
 	void DoSend(const T& packet)
@@ -58,7 +58,7 @@ public:
 
 	int GetCurrentDataSize() const { return _currentDataSize; }
 
-	std::array<char, BUFFER_SIZE>& GetRecvBuffer() { return _recvBuffer; }
+	RecvBuffer& GetRecvBuffer() { return _recvBuffer; }
 
 	uint64 GetSessionID() const { return _sessionID; }
 

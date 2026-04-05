@@ -23,14 +23,15 @@ private:
 	// 고정 크기 핸들러
 	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
 	void HandleMoveObject(const Common::SCMovePlayer& Packet);
-	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleLogin(const Common::SCLogin& Packet);
+	void HandleReady(const Common::SCReady& Packet);
+	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
-
+	void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
 	// 핸들러 맵에 함수 등록

@@ -4,19 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
+#include "Interface/STControllerHUDInterface.h"
 #include "STLobbyController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTLobbyController : public ASTBaseController
+class STRANGESHOWDOWN_API ASTLobbyController : public ASTBaseController, public ISTControllerHUDInterface
 {
 	GENERATED_BODY()
 public:
 	ASTLobbyController();
 
 	virtual void SetupInputComponent() override;
+	virtual class USTChatManagerWidget* GetChatManagerWidget() override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
 	TObjectPtr<class USTLobbyHUD> LobbyHUDWidget;

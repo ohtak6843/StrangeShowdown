@@ -20,7 +20,7 @@ public:
 	void Reset();
 
 	void PrepareRecv();
-	void PrepareSend(const std::vector<char>& packet, const int index);
+	void PrepareSend(const SendBuffer& packet, const int index);
 	void PrepareAccept();
 
 	// getter and setter
