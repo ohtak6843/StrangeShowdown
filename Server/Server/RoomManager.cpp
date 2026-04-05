@@ -14,7 +14,7 @@ void RoomManager::HandleCreateRoom(SessionPtr session, const Common::CSCreateRoo
 	// 방 생성 및 초기화
 	auto id{ _roomCounter++ };
 	_rooms[id] = GET_SINGLE(ObjectManager)->Pop<Room>();
-	_rooms[id]->HandleCreateRoom(id, packet);
+	_rooms[id]->HandleCreateRoom(id, session, packet);
 
 	// 방을 성공적으로 만들었으면 패킷을 보내준다
 	Common::SCCreateRoom room_packet{ true };

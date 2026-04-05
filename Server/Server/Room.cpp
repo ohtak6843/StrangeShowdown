@@ -9,12 +9,13 @@ void Room::PushJob(Job& job)
 	_jobQueue.push(job);
 }
 
-void Room::HandleCreateRoom(const uint32 roomID, const Common::CSCreateRoom& packet)
+void Room::HandleCreateRoom(const uint32 roomID, const SessionPtr session, const Common::CSCreateRoom& packet)
 {
 	_roomID = roomID;
 	_name = packet.name;
 	_hasPassword = packet.hasPassword;
 	_password = packet.password;
+	_hostID = session->GetSessionID();
 }
 
 void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
@@ -101,11 +102,19 @@ void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 void Room::HandleStart(const SessionPtr session)
 {
 	// todo: 플레이어가 방장인지 검사.
-
+	if (session->GetSessionID() != _hostID)
+	{
+		return;
+	}
 
 	// 모든 플레이어가 준비중인지 검사.
 	for (const auto& [id, player] : _players)
 	{
+		// 방장은 시작을 보냄.
+		if (id == _hostID)
+		{
+			continue;
+		}
 		if (!player->IsReady())
 		{
 			// 시작 실패 패킷을 보냄.

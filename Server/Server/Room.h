@@ -22,7 +22,7 @@ public:
 	// handler method
 	// --
 
-	void HandleCreateRoom(const uint32 roomID, const Common::CSCreateRoom& packet);
+	void HandleCreateRoom(const uint32 roomID, const SessionPtr session, const Common::CSCreateRoom& packet);
 	void HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
 	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
 	void HandleStart(const SessionPtr session);
@@ -84,6 +84,7 @@ private:
 	std::string _name{};
 	bool _hasPassword{ false };
 	std::string _password{};
+	uint64 _hostID{};
 	
 	// 임시. 이후 enum으로 변경
 	bool _inGame{ false };

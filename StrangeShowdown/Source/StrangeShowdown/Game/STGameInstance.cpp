@@ -282,6 +282,20 @@ void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 	}
 }
 
+void USTGameInstance::HandleReady(const Common::SCReady& Packet)
+{
+	UE_LOG(LogTemp, Log, TEXT("Player %d is %s"), Packet.id, Packet.ready ? TEXT("ready") : TEXT("not ready"));
+}
+
+void USTGameInstance::HandleStartGame(const Common::SCStartGame& Packet)
+{
+	UE_LOG(LogTemp, Log, TEXT("Game Start: %s"), Packet.start ? TEXT("true") : TEXT("false"));
+	if (true == Packet.start)
+	{
+		ChangeWorld(INVTEXT("L_InGame"));
+	}
+}
+
 void USTGameInstance::GetRoomList()
 {
 	Common::CSGetRoomList GetRoomListPacket{};
@@ -349,6 +363,22 @@ void USTGameInstance::Chat(const FText& Message)
 	UE_LOG(LogTemp, Log, TEXT("Chat called: Message=%s"), *Message.ToString());
 }
 
+void USTGameInstance::Ready(bool Value)
+{
+	Common::CSReady ReadyPacket{ Value };
+	auto Packet{ STSerializer::Serialize(ReadyPacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("Ready called: Value=%s"), Value ? TEXT("true") : TEXT("false"));
+}
+
+void USTGameInstance::StartGame()
+{
+	Common::CSStartGame StartGamePacket{};
+	auto Packet{ STSerializer::Serialize(StartGamePacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("StartGame called"));
+}
+
 void USTGameInstance::DevGetRoomList()
 {
 	GetRoomList();
@@ -376,6 +406,16 @@ void USTGameInstance::DevChat(const FString& Message)
 {
 	FText TextMessage = FText::FromString(Message);
 	Chat(TextMessage);
+}
+
+void USTGameInstance::DevReady(bool Value)
+{
+	Ready(Value);
+}
+
+void USTGameInstance::DevStartGame()
+{
+	StartGame();
 }
 
 

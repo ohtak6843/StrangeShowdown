@@ -88,6 +88,8 @@ public:
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+	void HandleReady(const Common::SCReady& Packet);
+	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
@@ -111,6 +113,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Chat(const FText& Message);
 
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void Ready(bool Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Network")
+	void StartGame();
+
+
+
 
 	// Exec 명령어
 
@@ -128,6 +138,12 @@ public:
 
 	UFUNCTION(Exec)
 	void DevChat(const FString& Message);
+
+	UFUNCTION(Exec)
+	void DevReady(bool Ready);
+
+	UFUNCTION(Exec)
+	void DevStartGame();
 
 
 	// util
