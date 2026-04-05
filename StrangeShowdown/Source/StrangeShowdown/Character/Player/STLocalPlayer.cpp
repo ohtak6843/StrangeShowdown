@@ -197,6 +197,7 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
 		InHUDWidget->SetInventoryComponent(InventoryComp);
 		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
+		InHUDWidget->SetStoreComponent(StoreComp);
 
 		InHUDWidget->UpdateStat();
 		InHUDWidget->UpdateQuickSlots();
@@ -204,6 +205,7 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
+		StoreComp->OnStoreUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStoreMenu);
 
 		// OnDrop 시 업데이트 연결
 		for (int i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)

@@ -41,6 +41,7 @@ protected:
 	void OpenStore(const FInputActionValue& Value);
 	void FocusChatManager(const FInputActionValue& Value);
 	void OpenBigMap(const FInputActionValue& Value);
+	void OpenBountyPoster(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenInventoryAction;
@@ -54,6 +55,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenBigMapAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> OpenBountyPosterAction;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsInventoryOpen : 1;
 
@@ -62,4 +66,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsBigMapOpen : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 bIsBountyPosterOpen : 1;
 };

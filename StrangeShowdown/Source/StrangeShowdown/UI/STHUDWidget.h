@@ -82,14 +82,20 @@ protected:
 
 #pragma region Store Section
 public:
+	void SetStoreComponent(class USTStoreComponent* InStoreComp);
+
 	bool OpenStoreMenu();
 	bool CloseStoreMenu();
 	void UpdateStoreMenu();
 
 protected:
-	// TODO: StoreMenuWidget 추가하기
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-	//TObjectPtr<class USTStoreMenuWidget> StoreMenu;
+	TWeakObjectPtr<class USTStoreComponent> SourceStoreComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class USTStoreMenuWidget> StoreMenuClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class USTStoreMenuWidget> StoreMenuWidget;
 
 #pragma endregion
 
@@ -130,4 +136,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class USTMiniMapWidget> BigMapWidget;
 #pragma endregion
+
+#pragma region Bounty Poster Section
+public:
+	bool OpenBountyPoster();
+	bool CloseBountyPoster();
+	void UpdateBountyPoster();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD)
+	TSubclassOf<class USTBountyPosterMenuWidget> BountyPosterMenuClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class USTBountyPosterMenuWidget> BountyPosterMenuWidget;
 };

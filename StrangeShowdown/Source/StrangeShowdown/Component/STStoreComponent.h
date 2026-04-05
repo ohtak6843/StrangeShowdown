@@ -8,7 +8,7 @@
 class ASTLocalPlayer;
 class USTItemDataAssetBase;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStoreUpdated);
+DECLARE_MULTICAST_DELEGATE(FOnStoreUpdated);
 
 USTRUCT(BlueprintType)
 struct FStoreSlot
@@ -16,14 +16,14 @@ struct FStoreSlot
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USTItemDataAssetBase* ItemData = nullptr;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 SlotIndex = -1;
 
-	UPROPERTY(BlueprintReadWrite)
-	bool bSold = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsSold = false;
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -38,21 +38,21 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
-	ASTStorekeeper* CurrentStorekeeper;
+	// UI 갱신 이벤트
+	FOnStoreUpdated OnStoreUpdated;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Store)
+	TWeakObjectPtr<class ASTStorekeeper> CurrentStorekeeper;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Store)
 	TArray<FStoreSlot> Slots;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
-	int32 SlotCount = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Store)
+	int32 SlotCount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Store")
-	int32 RerollCost = 5;
-
-	// UI 갱신 이벤트
-	UPROPERTY(BlueprintAssignable)
-	FOnStoreUpdated OnStoreUpdated;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Store)
+	int32 RerollCost;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Store")

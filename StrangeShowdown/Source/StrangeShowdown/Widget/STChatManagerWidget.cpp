@@ -88,7 +88,6 @@ void USTChatManagerWidget::OnChatInputCommitted(const FText& Text, ETextCommit::
 
 			FString NickName = Player->PlayerNickName;
 
-			// 임시로 FDateTime::Now() 사용
 			AddChatMessage(NickName, InputMessage);
 
 			ChatInputTextBox->SetText(FText::GetEmpty());

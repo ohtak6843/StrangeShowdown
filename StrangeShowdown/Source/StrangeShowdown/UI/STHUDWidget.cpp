@@ -8,9 +8,12 @@
 #include "Component/STQuickSlotComponent.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "Component/STInventoryComponent.h"
+#include "UI/Store/STStoreMenuWidget.h"
+#include "Component/STStoreComponent.h"
 #include "Interface/STCharacterHUDInterface.h"
 #include "Widget/STChatManagerWidget.h"
 #include "Widget/STMiniMapWidget.h"
+#include "UI/BountyPoster/STBountyPosterMenuWidget.h"
 
 DEFINE_LOG_CATEGORY(LogSTHUDWidget);
 
@@ -165,11 +168,20 @@ void USTHUDWidget::UpdateQuickSlots()
 	}
 }
 
+void USTHUDWidget::SetStoreComponent(USTStoreComponent* InStoreComp)
+{
+	if (InStoreComp)
+	{
+		SourceStoreComp = InStoreComp;
+	}
+}
+
 bool USTHUDWidget::OpenStoreMenu()
 {
 	// 상점 열었을 때, 다른 UI Remove
 
 	// 상점 Update 하고
+	StoreMenuWidget->OnExitButtonClicked.BindUObject(this, &USTHUDWidget::CloseStoreMenu);
 
 	// 플레이어 움직이지 못하게 하기
 
@@ -236,5 +248,41 @@ void USTHUDWidget::UpdateMiniMap()
 }
 
 void USTHUDWidget::UpdateBigMap()
+{
+}
+
+bool USTHUDWidget::OpenBountyPoster()
+{
+	if (!BountyPosterMenuWidget)
+	{
+		BountyPosterMenuWidget = CreateWidget<USTBountyPosterMenuWidget>(this, BountyPosterMenuClass);
+		if (BountyPosterMenuWidget)
+		{
+			BountyPosterMenuWidget->AddToViewport();
+			BountyPosterMenuWidget->UpdateBountyPosterMenu();
+
+			return true;
+		}
+	}
+
+	UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Bounty Poster: BountyPosterMenuWidget is already open"));
+	return false;
+}
+
+bool USTHUDWidget::CloseBountyPoster()
+{
+	if (BountyPosterMenuWidget)
+	{
+		BountyPosterMenuWidget->RemoveFromParent();
+		BountyPosterMenuWidget = nullptr;
+
+		return true;
+	}
+
+	UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to close Bounty Poster: BountyPosterMenuWidget is not open"));
+	return false;
+}
+
+void USTHUDWidget::UpdateBountyPoster()
 {
 }

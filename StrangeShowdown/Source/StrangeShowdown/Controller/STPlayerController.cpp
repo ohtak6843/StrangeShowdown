@@ -22,6 +22,7 @@ void ASTPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(OpenStoreAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenStore);
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTPlayerController::FocusChatManager);
 	EnhancedInputComponent->BindAction(OpenBigMapAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBigMap);
+	EnhancedInputComponent->BindAction(OpenBountyPosterAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBountyPoster);
 }
 
 void ASTPlayerController::BeginPlay()
@@ -94,6 +95,23 @@ void ASTPlayerController::OpenBigMap(const FInputActionValue& Value)
 		{
 			bool result = HUDWidget->OpenBigMap();
 			bIsBigMapOpen = result;
+		}
+	}
+}
+
+void ASTPlayerController::OpenBountyPoster(const FInputActionValue& Value)
+{
+	if (HUDWidget)
+	{
+		if (bIsBountyPosterOpen)
+		{
+			bool result = HUDWidget->CloseBountyPoster();
+			bIsBountyPosterOpen = !result;
+		}
+		else
+		{
+			bool result = HUDWidget->OpenBountyPoster();
+			bIsBountyPosterOpen = result;
 		}
 	}
 }

@@ -6,7 +6,8 @@
 
 USTStoreComponent::USTStoreComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	SlotCount = 5;
+	RerollCost = 5;
 }
 
 void USTStoreComponent::BeginPlay()
@@ -20,14 +21,14 @@ void USTStoreComponent::BeginPlay()
 
 void USTStoreComponent::InitStore()
 {
-	if (!CurrentStorekeeper) return;
+	if (!CurrentStorekeeper.IsValid()) return;
 
 	const TArray<USTItemDataAssetBase*>& Items = CurrentStorekeeper->StoreItemPool;
 
 	for (int32 i = 0; i < Slots.Num(); ++i)
 	{
 		Slots[i].SlotIndex = i;
-		Slots[i].bSold = false;
+		Slots[i].bIsSold = false;
 
 		if (Items.IsValidIndex(i))
 		{
@@ -51,7 +52,7 @@ void USTStoreComponent::Reroll()
 
 void USTStoreComponent::BuyItem(int32 SlotIndex)
 {
-	if (!CurrentStorekeeper) return;
+	if (!CurrentStorekeeper.IsValid()) return;
 
 	CurrentStorekeeper->BuyItem(SlotIndex);
 }
