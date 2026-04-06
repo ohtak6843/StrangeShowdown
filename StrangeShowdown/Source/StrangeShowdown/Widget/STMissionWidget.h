@@ -1,27 +1,25 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
-#include "Components/ListView.h"
+#include "Components/Image.h"
+#include "Game/STMissionRowData.h"
 #include "STMissionWidget.generated.h"
 
-/**
- * 
- */
-
-USTRUCT(BlueprintType)
-struct FMissionInfo
+USTRUCT()
+struct FMissionSlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
-	class UTextBlock* MissionText;
+	UPROPERTY()
+	UTextBlock* Title = nullptr;
 
-	UPROPERTY(BlueprintReadWrite)
-	class UTextBlock* MissionTitle;
+	UPROPERTY()
+	UTextBlock* Mission = nullptr;
+
+	UPROPERTY()
+	UImage* Image = nullptr;
 };
 
 UCLASS()
@@ -32,20 +30,38 @@ class STRANGESHOWDOWN_API USTMissionWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	// MissionComponent에서 호출될 함수
+	// Delegate 바인딩용
 	UFUNCTION()
-	void AddMission(const FText& NewTitle, const FText& NewMission);
+	void AddMission(USTMissionRowData* Data);
+
+	UFUNCTION()
+	void MissionClear(USTMissionRowData* Data);
+
+	void RemoveMission(USTMissionRowData* Data);
+	void RebuildSlots();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Mission")
+	void MissionAnimation(int32 Index);
 
 protected:
-	// UMG에서 BindWidget 체크
-	UPROPERTY(meta = (BindWidget))
-	UListView* MissionListView;
-
-private:
-	// 현재 저장된 미션 데이터
+	// 슬롯 (UI)
 	UPROPERTY()
-	TArray<UObject*> MissionItems;
+	TArray<FMissionSlot> MissionSlots;
 
-	// 최대 미션 개수
-	static constexpr int32 MaxMissionCount = 3;
+	// 데이터
+	UPROPERTY(BlueprintReadOnly, Category = "Mission")
+	TArray<USTMissionRowData*> ActiveMissions;
+
+	// BindWidget
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission1Title;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission2Title;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission3Title;
+
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission1;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission2;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission3;
+
+	UPROPERTY(meta = (BindWidget)) UImage* Mission1Image;
+	UPROPERTY(meta = (BindWidget)) UImage* Mission2Image;
+	UPROPERTY(meta = (BindWidget)) UImage* Mission3Image;
 };

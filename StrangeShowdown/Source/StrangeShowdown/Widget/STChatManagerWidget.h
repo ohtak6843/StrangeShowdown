@@ -40,6 +40,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 	void AddChatMessage(const FString& SenderNickName, const FString& Message);
 
+	// 공지 추가
+	UFUNCTION(BlueprintCallable, Category = "Chat")
+	void AddSystemMessage(const FString& Message);
+
 	// Enter 눌렀을 때 입력 처리, 입력 텍스트를 FChatMessage로 변환하여 ChatLog에 추가
 	UFUNCTION()
 	void OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod);
