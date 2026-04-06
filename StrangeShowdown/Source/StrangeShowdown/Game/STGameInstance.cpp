@@ -256,8 +256,10 @@ void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, c
 
 void USTGameInstance::HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	FString Message{ UTF8_TO_TCHAR(reinterpret_cast<const char*>(PayloadPtr)) };
-	UE_LOG(LogTemp, Log, TEXT("Chat Message Received By %d: %s"), Packet.id, *Message);
+	FUTF8ToTCHAR ConvertedStr(reinterpret_cast<const char*>(PayloadPtr), PayloadSize);
+	FString Message(ConvertedStr.Length(), ConvertedStr.Get());
+
+	UE_LOG(LogTemp, Log, TEXT("Chat Message Received By %d length %d : %s"), Packet.id, PayloadSize, *Message);
 
 	APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
 	ISTControllerHUDInterface* HUDInterface{ Cast<ISTControllerHUDInterface>(PlayerController) };

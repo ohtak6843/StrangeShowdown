@@ -143,11 +143,12 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 	
 	// message
 	std::vector<uint8> additional_data(payload, payload + payload_size);
+	additional_data.push_back('\0');
 
 	// packet
 	Common::SCChat chat_packet{
 		id,
-		payload_size
+		static_cast<uint16>(payload_size + 1)
 	};
 
 	// Á÷·ÄÈ­
