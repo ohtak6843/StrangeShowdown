@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
 #include "InputActionValue.h"
+#include "Interface/STControllerHUDInterface.h"
 #include "STPlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController
+class STRANGESHOWDOWN_API ASTPlayerController : public ASTBaseController, public ISTControllerHUDInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual class USTChatManagerWidget* GetChatManagerWidget() override;
+
 	class USTHUDWidget* GetHUDWidget() const { return HUDWidget; }
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Store")

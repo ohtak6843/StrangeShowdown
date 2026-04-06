@@ -40,6 +40,11 @@ void ASTPlayerController::BeginPlay()
 	}
 }
 
+USTChatManagerWidget* ASTPlayerController::GetChatManagerWidget()
+{
+	ISTControllerHUDInterface::GetChatManagerWidget();
+	return HUDWidget->GetChatManagerWidget();
+}
 void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 {
 	if (HUDWidget)
