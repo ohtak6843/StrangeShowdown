@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Components/WidgetComponent.h"
+#include "Component/STTargetIndicatorComponent.h"
 #include "STFieldPlayer.generated.h"
 
 /**
@@ -26,7 +27,10 @@ public:
 	void Move(const FVector& Location, const FRotator& Rotator);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
-	UWidgetComponent* StatWidgetComponent;
+	TObjectPtr<UWidgetComponent> StatWidgetComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
+	TObjectPtr<USTTargetIndicatorComponent> TargetIndicatorComponent;
 
 protected:
 

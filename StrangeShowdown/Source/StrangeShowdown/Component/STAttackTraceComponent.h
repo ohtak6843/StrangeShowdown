@@ -17,53 +17,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-
-	// 델리게이트를 받아 위젯에 타겟 획득 알림, 위치 Set, 위젯 삭제
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void HandleTargetAcquired(ASTFieldPlayer* NewTarget);
-
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void HandleTargetLost();
-
-public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-		FOnAttackTraceTargetAcquired,
-		ASTFieldPlayer*, NewTarget
-	);
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(
-		FOnAttackTraceTargetLost
-	);
-
-public:
-	// UI 위젯 클래스 (설계도)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AttackTrace|UI")
-	TSubclassOf<UUserWidget> AttackTraceWidgetClass;
-
-	// 실제 생성된 위젯 인스턴스
-	UPROPERTY(Transient)
-	TObjectPtr<UWidgetComponent> AttackTraceWidgetComponent;
-
 	// 현재 추적 중인 플레이어
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AttackTrace|State")
 	TObjectPtr<ASTFieldPlayer> TracingFieldPlayer;
-
-	// spine03으로부터 위젯 생성 위치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AttackTrace|UI")
-	FVector WidgetOffset = FVector(0.f, 0.f, 0.f);
-
-public:
-	// 타겟 획득 시
-	UPROPERTY(BlueprintAssignable, Category = "AttackTrace|Event")
-	FOnAttackTraceTargetAcquired OnTargetAcquired;
-
-	// 타겟 상실 시
-	UPROPERTY(BlueprintAssignable, Category = "AttackTrace|Event")
-	FOnAttackTraceTargetLost OnTargetLost;
 
 	// 공격 추적 시작 여부
 	UPROPERTY(BlueprintReadWrite, Category = "AttackTrace|Bool")
