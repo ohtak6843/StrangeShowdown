@@ -29,3 +29,8 @@ void USTMissionComponent::ClearMission(int32 Index)
 
 	Missions.RemoveAt(Index);
 }
+
+void USTMissionComponent::SetTestMission(int32 Index)
+{
+	SetMission(FText::FromString(FString::Printf(TEXT("Mission %d"), Index)), FText::FromString(TEXT("This is a test mission.")));
+}

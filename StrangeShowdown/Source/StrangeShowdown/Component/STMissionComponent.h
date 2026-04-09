@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ClearMission(int32 Index);
 
+	UFUNCTION(BlueprintCallable)
+	void SetTestMission(int32 Index);
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FMissionStart OnMissionStart;

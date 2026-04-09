@@ -2,16 +2,42 @@
 #include "Component/STAttackTraceComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 USTTargetIndicatorComponent::USTTargetIndicatorComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void USTTargetIndicatorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!AttackTraceWidgetComponent || !AttackTraceWidgetComponent->IsVisible())
+		return;
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC) return;
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	FVector ToCamera = CameraLocation - AttackTraceWidgetComponent->GetComponentLocation();
+	FRotator LookAtRotation = FRotationMatrix::MakeFromX(ToCamera).Rotator();
+	AttackTraceWidgetComponent->SetWorldRotation(LookAtRotation);
+
+	USkeletalMeshComponent* MeshComp = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+	if (!MeshComp) return;
+
+	FVector HeadLocation = MeshComp->GetSocketLocation(TEXT("head"));
+
+	FVector Forward = CameraRotation.Vector();
+	FVector NewLocation = HeadLocation + Forward * -20.f;
+
+	AttackTraceWidgetComponent->SetWorldLocation(NewLocation);
 }
 
 // Called when the game starts
@@ -19,15 +45,21 @@ void USTTargetIndicatorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner(), TEXT("AttackTraceWidgetComponent"));
+	AActor* Owner = GetOwner();
+	if (!Owner) return;
 
-	AttackTraceWidgetComponent->SetupAttachment(GetOwner()->GetRootComponent());
+	USkeletalMeshComponent* MeshComp = Owner->FindComponentByClass<USkeletalMeshComponent>();
+	if (!MeshComp) return;
+
+	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(Owner, TEXT("AttackTraceWidgetComponent"));
+
+	AttackTraceWidgetComponent->SetupAttachment(MeshComp, TEXT("head"));
 
 	AttackTraceWidgetComponent->RegisterComponent();
 	AttackTraceWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AttackTraceWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
-	AttackTraceWidgetComponent->SetDrawSize(FVector2D(100.f, 100.f));
+	AttackTraceWidgetComponent->SetDrawSize(FVector2D(50.f, 50.f));
 	AttackTraceWidgetComponent->SetTwoSided(true);
 	AttackTraceWidgetComponent->SetVisibility(false);
 
@@ -67,22 +99,10 @@ void USTTargetIndicatorComponent::UpdateUI()
 	if (Attackers.Num() > 0)
 	{
 		AttackTraceWidgetComponent->SetVisibility(true);
-		// AttackTraceWidget이 널인지 확인
-
-		if (AttackTraceWidgetComponent->GetUserWidgetObject())
-		{
-			UE_LOG(LogTemp, Log, TEXT("Attack Trace Widget is valid."));
-			// 위젯에 공격자 수 업데이트하는 로직 추가 가능
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack Trace Widget is null."));
-		}
 	}
 	else
 	{
 		AttackTraceWidgetComponent->SetVisibility(false);
-		UE_LOG(LogTemp, Log, TEXT("Target Indicator Hidden"));
 	}
 }
 
