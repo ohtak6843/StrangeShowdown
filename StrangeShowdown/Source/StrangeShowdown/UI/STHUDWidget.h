@@ -119,6 +119,16 @@ protected:
 
 #pragma endregion
 
+#pragma region Area Volume Section
+public:
+	class USTAreaVolumeWidget* GetAreaVolumeWidget() const { return AreaVolumeWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTAreaVolumeWidget> AreaVolumeWidget;
+
+#pragma endregion
+
 #pragma region Map Section
 public:
 	class USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }
