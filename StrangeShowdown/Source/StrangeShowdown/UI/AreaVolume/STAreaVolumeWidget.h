@@ -17,4 +17,7 @@ class STRANGESHOWDOWN_API USTAreaVolumeWidget : public UUserWidget
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void UpdateAreaInfo(enum EAreaType AreaType);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DeleteAreaInfo(enum EAreaType AreaType);
 };

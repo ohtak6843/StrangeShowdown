@@ -7,3 +7,7 @@
 void USTAreaVolumeWidget::UpdateAreaInfo_Implementation(EAreaType AreaType)
 {
 }
+
+void USTAreaVolumeWidget::DeleteAreaInfo_Implementation(EAreaType AreaType)
+{
+}

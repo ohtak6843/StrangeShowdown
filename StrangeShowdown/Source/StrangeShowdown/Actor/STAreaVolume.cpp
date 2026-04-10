@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Controller/STPlayerController.h"
 #include "UI/AreaVolume/STAreaVolumeWidget.h"
+#include "Character/Player/STLocalPlayer.h"
 #include "UI/STHUDWidget.h"
 
 // Sets default values
@@ -26,6 +27,7 @@ void ASTAreaVolume::BeginPlay()
 	Super::BeginPlay();
 	
 	Box->OnComponentBeginOverlap.AddDynamic(this, &ASTAreaVolume::OnOverlapBegin);
+	Box->OnComponentEndOverlap.AddDynamic(this, &ASTAreaVolume::OnOverlapEnd);
 
 	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
@@ -44,7 +46,24 @@ void ASTAreaVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	HUDWidget->GetAreaVolumeWidget()->UpdateAreaInfo(AreaType);
+	// STLocalPlayer와 충돌했는지 확인
+	if (OtherActor && OtherActor->IsA(ASTLocalPlayer::StaticClass()))
+	{
+		HUDWidget->GetAreaVolumeWidget()->UpdateAreaInfo(AreaType);
+	}
+}
+
+void ASTAreaVolume::OnOverlapEnd(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex)
+{
+	// STLocalPlayer와 충돌이 끝났는지 확인
+	if (OtherActor && OtherActor->IsA(ASTLocalPlayer::StaticClass()))
+	{
+		HUDWidget->GetAreaVolumeWidget()->DeleteAreaInfo(AreaType);
+	}
 }
 
 void ASTAreaVolume::BringHUD()
