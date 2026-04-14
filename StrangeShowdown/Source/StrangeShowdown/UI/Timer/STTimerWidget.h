@@ -19,9 +19,13 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void SetTimer(float InMaxTime);
+	void SetTurn(int InTurn);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class UImage> TimerImage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class UTextBlock> TurnText;
 	
 private:
 	float CurrentTime = 0.f;

@@ -3,6 +3,7 @@
 
 #include "UI/Timer/STTimerWidget.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void USTTimerWidget::NativeConstruct()
 {
@@ -37,4 +38,12 @@ void USTTimerWidget::SetTimer(float InMaxTime)
 {
 	CurrentTime = 0.f;
 	MaxTime = InMaxTime;
+}
+
+void USTTimerWidget::SetTurn(int InTurn)
+{
+	if (TurnText)
+	{
+		TurnText->SetText(FText::Format(NSLOCTEXT("STTimerWidget", "TurnFormat", "{0}ео"), FText::AsNumber(InTurn)));
+	}
 }
