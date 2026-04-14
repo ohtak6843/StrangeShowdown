@@ -119,6 +119,16 @@ protected:
 
 #pragma endregion
 
+#pragma region Timer
+public:
+	class USTTimerWidget* GetTimerWidget() const { return TimerWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTTimerWidget> TimerWidget;
+
+#pragma endregion
+
 #pragma region Area Volume Section
 public:
 	class USTAreaVolumeWidget* GetAreaVolumeWidget() const { return AreaVolumeWidget; }
