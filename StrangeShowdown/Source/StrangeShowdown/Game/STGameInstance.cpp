@@ -8,13 +8,18 @@
 #include "Common/TcpSocketBuilder.h"
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "SocketSubsystem.h"
-#include "Kismet/GameplayStatics.h"
-#include "Interface/STControllerHUDInterface.h"
-#include "Widget/STChatManagerWidget.h"
+
+#include "Manager/STNetworkManager.h"
+#include "Manager/STDataManager.h"
 
 #include "Network/SocketIO.h"
 #include "Network/STSerializer.h"
 #include "Network/STPacketHandler.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Interface/STControllerHUDInterface.h"
+#include "Widget/STChatManagerWidget.h"
+
 
 void USTGameInstance::Init()
 {
@@ -44,6 +49,10 @@ void USTGameInstance::Init()
 	}
 
 #if NETWORK_ENABLED
+
+	NetworkManager = NewObject<USTNetworkManager>(this);
+	DataManager = NewObject<USTDataManager>(this);
+
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
 	
 	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
@@ -86,6 +95,7 @@ void USTGameInstance::ConnectToGameServer()
 {
 
 #if NETWORK_ENABLED
+	
 	// Socket Subsystem
 	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(TEXT("Stream"), TEXT("Client Socket"));
 
@@ -178,51 +188,14 @@ void USTGameInstance::HandleRecvPackets()
 
 void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
-
-	// transform
-	FTransform transform{ FTransform::Identity };
-
-	// todo: 수정 필요
-	transform.SetLocation(FVector(Packet.pos.x, Packet.pos.y, Packet.pos.z));
-	transform.SetRotation(FQuat::Identity);
-	// 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	if (nullptr == OtherPlayerClass)
-	{
-		UE_LOG(LogTemp, Log, TEXT("OtherPlayerClass is NOT assigned!"));
-		return;
-	}
-
-	auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
-		OtherPlayerClass,
-		transform,
-		SpawnParams
-	) };
-
-	// playerid 넣기
-	PlayerMap.Add(Packet.objectID, player);
+	// player bp class
+	DataManager->HandleSpawn(OtherPlayerClass, Packet);
 
 }
 
 void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (ASTFieldPlayer **PlayerPtr{ PlayerMap.Find(Packet.id) })
-	{
-		ASTFieldPlayer* Player{ *PlayerPtr };
-		
-		if (false == IsValid(Player))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player with ID %d is not valid"), Packet.id);
-			return;
-		}
-
-		FVector location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
-		FRotator rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
-		Player->Move(location, rotation);
-		Player->PlayerStateFlag = Packet.state;
-	}
+	DataManager->HandleMove(Packet);
 }
 
 void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)

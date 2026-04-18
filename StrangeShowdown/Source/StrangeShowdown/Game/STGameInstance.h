@@ -16,6 +16,8 @@
 
 class SocketIO;
 class STPacketHandler;
+class USTNetworkManager;
+class USTDataManager;
 
 /**
  * 
@@ -162,10 +164,16 @@ private:
 	TSharedPtr<SocketIO> SocketIOInstance{};
 	TSharedPtr<STPacketHandler> PacketHandler{};
 
+	// --
+	// manager
+	// --
 
-	// 가비지 컬렉터 삭제 방지
-	UPROPERTY(VisibleAnywhere, Category = "Network")
-	TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+	UPROPERTY()
+	USTNetworkManager* NetworkManager{};
+
+	UPROPERTY()
+	USTDataManager* DataManager{};
+
 
 	// GameInstance 자체 Ticker
 	FTSTicker::FDelegateHandle TickHandle{};
