@@ -62,6 +62,12 @@ void ASTFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
 		static_cast<float>(FVector::Dist(Location, TargetLocation)) / SendMoveMaxTime
 	};
 
+	if (nullptr == GetMesh())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mesh is not valid in Move function"));
+		return;
+	}
+
 	SetActorLocation(TargetLocation);
 	SetActorRotation(TargetRotation);
 
@@ -78,6 +84,7 @@ void ASTFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
 			Movement->Velocity = Direction * Speed;
 		}
 	}
+	
 
 	TargetLocation = Location;
 	TargetRotation = Rotator;

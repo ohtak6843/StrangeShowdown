@@ -12,7 +12,13 @@
 
 
 
-void USTDataManager::HandleSpawn(TSubclassOf<ASTFieldPlayer> OtherPlayerClass , const Common::SCSpawnObject& Packet)
+
+void USTDataManager::init(TSubclassOf<ASTFieldPlayer> InOtherPlayerClass)
+{
+	OtherPlayerClass = InOtherPlayerClass;
+}
+
+void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
 	// UClass
 	if (nullptr == OtherPlayerClass)
@@ -22,10 +28,10 @@ void USTDataManager::HandleSpawn(TSubclassOf<ASTFieldPlayer> OtherPlayerClass , 
 	}
 
 	// transform
-	FTransform transform{ FTransform::Identity };
+	FTransform Transform{ FTransform::Identity };
 
-	transform.SetLocation(FVector(Packet.pos.x, Packet.pos.y, Packet.pos.z));
-	transform.SetRotation(FQuat::Identity);
+	Transform.SetLocation(FVector(Packet.pos.x, Packet.pos.y, Packet.pos.z));
+	Transform.SetRotation(FQuat::Identity);
 
 	// spawn param
 	FActorSpawnParameters SpawnParams;
@@ -34,21 +40,29 @@ void USTDataManager::HandleSpawn(TSubclassOf<ASTFieldPlayer> OtherPlayerClass , 
 	// spawn player
 	auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
 		OtherPlayerClass,
-		transform,
+		Transform,
 		SpawnParams
 	) };
 
-	// playermap에 추가
-	PlayerMap.Add(Packet.objectID, player);
+	// playerinfo 생성
+	FPlayerInfo PlayerInfo{
+		.Player = player,
+		.NickName = FString::Printf(TEXT("Player_%llu"), Packet.objectID),
+		.PlayerID = Packet.objectID
+	};
+
+	// playerinfoMap에 추가
+	PlayerInfoMap.Add(Packet.objectID, PlayerInfo);
 	
 	UE_LOG(LogTemp, Log, TEXT("HandleSpawn: PlayerID=%llu"), Packet.objectID);
 }
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (ASTFieldPlayer * *PlayerPtr{ PlayerMap.Find(Packet.id) })
+	if (auto* InfoPtr{ PlayerInfoMap.Find(Packet.id) })
 	{
-		ASTFieldPlayer* Player{ *PlayerPtr };
+		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
+		ASTFieldPlayer* Player{ InfoPtr->Player };
 
 		if (false == IsValid(Player))
 		{
@@ -56,13 +70,38 @@ void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 			return;
 		}
 
-		FVector location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
-		FRotator rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
-		Player->Move(location, rotation);
+		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
+		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
+		Player->Move(Location, Rotation);
 		Player->PlayerStateFlag = Packet.state;
 	}
 }
 
-void USTDataManager::ChangeMap(const FString& MapName)
+void USTDataManager::RefreshPlayers()
 {
+	for(auto& Elem : PlayerInfoMap)
+	{
+		if (IsValid(Elem.Value.Player) && false == Elem.Value.Player->IsActorBeingDestroyed())
+		{
+			Elem.Value.Player->Destroy();
+		}
+
+		FTransform Transform{ FTransform::Identity };
+
+		Transform.SetLocation(FVector{});
+		Transform.SetRotation(FQuat::Identity);
+
+		// spawn param
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+
+		auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
+			OtherPlayerClass,
+			Transform,
+			SpawnParams)
+		};
+
+		Elem.Value.Player = player;
+	}
 }

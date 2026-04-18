@@ -6,7 +6,6 @@
 #include "UObject/NoExportTypes.h"
 
 #include "protocol.h"
-#include "Character/STCharacter.h"
 
 #include "STDataManager.generated.h"
 
@@ -17,10 +16,13 @@ class ASTFieldPlayer;
 *  레벨이 바뀌어도 유지되는 플레이어 정보를 담는 구조체
 *  DataManager에서 관리해 서버와 연동된다.
 */
+USTRUCT(BlueprintType)
 struct FPlayerInfo
 {
+	GENERATED_BODY()
+
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	ASTCharacter* Player;
+	ASTFieldPlayer* Player;
 
 	FString NickName;
 
@@ -28,7 +30,7 @@ struct FPlayerInfo
 };
 
 /**
-* @brief:
+* @brief:  
 *  서버와 연동되는 클라이언트의 정보관리
 */
 UCLASS()
@@ -38,11 +40,15 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 
 public:
 
+	// method
+	
+	void init(TSubclassOf<ASTFieldPlayer> InOtherPlayerClass);
+
 	// --
 	// 패킷 처리 함수들
 	// --
 
-	void HandleSpawn(TSubclassOf<ASTFieldPlayer> OtherPlayerClass, const Common::SCSpawnObject& Packet);
+	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	//void HandleJoinRoom(const Common::SCJoinRoom& Packet);
@@ -54,16 +60,19 @@ public:
 	//void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
-	void ChangeMap(const FString& MapName);
+	void RefreshPlayers();
 
 	// todo cham: 나중에 private화.
 public:
 
 	// 가비지 컬렉터 사라짐 방지 위해 UPROPERTY로 선언
+	//UPROPERTY()
+	//TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+
 	UPROPERTY()
-	TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+	TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
 
 	// 가비지 컬렉터 사라짐 방지 위해 UPROPERTY로 선언
-	//UPROPERTY(VisibleAnywhere, Category = "Data")
-	//TMap<uint64, FPlayerInfo*> PlayerInfoMap{};
+	UPROPERTY()
+	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
 };

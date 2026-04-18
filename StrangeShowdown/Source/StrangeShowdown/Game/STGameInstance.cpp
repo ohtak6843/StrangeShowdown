@@ -53,6 +53,8 @@ void USTGameInstance::Init()
 	NetworkManager = NewObject<USTNetworkManager>(this);
 	DataManager = NewObject<USTDataManager>(this);
 
+	DataManager->init(OtherPlayerClass);
+
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
 	
 	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
@@ -189,7 +191,7 @@ void USTGameInstance::HandleRecvPackets()
 void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
 	// player bp class
-	DataManager->HandleSpawn(OtherPlayerClass, Packet);
+	DataManager->HandleSpawn(Packet);
 
 }
 
@@ -316,10 +318,10 @@ void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 void USTGameInstance::ChangeWorld(const FText& Level)
 {
 	IsLoadingLevel = true;
-	//PlayerMap.Empty();
 
 	FName LevelName(*Level.ToString());
 	UGameplayStatics::OpenLevel(this, LevelName);
+
 	UE_LOG(LogTemp, Log, TEXT("ChangeWorld called"));
 }
 
@@ -408,5 +410,7 @@ void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
 		IsLoadingLevel = false;
+
+		DataManager->RefreshPlayers();
 	}
 }
