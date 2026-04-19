@@ -18,9 +18,6 @@ class STRANGESHOWDOWN_API USTTooltipWidget : public UUserWidget
 public:
 	USTTooltipWidget(const FObjectInitializer& ObjectInitializer);
 
-protected:
-	virtual void NativeConstruct() override;
-
 public:
 	void UpdateTooltip(const FSTItemSlot& ItemSlot);
 
@@ -28,12 +25,12 @@ protected:
 	UPROPERTY()
 	FSTItemSlot SlotData;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> ItemImage;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> ItemName;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> ItemDescription;
 };

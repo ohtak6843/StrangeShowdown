@@ -18,26 +18,15 @@ class STRANGESHOWDOWN_API USTInventoryWidget : public UUserWidget
 public:
 	USTInventoryWidget(const FObjectInitializer& ObjectInitializer);
 
-protected:
-	virtual void NativeConstruct() override;
-
 public:
 	void SetupInventory(int32 InventorySlotCount);
 
 	void UpdateInventory(const TArray<FSTItemSlot>& InItemSlots);
 
 protected:
-	void HandleSlotMouseEnter(const FSTItemSlot& ItemSlot);
-	void HandleSlotMouseMove(const FPointerEvent& InMouseEvent);
-	void HandleSlotMouseLeave();
-
-protected:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
 	TSubclassOf<class USTSlotWidget> SlotWidgetClass;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UWrapBox> SlotWrapBox;
-
-	UPROPERTY()
-	TObjectPtr<class USTTooltipWidget> Tooltip;
 };

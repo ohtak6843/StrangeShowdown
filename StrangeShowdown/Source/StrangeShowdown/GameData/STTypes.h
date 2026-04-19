@@ -47,8 +47,6 @@ enum class EPlayerState : uint8
 	Idle			= Common::PlayerState::Idle			UMETA(DisplayName = "Idle"),
 	Jumping			= Common::PlayerState::Jumping		UMETA(DisplayName = "Jumping"),
 	HoldItem		= Common::PlayerState::HoldItem		UMETA(DisplayName = "HoldItem"),
-	ArmedPistol		= Common::PlayerState::ArmedPistol	UMETA(DisplayName = "ArmedPistol"),
-	ArmedHammer		= Common::PlayerState::ArmedHammer	UMETA(DisplayName = "ArmedHammer"),
 	Aiming			= Common::PlayerState::Aiming		UMETA(DisplayName = "Aiming"),
 	LookingUp		= Common::PlayerState::LookingUp	UMETA(DisplayName = "LookingUp"),
 	Dead			= Common::PlayerState::Dead			UMETA(DisplayName = "Dead"),

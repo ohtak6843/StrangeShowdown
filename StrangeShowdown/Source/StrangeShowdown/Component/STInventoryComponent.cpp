@@ -18,41 +18,45 @@ void USTInventoryComponent::InitializeComponent()
 	MouseDrop.AddDynamic(this, &USTInventoryComponent::ChangeSlot_FromEvent);
 }
 
-bool USTInventoryComponent::AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex)
+bool USTInventoryComponent::AddItem(FSTItemSlot ItemSlot, int32& OutAddedInventoryIndex)
 {
-	if (!NewItem || Count <= 0)
+	if (!ItemSlot.ItemData || ItemSlot.Count <= 0)
 		return false;
 
-	int32 StackSlot = FindStackableSlot(NewItem);
+	int32 StackSlot = FindStackableSlot(ItemSlot.ItemData);
 
 	if (StackSlot != -1)
 	{
-		int32 SpaceLeft = NewItem->MaxStack - Slots[StackSlot].Count;
-		int32 AddCount = FMath::Min(SpaceLeft, Count);
+		int32 SpaceLeft = ItemSlot.ItemData->MaxStack - Slots[StackSlot].Count;
+		int32 AddCount = FMath::Min(SpaceLeft, ItemSlot.Count);
 
 		Slots[StackSlot].Count += AddCount;
-		Count -= AddCount;
+		ItemSlot.Count -= AddCount;
 		OutAddedInventoryIndex = StackSlot;
 
-		if (Count <= 0)
+		if (ItemSlot.Count <= 0)
+		{
+			OnInventoryUpdated.Broadcast();
 			return true;
+		}
 	}
 
-	while (Count > 0)
+	while (ItemSlot.Count > 0)
 	{
 		int32 EmptyIndex = FindEmptySlot();
 		if (EmptyIndex == -1)
 			return false;
 
-		int32 AddCount = FMath::Min(Count, NewItem->MaxStack);
+		int32 AddCount = FMath::Min(ItemSlot.Count, ItemSlot.ItemData->MaxStack);
 
-		Slots[EmptyIndex].ItemData = NewItem;
+		Slots[EmptyIndex].ItemData = ItemSlot.ItemData;
 		Slots[EmptyIndex].Count = AddCount;
 
-		Count -= AddCount;
+		ItemSlot.Count -= AddCount;
 		OutAddedInventoryIndex = EmptyIndex;
 	}
 
+	OnInventoryUpdated.Broadcast();
 	return true;
 }
 
@@ -140,16 +144,6 @@ EItemUseType USTInventoryComponent::UseItem(int32 SlotIndex, ASTLocalPlayer* Pla
 	if (!Effect->Use(Player, Slot.ItemData))
 	{
 		return EItemUseType::Exception;
-	}
-
-	const int32 Cost = (StaminaCost > 0) ? StaminaCost : Slot.ItemData->StaminaCost;
-
-	// 아이템 제거
-	RemoveItem(SlotIndex, 1);
-
-	if (Player && Player->StatComp)
-	{
-		Player->StatComp->AddStamina(-Cost);
 	}
 
 	OnInventoryUpdated.Broadcast();

@@ -8,9 +8,10 @@ USTDragWidget::USTDragWidget(const FObjectInitializer& ObjectInitializer) : Supe
 {
 }
 
-void USTDragWidget::NativeConstruct()
+void USTDragWidget::SetDragImage(UTexture2D* InItemImage)
 {
-	Super::NativeConstruct();
-
-	DragItemImage = Cast<UImage>(GetWidgetFromName(TEXT("ImageDragItem")));
+	if (DragItemImage)
+	{
+		DragItemImage->SetBrushFromTexture(InItemImage);
+	}
 }

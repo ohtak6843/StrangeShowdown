@@ -31,6 +31,8 @@ public:
 	virtual void InitializeComponent() override;
 
 public:
+	void SetCurrentSelectIndex(int32 NewIndex);
+
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	bool AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex);
@@ -46,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "QuickSlot")
 	class USTItemDataAssetBase* GetCurrentSelectedQuickSlotItemData() const;
 
-	void AddItem(const FSTItemSlot& ItemSlot, int32 InventoryIndex, int32 QuickSlotIndex);
+	bool AddItem(class USTInventoryComponent* InventoryComp, int32 InventoryIndex, int32 QuickSlotIndex);
 
 public:
 	// MouseDropToQuickSlot 이벤트 디스패처

@@ -7,6 +7,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
 #include "Item/STItemDataAssetBase.h"
+#include "Component/STInventoryComponent.h"
+#include "DragDropOperation/STInventoryDragDropOperation.h"
 
 USTQuickSlotWidget::USTQuickSlotWidget(const FObjectInitializer& ObjectInitializer)
 {
@@ -43,7 +45,15 @@ bool USTQuickSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDr
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
-	//OnQuickSlotWidgetDrop.Broadcast(InventorySystemComp, InventoryIndex, SlotIndex);
+	USTInventoryDragDropOperation* DragDropOperation = Cast<USTInventoryDragDropOperation>(InOperation);
+	if (DragDropOperation)
+	{
+		USTInventoryComponent* InventoryComp = DragDropOperation->SourceInventory;
+		if (OnQuickSlotWidgetDrop.IsBound())
+		{
+			OnQuickSlotWidgetDrop.Execute(InventoryComp, DragDropOperation->SourceSlotIndex, SlotIndex);
+		}
+	}
 
 	return true;
 }

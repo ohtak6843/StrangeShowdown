@@ -163,9 +163,11 @@ void ASTLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ShoulderLook);
 	EnhancedInputComponent->BindAction(PistolAimAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PistolAim);
-	EnhancedInputComponent->BindAction(PistolFireAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PistolFire);
+	EnhancedInputComponent->BindAction(UseQuickSlotItemAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::UseQuickSlotItem);
+	EnhancedInputComponent->BindAction(LookingUpAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::LookingUp);
 	EnhancedInputComponent->BindAction(ChangeQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ChangeQuickSlot);
 	EnhancedInputComponent->BindAction(ScrollQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ScrollQuickSlot);
+	EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PickUp);
 }
 
 void ASTLocalPlayer::BeginPlay()
@@ -210,7 +212,7 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		// OnDrop 시 업데이트 연결
 		for (int i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
 		{
-			InHUDWidget->GetQuickSlotWidget(i)->OnQuickSlotWidgetDrop.AddUObject(QuickSlotComp, &USTQuickSlotComponent::AddItem);
+			InHUDWidget->GetQuickSlotWidget(i)->OnQuickSlotWidgetDrop.BindUObject(QuickSlotComp, &USTQuickSlotComponent::AddItem);
 		}
 	}
 }
@@ -256,8 +258,6 @@ void ASTLocalPlayer::AttackHitCheck()
 	// 스태미나 감소
 	StatComp->AddStamina(-1.f);
 
-	OnStatUIUpdated();
-
 #if ENABLE_DRAW_DEBUG
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
 #endif
@@ -271,63 +271,6 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	TargetPose = PoseSettings[NewPose];
 
 	PoseElapsedTime = 0.f;
-}
-
-void ASTLocalPlayer::Interact(int32& OutAddedInventoryIndex)
-{
-	FVector Start = CameraComp->GetComponentLocation();
-	FVector ForwardVector = CameraComp->GetForwardVector();
-	FVector End = ((ForwardVector * 500.f) + Start);
-
-	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams;
-
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		Start,
-		End,
-		ECC_Visibility,
-		CollisionParams
-	);
-
-	if (!bIsHit)
-		return;
-
-	ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
-	if (!PickupItem || !InventoryComp || !PickupItem->ItemData)
-		return;
-
-	int32 AddedInventoryIndex = -1;
-
-	bool bAdded = InventoryComp->AddItem(
-		PickupItem->ItemData,
-		1,
-		AddedInventoryIndex
-	);
-
-	// TODO: 인벤토리 위젯 업데이트 하도록 브로드캐스트
-
-	if (bAdded && QuickSlotComp)
-	{
-		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
-		{
-			FSTItemSlot& QuickSlot = QuickSlotComp->QuickSlots[i];
-			if (QuickSlot.ItemData == PickupItem->ItemData)
-			{
-				QuickSlot.Count += 1;
-				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
-				break;
-			}
-		}
-	}
-
-	if (!bAdded || AddedInventoryIndex == -1)
-		return;
-	
-	// AddInventoryIndex 반환
-	OutAddedInventoryIndex = AddedInventoryIndex;
-
-	PickupItem->Destroy();
 }
 
 void ASTLocalPlayer::UseItem()
@@ -356,6 +299,20 @@ void ASTLocalPlayer::UseItem()
 
 	// 사용 결과에 따른 분기 효과(Implement)
 	UseItemEffect(OutSlot, Result);
+
+	if (OutSlot.ItemData)
+	{
+		const int32 Cost = OutSlot.ItemData->StaminaCost;
+		StatComp->AddStamina(-Cost);
+
+		// 아이템 제거
+		InventoryComp->RemoveItem(InventorySlotIndex, 1);
+	}
+
+	InventoryComp->OnInventoryUpdated.Broadcast();
+
+	// 아이템 사용 후 퀵슬롯 업데이트
+	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
 }
@@ -412,7 +369,6 @@ void ASTLocalPlayer::DropItem()
 		RightHandSkeletalMesh->SetEnableGravity(true);
 		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
-
 	case EItemType::Hammer:
 	case EItemType::Helmet:
 	case EItemType::Meat:
@@ -462,24 +418,74 @@ void ASTLocalPlayer::PistolAim(const FInputActionValue& Value)
 		AddState(EPlayerState::Aiming);
 		ApplyStateSettings(ECameraPose::Aiming);
 		bUseControllerRotationYaw = true;
+
+		int32 SlotIndex = 0;
+		QuickSlotComp->SetCurrentSelectIndex(SlotIndex);
+		HoldItem();
 	}
 }
 
-void ASTLocalPlayer::PistolFire(const FInputActionValue& Value)
+void ASTLocalPlayer::LookingUp(const FInputActionValue& Value)
 {
-	// TODO: 좌클릭 처리를 여기서 분기하기, 함수 이름 변경하기
-	bool bIsAiming = HasAnyState(EPlayerState::Aiming);
-	if (bIsAiming)
+	bool bIsLookingUp = HasAnyState(EPlayerState::LookingUp);
+	if (bIsLookingUp)
 	{
-		//TODO: 파티클 애니메이션 재생
+		RemoveState(EPlayerState::LookingUp);
+		ApplyStateSettings(ECameraPose::Idle);
+		bUseControllerRotationYaw = false;
+	}
+	else
+	{
+		AddState(EPlayerState::LookingUp);
+		ApplyStateSettings(ECameraPose::LookingUp);
+		bUseControllerRotationYaw = true;
+	}
+}
+
+void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
+{
+	USTItemDataAssetBase* CurrentItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
+	if (nullptr == CurrentItemData)
+		return;
+
+	switch (CurrentItemData->ItemType)
+	{
+		case EItemType::Pistol:
+			if (HasAnyState(EPlayerState::Aiming) && AttackTraceComp->TracingFieldPlayer)
+			{
+				PistolFire();
+			}
+			break;
+		case EItemType::Hammer:
+			if (1.0f <= StatComp->CurrentStamina)
+			{
+				HammerSmash();
+			}
+			else
+			{
+				NotEnoughStaminaCostFloatingMessage();
+			}
+			break;
+		case EItemType::Helmet:
+		case EItemType::Meat:
+		case EItemType::Whiskey:
+		case EItemType::EnhancePower:
+			UseItem();
+			break;
 	}
 }
 
 void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
 {
-	int32 SlotIndex = FMath::RoundToInt(Value.Get<float>());
+	int32 SlotIndex = FMath::RoundToInt(Value.Get<float>()) - 1;
 
-	// TODO: 퀵슬롯 변경 로직 작성
+	bool result = HasAnyState(EPlayerState::Aiming | EPlayerState::LookingUp);
+	if(result)
+	{
+		ApplyStateSettings(ECameraPose::Idle);
+	}
+	QuickSlotComp->SetCurrentSelectIndex(SlotIndex);
+	HoldItem();
 }
 
 void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
@@ -490,14 +496,78 @@ void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
 
 	if(ScrollValue > 0)
 	{
-		//CurrentIndex = (CurrentIndex + 1) % QuickSlotComp->QuickSlots.Num();
-		UE_LOG(LogTemp, Log, TEXT("Scroll Up"));
+		CurrentIndex = (CurrentIndex + 1) % QuickSlotComp->QuickSlots.Num();
 	}
 	else if(ScrollValue < 0)
 	{
-		//CurrentIndex = (CurrentIndex - 1 + QuickSlotComp->QuickSlots.Num()) % QuickSlotComp->QuickSlots.Num();
-		UE_LOG(LogTemp, Log, TEXT("Scroll Down"));
+		CurrentIndex = (CurrentIndex - 1 + QuickSlotComp->QuickSlots.Num()) % QuickSlotComp->QuickSlots.Num();
 	}
+
+	QuickSlotComp->SetCurrentSelectIndex(CurrentIndex);
+	HoldItem();
+}
+
+void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
+{
+	FVector Start = CameraComp->GetComponentLocation();
+	FVector ForwardVector = CameraComp->GetForwardVector();
+	FVector End = ((ForwardVector * 500.f) + Start);
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		CollisionParams
+	);
+
+	if (!bIsHit)
+		return;
+
+	ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
+	if (!PickupItem || !InventoryComp || !PickupItem->ItemData)
+		return;
+
+	int32 AddedInventoryIndex = -1;
+
+	FSTItemSlot ItemSlot(PickupItem->ItemData, true, 1);
+
+	bool bAdded = InventoryComp->AddItem(
+		ItemSlot,
+		AddedInventoryIndex
+	);
+
+	if (bAdded && QuickSlotComp)
+	{
+		for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
+		{
+			FSTItemSlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+			if (QuickSlot.ItemData == PickupItem->ItemData)
+			{
+				QuickSlot.Count += 1;
+				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+				break;
+			}
+		}
+	}
+
+	if (!bAdded || AddedInventoryIndex == -1)
+		return;
+
+	PickupItem->Destroy();
+
+	// 퀵슬롯에 추가된 아이템이 없으면 자동으로 퀵슬롯에 추가
+	if (QuickSlotComp)
+	{
+		int32 TargetQuickSlotIndex = -2;
+		bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
+	}
+
+	// 아이템 장착
+	HoldItem();
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

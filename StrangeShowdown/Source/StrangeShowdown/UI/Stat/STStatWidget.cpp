@@ -10,23 +10,6 @@
 
 USTStatWidget::USTStatWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FObjectFinder<UTexture2D> PlayerHeartRef(TEXT("/Game/StrangeShowdown/UI/Texture/T_CowboyHeart.T_CowboyHeart"));
-	if (PlayerHeartRef.Object)
-	{
-		PlayerHeartTexture = PlayerHeartRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UTexture2D> GhostHeartRef(TEXT("/Game/StrangeShowdown/UI/Texture/T_GhostHeart.T_GhostHeart"));
-	if (GhostHeartRef.Object)
-	{
-		GhostHeartTexture = GhostHeartRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UTexture2D> SheriffHeartRef(TEXT("/Game/StrangeShowdown/UI/Texture/T_SheriffHeart.T_SheriffHeart"));
-	if (SheriffHeartRef.Object)
-	{
-		SheriffHeartTexture = SheriffHeartRef.Object;
-	}
 }
 
 void USTStatWidget::NativeConstruct()

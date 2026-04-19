@@ -9,13 +9,6 @@ USTInventoryMenuWidget::USTInventoryMenuWidget(const FObjectInitializer& ObjectI
 {
 }
 
-void USTInventoryMenuWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	Inventory = Cast<USTInventoryWidget>(GetWidgetFromName(TEXT("WidgetInventory")));
-}
-
 void USTInventoryMenuWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
@@ -31,8 +24,8 @@ void USTInventoryMenuWidget::NativeDestruct()
 
 void USTInventoryMenuWidget::UpdateInventory(const TArray<FSTItemSlot>& InItemSlots)
 {
-	if (Inventory)
+	if (InventoryWidget)
 	{
-		Inventory->UpdateInventory(InItemSlots);
+		InventoryWidget->UpdateInventory(InItemSlots);
 	}
 }

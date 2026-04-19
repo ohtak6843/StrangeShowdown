@@ -40,9 +40,6 @@ ASTPlayerBase::ASTPlayerBase()
 
 	RightHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightWeaponMesh"));
 	RightHandSkeletalMesh->SetupAttachment(GetMesh());
-
-	// Character State
-	AddState(EPlayerState::ArmedPistol);
 }
 
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

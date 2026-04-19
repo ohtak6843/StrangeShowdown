@@ -7,10 +7,6 @@
 #include "GameData/STItemSlot.h"
 #include "STSlotWidget.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnSlotMouseEnter, const FSTItemSlot& /*ItemSlot*/)
-DECLARE_DELEGATE_OneParam(FOnSlotMouseMove, const FPointerEvent& /*InMouseEvent*/)
-DECLARE_DELEGATE(FOnSlotMouseLeave);
-
 /**
  * 
  */
@@ -23,29 +19,39 @@ public:
 	USTSlotWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	virtual void NativeConstruct() override;
-
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
-public:
-	void UpdateSlot(const FSTItemSlot& ItemSlot);
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
-	FOnSlotMouseEnter OnSlotMouseEnter;
-	FOnSlotMouseMove OnSlotMouseMove;
-	FOnSlotMouseLeave OnSlotMouseLeave;
+public:
+	void UpdateSlot(const FSTItemSlot& ItemSlot, int32 Index);
 
 protected:
 	UPROPERTY()
 	FSTItemSlot SlotData;
 
 	UPROPERTY()
+	int32 SlotIndex;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> ItemImage;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class USizeBox> ItemCountBox;
 
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> ItemCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
+	TSubclassOf<class USTTooltipWidget> TooltipWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget)
+	TObjectPtr<class USTTooltipWidget> Tooltip;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
+	TSubclassOf<class USTDragWidget> DragWidgetClass;
 };

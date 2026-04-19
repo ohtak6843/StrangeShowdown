@@ -31,12 +31,6 @@ public:
 	// ISTAnimAttackInterface
 	virtual void AttackHitCheck() override;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnStatUIUpdated();
-
-	UFUNCTION(BlueprintCallable)
-	void Interact(int32& OutAddedInventoryIndex);
-
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UseItem();
 
@@ -46,6 +40,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DropItem();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PistolFire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HammerSmash();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void UseItemEffect(struct FSTItemSlot slot, EItemUseType UseType);
@@ -96,9 +96,11 @@ protected:
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);
-	void PistolFire(const FInputActionValue& Value);
+	void LookingUp(const FInputActionValue& Value);
+	void UseQuickSlotItem(const FInputActionValue& Value);
 	void ChangeQuickSlot(const FInputActionValue& Value);
 	void ScrollQuickSlot(const FInputActionValue& Value);
+	void PickUp(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
@@ -113,13 +115,19 @@ protected:
 	TObjectPtr<class UInputAction> PistolAimAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	TObjectPtr<class UInputAction> PistolFireAction;
+	TObjectPtr<class UInputAction> LookingUpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> UseQuickSlotItemAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> ChangeQuickSlotAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> ScrollQuickSlotAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> PickUpAction;
 
 // Montage Section
 protected:

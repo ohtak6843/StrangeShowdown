@@ -85,12 +85,12 @@ protected:
 
 // Heart Image Section
 protected:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
 	TObjectPtr<class UTexture2D> PlayerHeartTexture;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
 	TObjectPtr<class UTexture2D> GhostHeartTexture;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Widget)
 	TObjectPtr<class UTexture2D> SheriffHeartTexture;
 };

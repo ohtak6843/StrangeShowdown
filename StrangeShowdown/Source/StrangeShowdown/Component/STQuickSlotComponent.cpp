@@ -3,6 +3,7 @@
 
 #include "Component/STQuickSlotComponent.h"
 #include "Item/STItemDataAssetBase.h"
+#include "Character/Player/STLocalPlayer.h"
 
 // Sets default values for this component's properties
 USTQuickSlotComponent::USTQuickSlotComponent()
@@ -25,6 +26,16 @@ void USTQuickSlotComponent::InitializeComponent()
 	}
 
 	MouseDropToQuickSlot.AddDynamic(this, &USTQuickSlotComponent::AddToQuickSlot_FromEvent);
+}
+
+void USTQuickSlotComponent::SetCurrentSelectIndex(int32 NewIndex)
+{
+	if (QuickSlots.IsValidIndex(NewIndex))
+	{
+		CurrentSelectQuickSlotIndex = NewIndex;
+	}
+
+	OnQuickSlotUpdated.Broadcast();
 }
 
 bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex)
@@ -132,6 +143,95 @@ USTItemDataAssetBase* USTQuickSlotComponent::GetCurrentSelectedQuickSlotItemData
 	return nullptr;
 }
 
-void USTQuickSlotComponent::AddItem(const FSTItemSlot& ItemSlot, int32 InventoryIndex, int32 QuickSlotIndex)
+bool USTQuickSlotComponent::AddItem(USTInventoryComponent* InventoryComp, int32 InventoryIndex, int32 QuickSlotIndex)
 {
+	if (InventoryComp == nullptr)
+	{
+		return false;
+	}
+
+	// 인벤토리 슬롯 유효성 검사
+	if (!InventoryComp->Slots.IsValidIndex(InventoryIndex))
+	{
+		return false;
+	}
+
+	// 0,1번 슬롯은 사용 불가
+	if (QuickSlotIndex == 0 || QuickSlotIndex == 1)
+	{
+		return false;
+	}
+
+	// 인벤토리에서 아이템 가져오기
+	FSTItemSlot ItemSlot = InventoryComp->Slots[InventoryIndex];
+
+	// 이미 있는 슬롯을 재사용
+	if (QuickSlotIndex == -2)
+	{
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				QuickSlotIndex = i;
+				break;
+			}
+		}
+	}
+	// 기존 슬롯을 제거
+	else
+	{
+		for (int32 i = 0; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == ItemSlot.ItemData)
+			{
+				QuickSlots[i] = FSTItemSlot();
+				InventorySlotIndex[i] = -1;
+				break;
+			}
+		}
+	}
+
+	// TargetQuickSlotIndex가 -2면 빈 슬롯에 추가(바로 추가)
+	if (QuickSlotIndex == -2)
+	{
+		// 빈 슬롯 찾기
+		for (int32 i = fixIndex; i < QuickSlots.Num(); i++)
+		{
+			if (QuickSlots[i].ItemData == nullptr)
+			{
+				QuickSlotIndex = i;
+				break;
+			}
+		}
+
+		// 빈 슬롯을 못 찾으면 실패
+		if (QuickSlotIndex == -2)
+		{
+			return false;
+		}
+	}
+
+	// QuickSlotIndex가 유효한 인덱스인지 검사
+	if (!QuickSlots.IsValidIndex(QuickSlotIndex))
+	{
+		return false;
+	}
+
+	// 해당 아이템이 몇번인지 저장
+	InventorySlotIndex[QuickSlotIndex] = InventoryIndex;
+
+	// 퀵슬롯에 설정 (Set Array Elem)
+	QuickSlots[QuickSlotIndex] = ItemSlot;
+
+	// Call On QuickSlotUpdated
+	OnQuickSlotUpdated.Broadcast();
+
+	// LocalPlayer면 아이템 장착
+	ASTLocalPlayer* Player = Cast<ASTLocalPlayer>(GetOwner());
+	if (Player)
+	{
+		Player->HoldItem();
+	}
+
+	return true;
 }

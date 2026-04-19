@@ -18,13 +18,10 @@ class STRANGESHOWDOWN_API USTDragWidget : public UUserWidget
 public:
 	USTDragWidget(const FObjectInitializer& ObjectInitializer);
 
-protected:
-	virtual void NativeConstruct() override;
-
 public:
-	FORCEINLINE void SetDragImage(class UImage* InItemImage) { DragItemImage = InItemImage; }
+	FORCEINLINE void SetDragImage(class UTexture2D* InItemImage);
 
 protected:
-	UPROPERTY()
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> DragItemImage;
 };

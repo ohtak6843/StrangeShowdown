@@ -6,25 +6,10 @@
 #include "Components/WrapBox.h"
 #include "UI/Inventory/STSlotWidget.h"
 #include "UI/Inventory/STTooltipWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 USTInventoryWidget::USTInventoryWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FClassFinder<USTSlotWidget> SlotWidgetRef(TEXT("/Game/StrangeShowdown/UITest/Inventory/WBP_Slot.WBP_Slot_C"));
-	if (SlotWidgetRef.Class)
-	{
-		SlotWidgetClass = SlotWidgetRef.Class;
-	}
-}
-
-void USTInventoryWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	SlotWrapBox = Cast<UWrapBox>(GetWidgetFromName(TEXT("WrapBoxSlot")));
-	ensure(SlotWrapBox);
-
-	Tooltip = Cast<USTTooltipWidget>(GetWidgetFromName(TEXT("WidgetTooltip")));
-	ensure(Tooltip);
 }
 
 void USTInventoryWidget::SetupInventory(int32 InventorySlotCount)
@@ -34,10 +19,6 @@ void USTInventoryWidget::SetupInventory(int32 InventorySlotCount)
 		USTSlotWidget* SlotWidget = CreateWidget<USTSlotWidget>(this, SlotWidgetClass);
 		if (SlotWidget)
 		{
-			SlotWidget->OnSlotMouseEnter.BindUObject(this, &USTInventoryWidget::HandleSlotMouseEnter);
-			SlotWidget->OnSlotMouseMove.BindUObject(this, &USTInventoryWidget::HandleSlotMouseMove);
-			SlotWidget->OnSlotMouseLeave.BindUObject(this, &USTInventoryWidget::HandleSlotMouseLeave);
-
 			SlotWrapBox->AddChild(SlotWidget);
 		}
 	}
@@ -59,26 +40,7 @@ void USTInventoryWidget::UpdateInventory(const TArray<FSTItemSlot>& InItemSlots)
 		USTSlotWidget* SlotWidget = Cast<USTSlotWidget>(SlotWrapBox->GetChildAt(i));
 		if (SlotWidget)
 		{
-			SlotWidget->UpdateSlot(InItemSlots[i]);
+			SlotWidget->UpdateSlot(InItemSlots[i], i);
 		}
 	}
-}
-
-void USTInventoryWidget::HandleSlotMouseEnter(const FSTItemSlot& ItemSlot)
-{
-	if (ItemSlot.ItemData)
-	{
-		Tooltip->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		Tooltip->UpdateTooltip(ItemSlot);
-	}
-}
-
-void USTInventoryWidget::HandleSlotMouseMove(const FPointerEvent& InMouseEvent)
-{
-	Tooltip->SetPositionInViewport(FVector2D(InMouseEvent.GetScreenSpacePosition()));
-}
-
-void USTInventoryWidget::HandleSlotMouseLeave()
-{
-	Tooltip->SetVisibility(ESlateVisibility::Hidden);
 }

@@ -19,13 +19,12 @@ public:
 	USTInventoryMenuWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 public:
 	void UpdateInventory(const TArray<FSTItemSlot>& InItemSlots);
 
 protected:
-	UPROPERTY()
-	TObjectPtr<class USTInventoryWidget> Inventory;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class USTInventoryWidget> InventoryWidget;
 };

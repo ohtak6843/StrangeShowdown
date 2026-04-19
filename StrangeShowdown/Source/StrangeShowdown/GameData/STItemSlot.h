@@ -10,7 +10,9 @@ struct FSTItemSlot
 	GENERATED_BODY()
 
 public:
-	FSTItemSlot() : ItemData(nullptr), bIsCountable(false), Count(0) {}
+	FSTItemSlot() : ItemData(nullptr), bIsCountable(true), Count(0) {}
+	FSTItemSlot(class USTItemDataAssetBase* InItemData, bool bInIsCountable = true, int32 InCount = 1)
+		: ItemData(InItemData), bIsCountable(bInIsCountable), Count(InCount) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USTItemDataAssetBase> ItemData;

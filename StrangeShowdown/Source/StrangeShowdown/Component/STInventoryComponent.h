@@ -30,7 +30,7 @@ public:
 public:
 	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(USTItemDataAssetBase* NewItem, int32 Count, int32& OutAddedInventoryIndex);
+	bool AddItem(FSTItemSlot ItemSlot, int32& OutAddedInventoryIndex);
 
 	// 아이템 제거
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -58,7 +58,7 @@ public:
 
 private:
 	int32 FindEmptySlot() const;
-	int32 FindStackableSlot(USTItemDataAssetBase* NewItem) const;
+	int32 FindStackableSlot(class USTItemDataAssetBase* NewItem) const;
 
 public:
 	// MouseDrop 이벤트 디스패처

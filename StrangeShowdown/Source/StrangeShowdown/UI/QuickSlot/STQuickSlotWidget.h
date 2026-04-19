@@ -7,7 +7,7 @@
 #include "GameData/STItemSlot.h"
 #include "STQuickSlotWidget.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnQuickSlotWidgetDrop, const FSTItemSlot& /*ItemSlot*/, int32 /*InventoryIndex*/, int32 /*QuickSlotIndex*/);
+DECLARE_DELEGATE_RetVal_ThreeParams(bool, FOnQuickSlotWidgetDrop, class USTInventoryComponent* /*InventoryComponent*/, int32 /*InventoryIndex*/, int32 /*QuickSlotIndex*/);
 
 /**
  * 
