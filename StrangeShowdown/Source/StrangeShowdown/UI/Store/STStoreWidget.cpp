@@ -12,7 +12,7 @@ USTStoreWidget::USTStoreWidget(const FObjectInitializer& ObjectInitializer) : Su
 
 void USTStoreWidget::SetupStore(int32 InStoreCount)
 {
-	for(int i=0; i<InStoreCount; i++)
+	for (int i = 0; i < InStoreCount; i++)
 	{
 		USTStoreSlotWidget* StoreSlotWidget = CreateWidget<USTStoreSlotWidget>(this, StoreSlotClass);
 		if (StoreSlotWidget)
@@ -24,6 +24,14 @@ void USTStoreWidget::SetupStore(int32 InStoreCount)
 
 void USTStoreWidget::UpdateStore(const TArray<FStoreSlot>& InStoreSlots)
 {
+	int32 StoreSlotWidgetCount = StoreSlotWrapBox->GetChildrenCount();
+	int32 StoreItemCount = InStoreSlots.Num();
+	if(StoreSlotWidgetCount != StoreItemCount)
+	{
+		StoreSlotWrapBox->ClearChildren();
+		SetupStore(StoreItemCount);
+	}
+
 	for(int i=0; i<StoreSlotWrapBox->GetChildrenCount(); i++)
 	{
 		USTStoreSlotWidget* StoreSlotWidget = Cast<USTStoreSlotWidget>(StoreSlotWrapBox->GetChildAt(i));

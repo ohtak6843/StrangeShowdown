@@ -19,6 +19,7 @@ void USTStoreMenuWidget::NativeConstruct()
 		ExitButton->OnHovered.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonHovered);
 		ExitButton->OnUnhovered.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonUnhovered);
 		ExitButton->OnClicked.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonClicked);
+		UE_LOG(LogTemp, Log, TEXT("Exit button bound to events"));
 	}
 }
 
@@ -39,6 +40,8 @@ void USTStoreMenuWidget::HandleExitButtonHovered()
 		float VolumeMultiplier = 0.8f;
 		UGameplayStatics::PlaySound2D(this, HoverSound, VolumeMultiplier, 1.0f, 0.0f, nullptr, nullptr, true);
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Exit button hovered"));
 }
 
 void USTStoreMenuWidget::HandleExitButtonUnhovered()
@@ -52,6 +55,8 @@ void USTStoreMenuWidget::HandleExitButtonUnhovered()
 	{
 		PlayAnimation(ExitHoverAnimation, 0.0f, 1, EUMGSequencePlayMode::Reverse, 1.0f);
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Exit button unhovered"));
 }
 
 void USTStoreMenuWidget::HandleExitButtonClicked()
@@ -59,5 +64,13 @@ void USTStoreMenuWidget::HandleExitButtonClicked()
 	if(OnExitButtonClicked.IsBound())
 	{
 		bool Result = OnExitButtonClicked.Execute();
+	}
+}
+
+void USTStoreMenuWidget::UpdateStoreMenu(const TArray<struct FStoreSlot>& InStoreSlots)
+{
+	if (StoreWidget)
+	{
+		StoreWidget->UpdateStore(InStoreSlots);
 	}
 }

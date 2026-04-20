@@ -22,11 +22,18 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 
+	UFUNCTION()
 	void HandleExitButtonHovered();
+
+	UFUNCTION()
 	void HandleExitButtonUnhovered();
+
+	UFUNCTION()
 	void HandleExitButtonClicked();
 
 public:
+	void UpdateStoreMenu(const TArray<struct FStoreSlot>& InStoreSlots);
+
 	FOnExitButtonClicked OnExitButtonClicked;
 
 protected:

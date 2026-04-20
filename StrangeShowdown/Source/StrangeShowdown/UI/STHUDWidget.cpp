@@ -178,18 +178,60 @@ void USTHUDWidget::SetStoreComponent(USTStoreComponent* InStoreComp)
 
 bool USTHUDWidget::OpenStoreMenu()
 {
-	// 상점 열었을 때, 다른 UI Remove
-
-	// 상점 Update 하고
-	StoreMenuWidget->OnExitButtonClicked.BindUObject(this, &USTHUDWidget::CloseStoreMenu);
-
-	// 플레이어 움직이지 못하게 하기
+	if(SourceStoreComp.IsValid())
+	{
+		if (!StoreMenuWidget)
+		{
+			StoreMenuWidget = CreateWidget<USTStoreMenuWidget>(this, StoreMenuClass);
+			if (StoreMenuWidget)
+			{
+				StoreMenuWidget->OnExitButtonClicked.BindUObject(this, &USTHUDWidget::CloseStoreMenu);
+				StoreMenuWidget->AddToViewport();
+				StoreMenuWidget->UpdateStoreMenu(SourceStoreComp.Get()->Slots);
+				APlayerController* PC = GetOwningPlayer();
+				if (PC)
+				{
+					FInputModeGameAndUI InputMode;
+					InputMode.SetWidgetToFocus(StoreMenuWidget->TakeWidget());
+					InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+					InputMode.SetHideCursorDuringCapture(true);
+					PC->SetInputMode(InputMode);
+					PC->bShowMouseCursor = true;
+					PC->SetIgnoreMoveInput(true);
+					return true;
+				}
+				UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Store Menu: PlayerController is null"));
+				return false;
+			}
+			UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Store Menu: StoreMenuWidget could not be created"));
+			return false;
+		}
+		UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to open Store Menu: StoreMenuWidget is already open"));
+		return false;
+	}
 
 	return true;
 }
 
 bool USTHUDWidget::CloseStoreMenu()
 {
+	if (StoreMenuWidget)
+	{
+		StoreMenuWidget->RemoveFromParent();
+		StoreMenuWidget = nullptr;
+		APlayerController* PC = GetOwningPlayer();
+		if (PC)
+		{
+			FInputModeGameOnly GameOnlyInputMode;
+			PC->SetInputMode(GameOnlyInputMode);
+			PC->bShowMouseCursor = false;
+			PC->SetIgnoreMoveInput(false);
+			return true;
+		}
+		UE_LOG(LogSTHUDWidget, Log, TEXT("Failed to close Store Menu: PlayerController is null"));
+		return false;
+	}
+
 	return true;
 }
 

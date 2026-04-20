@@ -40,6 +40,18 @@ void ASTPlayerController::BeginPlay()
 	}
 }
 
+void ASTPlayerController::OpenStore()
+{
+	if (HUDWidget)
+	{
+		if (!bIsStoreOpen)
+		{
+			bool Result = HUDWidget->OpenStoreMenu();
+			bIsStoreOpen = Result;
+		}
+	}
+}
+
 void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 {
 	if (HUDWidget)
@@ -53,23 +65,6 @@ void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 		{
 			bool Result = HUDWidget->OpenInventoryMenu();
 			bIsInventoryOpen = Result;
-		}
-	}
-}
-
-void ASTPlayerController::OpenStore(const FInputActionValue& Value)
-{
-	if (HUDWidget)
-	{
-		if (bIsStoreOpen)
-		{
-			bool Result = HUDWidget->CloseStoreMenu();
-			bIsStoreOpen = !Result;
-		}
-		else
-		{
-			bool Result = HUDWidget->OpenStoreMenu();
-			bIsStoreOpen = Result;
 		}
 	}
 }

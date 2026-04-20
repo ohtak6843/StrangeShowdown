@@ -25,6 +25,8 @@ protected:
 public:
 	class USTHUDWidget* GetHUDWidget() const { return HUDWidget; }
 
+	void OpenStore();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
 	void CreateStoreWidget();
 
@@ -38,7 +40,6 @@ protected:
 // Input Section
 protected:
 	void OpenInventory(const FInputActionValue& Value);
-	void OpenStore(const FInputActionValue& Value);
 	void FocusChatManager(const FInputActionValue& Value);
 	void OpenBigMap(const FInputActionValue& Value);
 	void OpenBountyPoster(const FInputActionValue& Value);

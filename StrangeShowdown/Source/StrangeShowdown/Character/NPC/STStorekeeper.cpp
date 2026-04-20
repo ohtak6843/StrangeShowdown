@@ -103,7 +103,7 @@ void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 
 		if (ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController()))
 		{
-			PC->CreateStoreWidget();
+			PC->OpenStore();
 		}
 	}
 }

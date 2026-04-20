@@ -23,7 +23,12 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
+	UFUNCTION()
+	void HandleItemSlotButtonHovered();
+
+	UFUNCTION()
 	void HandleItemSlotButtonClicked();
+
 	void UpdateSlot(const struct FStoreSlot& InStoreSlot);
 
 	FOnItemSlotButtonClicked OnItemSlotButtonClicked;
@@ -40,4 +45,7 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> GoldCostText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)
+	TObjectPtr<class USoundBase> HoverSound;
 };

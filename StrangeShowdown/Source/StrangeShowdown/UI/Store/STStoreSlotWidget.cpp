@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Component/STStoreComponent.h"
 #include "Item/STItemDataAssetBase.h"
+#include "Kismet/GameplayStatics.h"
 
 USTStoreSlotWidget::USTStoreSlotWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -18,8 +19,20 @@ void USTStoreSlotWidget::NativeConstruct()
 
 	if (ItemSlotButton)
 	{
+		ItemSlotButton->OnHovered.AddDynamic(this, &USTStoreSlotWidget::HandleItemSlotButtonHovered);
 		ItemSlotButton->OnClicked.AddDynamic(this, &USTStoreSlotWidget::HandleItemSlotButtonClicked);
 	}
+}
+
+void USTStoreSlotWidget::HandleItemSlotButtonHovered()
+{
+	if (HoverSound)
+	{
+		float VolumeMultiplier = 0.8f;
+		UGameplayStatics::PlaySound2D(this, HoverSound, VolumeMultiplier);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Item Slot Button Hovered"));
 }
 
 void USTStoreSlotWidget::HandleItemSlotButtonClicked()
@@ -29,7 +42,7 @@ void USTStoreSlotWidget::HandleItemSlotButtonClicked()
 
 void USTStoreSlotWidget::UpdateSlot(const FStoreSlot& InStoreSlot)
 {
-	if (InStoreSlot.ItemData && InStoreSlot.bIsSold)
+	if (InStoreSlot.ItemData && !InStoreSlot.bIsSold)
 	{
 		ItemImage->SetBrushFromTexture(InStoreSlot.ItemData->Icon);
 		ItemNameText->SetText(InStoreSlot.ItemData->ItemName);
