@@ -1,10 +1,10 @@
-#include "Widget/STMiniMapWidget.h"
+#include "UI/Map/STMiniMapWidget.h"
 #include "Components/Image.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Interface/STMiniMapTargetInterface.h"
-#include "Widget/STMiniMapItemIconWidget.h"
+#include "UI/Map/STMiniMapItemIconWidget.h"
 
 USTMiniMapWidget::USTMiniMapWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

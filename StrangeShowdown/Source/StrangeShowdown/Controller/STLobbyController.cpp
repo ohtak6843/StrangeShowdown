@@ -7,7 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 #include "Components/EditableTextBox.h"
-#include "Widget/STLobbyHUD.h"
+#include "UI/Lobby/STLobbyHUD.h"
 
 ASTLobbyController::ASTLobbyController()
 {

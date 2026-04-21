@@ -37,20 +37,6 @@ public:
 	static FOnFieldPlayerSpawned OnFieldPlayerSpawned;
 	static FOnFieldPlayerRemoved OnFieldPlayerRemoved;
 
-protected:
-	void ShoulderMove(const FInputActionValue& Value);
-	void ShoulderLook(const FInputActionValue& Value);
-
-	// Input Mapping Context
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> ShoulderMoveAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> ShoulderLookAction;
-
 // Network Section
 private:
 	uint64 PlayerID{};

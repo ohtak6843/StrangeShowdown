@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/WidgetComponent.h"
-#include "GameData/STItemSlot.h"
+#include "GameData/STSlotData.h"
 #include "GameData/STTypes.h"
 #include "STInventoryComponent.generated.h"
 

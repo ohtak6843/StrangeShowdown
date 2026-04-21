@@ -3,10 +3,13 @@
 
 #include "Character/Player/STLobbyLocalPlayer.h"
 #include "Character/Player/STLobbyFieldPlayer.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Game/STGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Controller/STLobbyController.h"
-#include "Widget/STLobbyHUD.h"
+#include "UI/Lobby/STLobbyHUD.h"
 
 ASTLobbyLocalPlayer::ASTLobbyLocalPlayer()
 {
@@ -29,32 +32,14 @@ ASTLobbyLocalPlayer::ASTLobbyLocalPlayer()
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
 }
 
-void ASTLobbyLocalPlayer::SetCameraPose(ECameraPose NewPose)
+void ASTLobbyLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
-	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	TargetPose = PoseSettings[NewPose];
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	PoseElapsedTime = 0.f;
-}
-
-void ASTLobbyLocalPlayer::ApplyStateSettings(ECameraPose NewState)
-{
-	switch (NewState)
-	{
-	case ECameraPose::Idle:
-		ChangeToIdle();
-		break;
-	case ECameraPose::Aiming:
-		ChangeToAiming();
-		break;
-	case ECameraPose::LookingUp:
-		ChangeToLookingUp();
-		break;
-	default:
-		break;
-	}
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLobbyLocalPlayer::ShoulderMove);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLobbyLocalPlayer::ShoulderLook);
 }
 
 void ASTLobbyLocalPlayer::BeginPlay()
@@ -129,8 +114,56 @@ void ASTLobbyLocalPlayer::Tick(float DeltaTime)
 void ASTLobbyLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
 	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+}
 
+void ASTLobbyLocalPlayer::ShoulderMove(const FInputActionValue& Value)
+{
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardDirection, MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void ASTLobbyLocalPlayer::ShoulderLook(const FInputActionValue& Value)
+{
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	AddControllerYawInput(LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void ASTLobbyLocalPlayer::SetCameraPose(ECameraPose NewPose)
+{
+	StartPose.SpringArmLength = SpringArmComp->TargetArmLength;
+	StartPose.CameraY = CameraComp->GetRelativeLocation().Y;
+
+	TargetPose = PoseSettings[NewPose];
+
+	PoseElapsedTime = 0.f;
+}
+
+void ASTLobbyLocalPlayer::ApplyStateSettings(ECameraPose NewState)
+{
+	switch (NewState)
+	{
+	case ECameraPose::Idle:
+		ChangeToIdle();
+		break;
+	case ECameraPose::Aiming:
+		ChangeToAiming();
+		break;
+	case ECameraPose::LookingUp:
+		ChangeToLookingUp();
+		break;
+	default:
+		break;
+	}
 }
 
 void ASTLobbyLocalPlayer::ChangeToIdle()

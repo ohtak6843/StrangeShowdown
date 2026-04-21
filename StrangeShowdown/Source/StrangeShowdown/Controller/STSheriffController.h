@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
-#include "Widget/STHUD.h"
 #include "InputActionValue.h"
 #include "Interface/STControllerHUDInterface.h"
 #include "STSheriffController.generated.h"

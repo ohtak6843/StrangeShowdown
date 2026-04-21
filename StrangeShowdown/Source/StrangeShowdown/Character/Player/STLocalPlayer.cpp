@@ -370,6 +370,7 @@ void ASTLocalPlayer::DropItem()
 	case EItemType::Meat:
 	case EItemType::Whiskey:
 	case EItemType::EnhancePower:
+	case EItemType::Letter:
 		RightHandStaticMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		RightHandStaticMesh->SetSimulatePhysics(true);
 		RightHandStaticMesh->SetEnableGravity(true);
@@ -477,6 +478,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::Meat:
 		case EItemType::Whiskey:
 		case EItemType::EnhancePower:
+		case EItemType::Letter:
 			UseItem();
 			break;
 	}

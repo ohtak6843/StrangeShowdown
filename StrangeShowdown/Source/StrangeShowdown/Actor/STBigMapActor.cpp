@@ -6,7 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Controller/STPlayerController.h"
-#include "Widget/STMiniMapWidget.h"
+#include "UI/Map/STMiniMapWidget.h"
 #include "GameFramework/HUD.h"
 #include "UI/STHUDWidget.h"
 #include "Interface/STMiniMapTargetInterface.h"

@@ -6,7 +6,7 @@
 #include "Character/Player/STPlayerBase.h"
 #include "GameData/STTypes.h"
 #include "InputActionValue.h"
-#include "GameData/STItemSlot.h"
+#include "GameData/STSlotData.h"
 #include "Interface/STCharacterHUDInterface.h"
 #include "Interface/STAnimAttackInterface.h"
 #include "STLocalPlayer.generated.h"

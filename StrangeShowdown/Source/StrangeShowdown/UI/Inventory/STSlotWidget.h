@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GameData/STItemSlot.h"
+#include "GameData/STSlotData.h"
 #include "STSlotWidget.generated.h"
 
 /**

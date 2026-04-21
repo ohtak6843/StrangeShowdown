@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "STItemSlot.generated.h"
+#include "STSlotData.generated.h"
 
 USTRUCT(BlueprintType)
 struct FSTItemSlot

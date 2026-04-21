@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Widget/STLobbyStatusWidget.h"
+#include "UI/Lobby/STLobbyStatusWidget.h"
 #include "Game/STGameState.h"
 #include "GameFramework/PlayerState.h"
 

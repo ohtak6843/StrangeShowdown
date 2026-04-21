@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Widget/STLobbyStatusWidget.h"
-#include "Widget/STChatManagerWidget.h"
+#include "UI/Lobby/STLobbyStatusWidget.h"
+#include "UI/ChatManager/STChatManagerWidget.h"
 #include "Components/TextBlock.h"
 #include "STLobbyHUD.generated.h"
 

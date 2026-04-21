@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/STUserWidget.h"
-#include "GameData/STItemSlot.h"
+#include "GameData/STSlotData.h"
 #include "STQuickSlotWidget.generated.h"
 
 DECLARE_DELEGATE_RetVal_ThreeParams(bool, FOnQuickSlotWidgetDrop, class USTInventoryComponent* /*InventoryComponent*/, int32 /*InventoryIndex*/, int32 /*QuickSlotIndex*/);

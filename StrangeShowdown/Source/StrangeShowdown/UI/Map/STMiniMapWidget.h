@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Widget/STMiniMapItemIconWidget.h"
+#include "UI/Map/STMiniMapItemIconWidget.h"
 #include "STMiniMapWidget.generated.h"
 
 /**

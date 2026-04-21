@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Component/STInventoryComponent.h"
-#include "GameData/STItemSlot.h"
+#include "GameData/STSlotData.h"
 #include "STQuickSlotComponent.generated.h"
 
 

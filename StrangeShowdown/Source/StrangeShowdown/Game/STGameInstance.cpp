@@ -10,7 +10,7 @@
 #include "SocketSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interface/STControllerHUDInterface.h"
-#include "Widget/STChatManagerWidget.h"
+#include "UI/ChatManager/STChatManagerWidget.h"
 
 #include "Network/SocketIO.h"
 #include "Network/STSerializer.h"

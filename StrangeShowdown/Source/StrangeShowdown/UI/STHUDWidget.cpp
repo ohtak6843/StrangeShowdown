@@ -11,8 +11,8 @@
 #include "UI/Store/STStoreMenuWidget.h"
 #include "Component/STStoreComponent.h"
 #include "Interface/STCharacterHUDInterface.h"
-#include "Widget/STChatManagerWidget.h"
-#include "Widget/STMiniMapWidget.h"
+#include "UI/ChatManager/STChatManagerWidget.h"
+#include "UI/Map/STMiniMapWidget.h"
 #include "UI/BountyPoster/STBountyPosterMenuWidget.h"
 #include "UI/Timer/STTimerWidget.h"
 
