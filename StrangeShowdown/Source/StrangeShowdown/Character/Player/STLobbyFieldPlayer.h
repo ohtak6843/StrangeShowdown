@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Components/WidgetComponent.h"
+#include "InputActionValue.h"
 #include "STLobbyFieldPlayer.generated.h"
 
 /**
@@ -22,18 +23,35 @@ class STRANGESHOWDOWN_API ASTLobbyFieldPlayer : public ASTPlayerBase
 public:
 	ASTLobbyFieldPlayer();
 
+protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+public:
 	void Move(const FVector& Location, const FRotator& Rotator);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
-	UWidgetComponent* StatWidgetComponent;
+	TObjectPtr<UWidgetComponent> StatWidgetComponent;
 
 	static FOnFieldPlayerSpawned OnFieldPlayerSpawned;
 	static FOnFieldPlayerRemoved OnFieldPlayerRemoved;
 
+protected:
+	void ShoulderMove(const FInputActionValue& Value);
+	void ShoulderLook(const FInputActionValue& Value);
+
+	// Input Mapping Context
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ShoulderMoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ShoulderLookAction;
+
+// Network Section
 private:
 	uint64 PlayerID{};
 	FVector TargetLocation{};

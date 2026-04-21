@@ -8,7 +8,6 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnStatChanged);
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STRANGESHOWDOWN_API USTStatComponent : public UActorComponent
 {

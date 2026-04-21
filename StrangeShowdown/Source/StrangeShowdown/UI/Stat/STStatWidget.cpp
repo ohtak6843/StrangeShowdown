@@ -195,10 +195,12 @@ void USTStatWidget::UpdateStat()
 
 #pragma region Action Update
 		int32 CurrentAction = StatComp->CurrentAction;
+		int32 UsableAction = StatComp->UseAbleAction;
 		int32 MaxAction = StatComp->MaxAction;
 		check(CurrentAction >= 0);
 
 		FLinearColor DarkGray(0.2f, 0.2f, 0.2f, 1.f);
+		FLinearColor Transparent(0.f, 0.f, 0.f, 0.f);
 		for (int32 i = 0; i < CurrentAction; i++)
 		{
 			if (ActionImages[i])
@@ -207,11 +209,19 @@ void USTStatWidget::UpdateStat()
 			}
 		}
 
-		for (int32 i = CurrentAction; i < MaxAction; i++)
+		for (int32 i = CurrentAction; i < UsableAction; i++)
 		{
 			if (ActionImages[i])
 			{
 				ActionImages[i]->SetBrushTintColor(DarkGray);
+			}
+		}
+
+		for (int32 i = UsableAction; i < MaxAction; i++)
+		{
+			if (ActionImages[i])
+			{
+				ActionImages[i]->SetBrushTintColor(Transparent);
 			}
 		}
 #pragma endregion

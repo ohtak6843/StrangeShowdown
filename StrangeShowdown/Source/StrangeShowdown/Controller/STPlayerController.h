@@ -42,16 +42,17 @@ protected:
 
 // Input Section
 protected:
+	void LookingUp(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
 	void FocusChatManager(const FInputActionValue& Value);
 	void OpenBigMap(const FInputActionValue& Value);
 	void OpenBountyPoster(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	TObjectPtr<class UInputAction> OpenInventoryAction;
+	TObjectPtr<class UInputAction> LookingUpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	TObjectPtr<class UInputAction> OpenStoreAction;
+	TObjectPtr<class UInputAction> OpenInventoryAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> FocusChatManagerAction;

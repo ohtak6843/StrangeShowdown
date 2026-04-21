@@ -6,8 +6,6 @@
 #include "UI/Store/STStoreSlotWidget.h"
 #include "Component/STStoreComponent.h"
 
-#include "Character/Player/STLocalPlayer.h"
-
 USTStoreWidget::USTStoreWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 }

@@ -18,8 +18,8 @@ void ASTPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+	EnhancedInputComponent->BindAction(LookingUpAction, ETriggerEvent::Triggered, this, &ASTPlayerController::LookingUp);
 	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenInventory);
-	EnhancedInputComponent->BindAction(OpenStoreAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenStore);
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTPlayerController::FocusChatManager);
 	EnhancedInputComponent->BindAction(OpenBigMapAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBigMap);
 	EnhancedInputComponent->BindAction(OpenBountyPosterAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBountyPoster);
@@ -71,6 +71,11 @@ void ASTPlayerController::OpenStore()
 			bIsStoreOpen = Result;
 		}
 	}
+}
+
+void ASTPlayerController::LookingUp(const FInputActionValue& Value)
+{
+	// TODO: UI ²ô°í Å°±â
 }
 
 void ASTPlayerController::OpenInventory(const FInputActionValue& Value)

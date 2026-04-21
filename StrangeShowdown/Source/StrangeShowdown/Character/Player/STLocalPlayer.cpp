@@ -383,6 +383,9 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
 	{
 		// TODO: 아이템 구매 로직
+		// 골드 감소
+		// 인벤토리에 아이템 추가
+		// floating message 추가
 	}
 }
 

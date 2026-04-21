@@ -51,28 +51,10 @@ ASTStorekeeper::ASTStorekeeper()
 
 	InteractWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 
-	// Set Skeletal Mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Business_Man_01.SK_Chr_Business_Man_01'"));
-	if (CharacterMeshRef.Object)
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
-	}
-
-	// Set Single Animation
-	static ConstructorHelpers::FObjectFinder<UAnimationAsset> AnimationRef(TEXT("/Script/Engine.BlendSpace'/Game/PolygonWestern/EpicContent/Mannequin/RetargetAnimations/Unarmed/BS_UnarmedIdleWalkRun.BS_UnarmedIdleWalkRun'"));
-	if (AnimationRef.Object)
-	{
-		GetMesh()->AnimationData.AnimToPlay = AnimationRef.Object;
-		GetMesh()->AnimationData.bSavedLooping = true;
-		GetMesh()->AnimationData.bSavedPlaying = true;
-	}
-
 	// Carriage
 	Carriage = CreateDefaultSubobject<UChildActorComponent>(TEXT("Carriage"));
 	Carriage->SetChildActorClass(ASTCarriage::StaticClass());
 	Carriage->SetupAttachment(GetMesh());
-	Carriage->SetRelativeLocationAndRotation(FVector(0.f, -120.f, 118.f), FRotator(0.f, 0.f, 0.f));
-	Carriage->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D> IconRef(
 		TEXT("/Script/Engine.Texture2D'/Game/StrangeShowdown/UI/Texture/T_StoreIcon.T_StoreIcon'")

@@ -47,21 +47,16 @@ void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
 
 void USTStatComponent::AddStamina(int32 StaminaAmount)
 {
-	CurrentStamina += StaminaAmount;
+	CurrentStamina = FMath::Clamp(CurrentStamina + StaminaAmount, 0.f, MaxStamina);
 
-	if (CurrentStamina > MaxStamina)
-	{
-		CurrentStamina = MaxStamina;
-	}
-	else if (CurrentStamina <= 0)
-	{
-		CurrentStamina = 0;
-	}
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::AddAction(int32 ActionAmount)
 {
-	CurrentAction += ActionAmount;
+	CurrentAction = FMath::Clamp(CurrentAction + ActionAmount, 0.f, UseAbleAction);
+
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::AddUseAbleAction(int32 ActionAmount)
