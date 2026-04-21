@@ -6,6 +6,7 @@
 #include "Widget/STMiniMapWidget.h"
 #include "UI/STHUDWidget.h"
 #include "Interface/STMiniMapTargetInterface.h"
+#include "Interface/STControllerHUDInterface.h"
 
 // Sets default values
 ASTMiniMapActor::ASTMiniMapActor()
@@ -44,16 +45,14 @@ void ASTMiniMapActor::Tick(float DeltaTime)
 
 void ASTMiniMapActor::BringHUD()
 {
-	ASTPlayerController* STPC = Cast<ASTPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (!STPC) return;
-	if (!STPC->GetHUDWidget()) return;
-
-	HUDWidget = STPC->GetHUDWidget();
-	MiniMapWidget = HUDWidget->GetMiniMapWidget();
-
-	if (!MiniMapWidget)
+	ISTControllerHUDInterface* PC = Cast<ISTControllerHUDInterface>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
+		MiniMapWidget = PC->GetMiniMapWidget();
+		if (!MiniMapWidget)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get MiniMapWidget from HUD"));
+		}
 	}
 }
 
@@ -95,12 +94,12 @@ FVector2D ASTMiniMapActor::WorldToMiniMap(const FVector& ItemLocation, const FVe
 	float CurrentYaw = GetActorRotation().Yaw;
 	Relative = Relative.GetRotated(-CurrentYaw);
 
-	if (!HUDWidget || !HUDWidget->GetMiniMapWidget() || !MiniMapCapture)
+	if (nullptr == MiniMapWidget || !MiniMapCapture)
 	{
 		return FVector2D::ZeroVector;
 	}
 
-	const float WidgetSize = HUDWidget->GetMiniMapWidget()->GetDesiredSize().Y;
+	const float WidgetSize = MiniMapWidget->GetDesiredSize().Y;
 	const float OrthoWidth = MiniMapCapture->OrthoWidth;
 
 	const float Scale = WidgetSize / OrthoWidth;
@@ -139,7 +138,6 @@ void ASTMiniMapActor::UpdateMiniMapRotation(float DeltaTime)
 void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 {
 	if (!MiniMapWidget) return;
-	if (!HUDWidget || !HUDWidget->GetMiniMapWidget()) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -175,7 +173,7 @@ void ASTMiniMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
-		const float WidgetSize = HUDWidget->GetMiniMapWidget()->GetDesiredSize().Y;
+		const float WidgetSize = MiniMapWidget->GetDesiredSize().Y;
 
 		const float MinX = Offset.X + 10.f;
 		const float MaxX = Offset.X + WidgetSize - 15.f;

@@ -29,7 +29,7 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 {
 	if (InPlayer)
 	{
-		PlayerBountyText->SetText(FText::AsNumber(InPlayer->StatComp->Prize));
+		PlayerBountyText->SetText(FText::AsNumber(InPlayer->StatComp->Bounty));
 		PlayerNameText->SetText(FText::FromString(InPlayer->PlayerNickName));
 
 		// TODO: 플레이어 2D 이미지로 설정해주기

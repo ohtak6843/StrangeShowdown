@@ -10,7 +10,6 @@
 
 ASTGhostController::ASTGhostController()
 {
-	AddInputAction();
 }
 
 void ASTGhostController::SetupInputComponent()
@@ -19,50 +18,82 @@ void ASTGhostController::SetupInputComponent()
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
-	EnhancedInputComponent->BindAction(TabUIAction, ETriggerEvent::Triggered, this, &ASTGhostController::ShowTabUI);
-	EnhancedInputComponent->BindAction(BigMapAction, ETriggerEvent::Triggered, this, &ASTGhostController::ShowBigMap);
-	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTGhostController::FocusChatManager);
 }
 
 void ASTGhostController::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
-void ASTGhostController::AddInputAction()
-{
-	// Input Actions
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionTabUIRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_TabUI.IA_TabUI'"));
-	if (nullptr != InputActionTabUIRef.Object)
+	HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
+
+	if (HUDWidget)
 	{
-		TabUIAction = InputActionTabUIRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionBigMapRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_BigMap.IA_BigMap'"));
-	if (nullptr != InputActionBigMapRef.Object)
-	{
-		BigMapAction = InputActionBigMapRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionFocusChatManagerRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_FocusChatManager.IA_FocusChatManager'"));
-	if (nullptr != InputActionFocusChatManagerRef.Object)
-	{
-		FocusChatManagerAction = InputActionFocusChatManagerRef.Object;
+		HUDWidget->AddToViewport();
 	}
 }
 
-void ASTGhostController::ShowTabUI()
+USTMiniMapWidget* ASTGhostController::GetMiniMapWidget()
 {
-	// TODO: RemoveAllUI가 C++로 구현 가능해지면 구현
+	USTMiniMapWidget* MiniMapWidget = ISTControllerHUDInterface::GetMiniMapWidget();
+
+	if (HUDWidget)
+	{
+		MiniMapWidget = HUDWidget->GetMiniMapWidget();
+	}
+
+	return MiniMapWidget;
 }
 
-void ASTGhostController::ShowBigMap()
+USTMiniMapWidget* ASTGhostController::GetBigMapWidget()
 {
-	// TODO: RemoveAllUI가 C++로 구현 가능해지면 구현
+	USTMiniMapWidget* BigMapWidget = ISTControllerHUDInterface::GetBigMapWidget();
+
+	if (HUDWidget)
+	{
+		BigMapWidget = HUDWidget->GetBigMapWidget();
+	}
+
+	return BigMapWidget;
 }
 
-void ASTGhostController::FocusChatManager()
+void ASTGhostController::FocusChatManager(const FInputActionValue& Value)
 {
-	SetInputMode(FInputModeGameAndUI());
+	if (HUDWidget)
+	{
+		HUDWidget->FocusChatManager();
+	}
+}
 
-	// TODO: ChatManagerWidget 구현 후 활성화
-	//HUDWidget->ChatManagerWidget->ChatInputTextBox->SetKeyboardFocus();
+void ASTGhostController::OpenBigMap(const FInputActionValue& Value)
+{
+	if (HUDWidget)
+	{
+		if (bIsBigMapOpen)
+		{
+			bool result = HUDWidget->CloseBigMap();
+			bIsBigMapOpen = !result;
+		}
+		else
+		{
+			bool result = HUDWidget->OpenBigMap();
+			bIsBigMapOpen = result;
+		}
+	}
+}
+
+void ASTGhostController::OpenBountyPoster(const FInputActionValue& Value)
+{
+	if (HUDWidget)
+	{
+		if (bIsBountyPosterOpen)
+		{
+			bool result = HUDWidget->CloseBountyPoster();
+			bIsBountyPosterOpen = !result;
+		}
+		else
+		{
+			bool result = HUDWidget->OpenBountyPoster();
+			bIsBountyPosterOpen = result;
+		}
+	}
 }

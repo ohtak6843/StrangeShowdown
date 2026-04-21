@@ -97,10 +97,14 @@ void USTQuickSlotWidget::SetSheriffImage()
 {
 	ItemImage->SetBrushFromTexture(LockImage);
 	ItemImage->SetVisibility(ESlateVisibility::Visible);
+	ItemCountBox->SetVisibility(ESlateVisibility::Hidden);
+	SelectBorder->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void USTQuickSlotWidget::SetGhostImage()
 {
 	ItemImage->SetBrushFromTexture(LockImage);
 	ItemImage->SetVisibility(ESlateVisibility::Visible);
+	ItemCountBox->SetVisibility(ESlateVisibility::Hidden);
+	SelectBorder->SetVisibility(ESlateVisibility::Hidden);
 }

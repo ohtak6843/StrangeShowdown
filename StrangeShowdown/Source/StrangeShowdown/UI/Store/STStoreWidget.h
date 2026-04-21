@@ -18,6 +18,8 @@ public:
 	USTStoreWidget(const FObjectInitializer& ObjectInitializer);
 
 public:
+	class UWrapBox* GetStoreSlotWrapBox() const { return StoreSlotWrapBox; }
+
 	void SetupStore(int32 InStoreCount);
 	void UpdateStore(const TArray<struct FStoreSlot>& InStoreSlots);
 

@@ -35,27 +35,24 @@ public:
 	FVector2D WorldToMiniMap(const FVector& WorldLocation) const;
 
 	// 미니맵 아이템 위치 업데이트
-	void UpdateTargetOnMiniMap(float DeltaTime);
+	void UpdateTargetOnBigMap(float DeltaTime);
 
 	// 플레이어 아이콘 위치 업데이트
-	void UpdatePlayerOnMiniMap(float DeltaTime);
+	void UpdatePlayerOnBigMap(float DeltaTime);
 
 	void InitWidgetComponent();
-	void ApplyMiniMapHidden();
+	void ApplyBigMapHidden();
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MiniMap")
-	class USceneCaptureComponent2D* MiniMapCapture;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BigMap)
+	TObjectPtr<USceneCaptureComponent2D> BigMapCapture;
 
 	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> MiniMapTargets;
+	TArray<TWeakObjectPtr<AActor>> BigMapTargets;
 
-	UPROPERTY(BlueprintReadOnly)
-	class USTMiniMapWidget* MiniMapWidget;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class USTMiniMapWidget> BigMapWidget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BigMap)
 	double zPosition = 2000.0f;
-
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<class USTHUDWidget> HUDWidget;
 };

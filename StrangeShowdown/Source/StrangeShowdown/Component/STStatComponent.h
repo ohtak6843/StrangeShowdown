@@ -91,7 +91,7 @@ public:
 	int32 MaxAction = 6;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 Prize;
+	int32 Bounty;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bAlive;

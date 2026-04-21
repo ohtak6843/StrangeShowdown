@@ -10,7 +10,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
+#include "Component/STStatComponent.h"
 #include "Component/STQuickSlotComponent.h"
+#include "UI/STHUDWidget.h"
+#include "UI/Stat/STStatWidget.h"
 
 ASTLocalGhost::ASTLocalGhost()
 {
@@ -63,8 +66,6 @@ ASTLocalGhost::ASTLocalGhost()
 			break;
 		}
 	}
-
-	AddInputMappingContext();
 }
 
 void ASTLocalGhost::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,8 +74,8 @@ void ASTLocalGhost::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::Move);
-	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::Look);
+	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::ShoulderMove);
+	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::ShoulderLook);
 }
 
 void ASTLocalGhost::BeginPlay()
@@ -88,30 +89,25 @@ void ASTLocalGhost::BeginPlay()
 	}
 }
 
-void ASTLocalGhost::AddInputMappingContext()
+void ASTLocalGhost::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
-	// Input Mapping Context
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_GhostInput.IMC_GhostInput"));
-	if (nullptr != InputMappingContextRef.Object)
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+	if (InHUDWidget)
 	{
-		DefaultMappingContext = InputMappingContextRef.Object;
-	}
+		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
 
-	// Input Actions
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
-	if (nullptr != InputActionShoulderMoveRef.Object)
-	{
-		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
-	}
+		InHUDWidget->SetWidgetType(EHUDWidgetType::Ghost);
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
-	if (nullptr != InputActionShoulderLookRef.Object)
-	{
-		ShoulderLookAction = InputActionShoulderLookRef.Object;
+		InHUDWidget->UpdateStat();
+		InHUDWidget->UpdateQuickSlots();
+
+		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
+		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 	}
 }
 
-void ASTLocalGhost::Move(const FInputActionValue& Value)
+void ASTLocalGhost::ShoulderMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -125,7 +121,7 @@ void ASTLocalGhost::Move(const FInputActionValue& Value)
 	AddMovementInput(RightDirection, MovementVector.Y);
 }
 
-void ASTLocalGhost::Look(const FInputActionValue& Value)
+void ASTLocalGhost::ShoulderLook(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 

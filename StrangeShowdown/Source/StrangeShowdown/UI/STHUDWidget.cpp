@@ -19,6 +19,7 @@ DEFINE_LOG_CATEGORY(LogSTHUDWidget);
 
 USTHUDWidget::USTHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	HUDWidgetType = EHUDWidgetType::Player;
 }
 
 void USTHUDWidget::NativeConstruct()
@@ -31,10 +32,43 @@ void USTHUDWidget::NativeConstruct()
 		HUDPawn->SetupHUDWidget(this);
 	}
 
-	// TODO: 나중에 위젯 타입 어떻게 할지 고민하기
+	SetWidgetType(HUDWidgetType);
+}
+
+void USTHUDWidget::SetWidgetType(EHUDWidgetType InWidgetType)
+{
+	HUDWidgetType = InWidgetType;
+
 	if (StatWidget)
 	{
-		StatWidget->SetWidgetType(HUDWidgetType);
+		switch (HUDWidgetType)
+		{
+		case EHUDWidgetType::Player:
+			StatWidget->SetPlayerWidget();
+			break;
+		case EHUDWidgetType::Ghost:
+			StatWidget->SetGhostWidget();
+			for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
+			{
+				USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
+				if (QuickSlotWidget)
+				{
+					QuickSlotWidget->SetGhostImage();
+				}
+			}
+			break;
+		case EHUDWidgetType::Sheriff:
+			StatWidget->SetSheriffWidget();
+			for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
+			{
+				USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
+				if (QuickSlotWidget)
+				{
+					QuickSlotWidget->SetSheriffImage();
+				}
+			}
+			break;
+		}
 	}
 }
 
@@ -138,6 +172,10 @@ void USTHUDWidget::SetupQuickSlots(int32 QuickSlotCount)
 		{
 			QuickSlotWidget->SetPadding(FMargin(13.0f, 10.0f, 25.0f, 0.0f));
 			QuickSlotWidget->SetSlotIndex(i);
+			if(SourceQuickSlotComp.IsValid())
+			{
+				QuickSlotWidget->OnQuickSlotWidgetDrop.BindUObject(SourceQuickSlotComp.Get(), &USTQuickSlotComponent::AddItem);
+			}
 			QuickSlotWrapBox->AddChild(QuickSlotWidget);
 		}
 	}
@@ -157,12 +195,15 @@ void USTHUDWidget::UpdateQuickSlots()
 			SetupQuickSlots(QuickSlotItemCount);
 		}
 
-		for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
+		if (EHUDWidgetType::Player == HUDWidgetType)
 		{
-			USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
-			if (QuickSlotWidget)
+			for (int i = 0; i < QuickSlotWrapBox->GetChildrenCount(); i++)
 			{
-				QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp.Get()->QuickSlots[i], SourceQuickSlotComp.Get()->CurrentSelectQuickSlotIndex);
+				USTQuickSlotWidget* QuickSlotWidget = GetQuickSlotWidget(i);
+				if (QuickSlotWidget)
+				{
+					QuickSlotWidget->UpdateQuickSlot(SourceQuickSlotComp.Get()->QuickSlots[i], SourceQuickSlotComp.Get()->CurrentSelectQuickSlotIndex);
+				}
 			}
 		}
 	}

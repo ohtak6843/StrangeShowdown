@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Component/STStoreComponent.h"
 #include "STStoreSlotWidget.generated.h"
-
-DECLARE_MULTICAST_DELEGATE(FOnItemSlotButtonClicked);
 
 /**
  * 
@@ -31,9 +30,10 @@ public:
 
 	void UpdateSlot(const struct FStoreSlot& InStoreSlot);
 
-	FOnItemSlotButtonClicked OnItemSlotButtonClicked;
-
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FStoreSlot StoreSlot;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> ItemSlotButton;
 

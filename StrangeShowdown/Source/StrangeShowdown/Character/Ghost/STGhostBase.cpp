@@ -52,9 +52,8 @@ ASTGhostBase::ASTGhostBase()
 	StatComp->Kill = 0;
 	StatComp->CurrentArmor = 0;
 	StatComp->MoveSpeed = 500;
-	// Ghost는 스태미너가 없으므로 -1로 설정
-	StatComp->CurrentStamina = -1;
+	StatComp->CurrentStamina = 0;
 	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Prize = 0;
+	StatComp->Bounty = 0;
 	StatComp->bAlive = true;
 }

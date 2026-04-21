@@ -29,15 +29,36 @@ void ASTPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HUDWidgetClass)
-	{
-		HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
-	}
+	HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
 
 	if (HUDWidget)
 	{
 		HUDWidget->AddToViewport();
 	}
+}
+
+USTMiniMapWidget* ASTPlayerController::GetMiniMapWidget()
+{
+	USTMiniMapWidget* MiniMapWidget = ISTControllerHUDInterface::GetMiniMapWidget();
+
+	if (HUDWidget)
+	{
+		MiniMapWidget = HUDWidget->GetMiniMapWidget();
+	}
+	
+	return MiniMapWidget;
+}
+
+USTMiniMapWidget* ASTPlayerController::GetBigMapWidget()
+{
+	USTMiniMapWidget* BigMapWidget = ISTControllerHUDInterface::GetBigMapWidget();
+	
+	if (HUDWidget)
+	{
+		BigMapWidget = HUDWidget->GetBigMapWidget();
+	}
+
+	return BigMapWidget;
 }
 
 void ASTPlayerController::OpenStore()

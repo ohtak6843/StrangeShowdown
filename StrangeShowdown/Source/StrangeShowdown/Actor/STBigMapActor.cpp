@@ -10,6 +10,7 @@
 #include "GameFramework/HUD.h"
 #include "UI/STHUDWidget.h"
 #include "Interface/STMiniMapTargetInterface.h"
+#include "Interface/STControllerHUDInterface.h"
 
 // Sets default values
 ASTBigMapActor::ASTBigMapActor()
@@ -18,8 +19,8 @@ ASTBigMapActor::ASTBigMapActor()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	MiniMapCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCapture"));
-	MiniMapCapture->SetupAttachment(RootComponent);
+	BigMapCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCapture"));
+	BigMapCapture->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -30,7 +31,7 @@ void ASTBigMapActor::BeginPlay()
 	SetActorLocation(FVector(0, -3500.f, zPosition));
 
 	InitWidgetComponent();
-	ApplyMiniMapHidden();
+	ApplyBigMapHidden();
 
 	// HUD 연결 타이머 설정(딜레이)
 	FTimerHandle TimerHandle;
@@ -47,25 +48,26 @@ void ASTBigMapActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateTargetOnMiniMap(DeltaTime);
-	UpdatePlayerOnMiniMap(DeltaTime);
+	UpdateTargetOnBigMap(DeltaTime);
+	UpdatePlayerOnBigMap(DeltaTime);
 }
 
 void ASTBigMapActor::BringHUD()
 {
-	ASTPlayerController* STPC = Cast<ASTPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (STPC)
+	ISTControllerHUDInterface* PC = Cast<ISTControllerHUDInterface>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC)
 	{
-		HUDWidget = STPC->GetHUDWidget();
-		MiniMapWidget = HUDWidget->GetBigMapWidget();
-		if (!MiniMapWidget)
+		BigMapWidget = PC->GetBigMapWidget();
+		if (BigMapWidget)
+		{
+			BigMapWidget->SetIsRotationAble(false);
+		}
+		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Failed to get BigMapWidget from HUD"));
 			return;
 		}
 	}
-
-	MiniMapWidget->SetIsRotationAble(false);
 }
 
 void ASTBigMapActor::RegisterBigMapTarget(AActor* Actor)
@@ -77,7 +79,7 @@ void ASTBigMapActor::RegisterBigMapTarget(AActor* Actor)
 		return;
 	}
 
-	MiniMapTargets.AddUnique(Actor);
+	BigMapTargets.AddUnique(Actor);
 
 	Actor->OnDestroyed.RemoveDynamic(this, &ASTBigMapActor::OnIconDestroyed);
 	Actor->OnDestroyed.AddDynamic(this, &ASTBigMapActor::OnIconDestroyed);
@@ -87,11 +89,11 @@ void ASTBigMapActor::OnIconDestroyed(AActor* DestroyedActor)
 {
 	if (!DestroyedActor) return;
 
-	MiniMapTargets.Remove(DestroyedActor);
+	BigMapTargets.Remove(DestroyedActor);
 
-	if (MiniMapWidget)
+	if (BigMapWidget)
 	{
-		MiniMapWidget->HideTargetIcon(DestroyedActor);
+		BigMapWidget->HideTargetIcon(DestroyedActor);
 	}
 }
 
@@ -105,8 +107,8 @@ FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 
 	Relative.Y *= -1.f;
 
-	const float WidgetSize = HUDWidget->GetBigMapWidget()->GetDesiredSize().Y;
-	const float OrthoWidth = MiniMapCapture->OrthoWidth;
+	const float WidgetSize = BigMapWidget->GetDesiredSize().Y;
+	const float OrthoWidth = BigMapCapture->OrthoWidth;
 
 	const float Scale = WidgetSize / OrthoWidth;
 	Relative *= Scale;
@@ -117,10 +119,9 @@ FVector2D ASTBigMapActor::WorldToMiniMap(const FVector& WorldLocation) const
 	return Relative;
 }
 
-void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
+void ASTBigMapActor::UpdateTargetOnBigMap(float DeltaTime)
 {
-	if (!MiniMapWidget) return;
-	if (!HUDWidget || !HUDWidget->GetBigMapWidget()) return;
+	if (!BigMapWidget) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -130,12 +131,12 @@ void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 
 	float CurrentYaw = GetActorRotation().Yaw;
 
-	for (int32 i = MiniMapTargets.Num() - 1; i >= 0; --i)
+	for (int32 i = BigMapTargets.Num() - 1; i >= 0; --i)
 	{
-		AActor* TargetActor = MiniMapTargets[i].Get();
+		AActor* TargetActor = BigMapTargets[i].Get();
 		if (!TargetActor)
 		{
-			MiniMapTargets.RemoveAt(i);
+			BigMapTargets.RemoveAt(i);
 			continue;
 		}
 
@@ -153,7 +154,7 @@ void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 		FVector2D Offset(-55.f, -20.f);
 		MiniMapPos += Offset;
 
-		const float WidgetSize = HUDWidget->GetBigMapWidget()->GetDesiredSize().Y;
+		const float WidgetSize = BigMapWidget->GetDesiredSize().Y;
 
 		const float MinX = Offset.X + 10.f;
 		const float MaxX = Offset.X + WidgetSize - 15.f;
@@ -162,18 +163,18 @@ void ASTBigMapActor::UpdateTargetOnMiniMap(float DeltaTime)
 
 		if (MiniMapPos.X < MinX || MiniMapPos.X > MaxX || MiniMapPos.Y < MinY || MiniMapPos.Y > MaxY)
 		{
-			MiniMapWidget->HideTargetIcon(TargetActor);
+			BigMapWidget->HideTargetIcon(TargetActor);
 		}
 		else
 		{
-			MiniMapWidget->UpdateTargetIcon(TargetActor, MiniMapPos);
+			BigMapWidget->UpdateTargetIcon(TargetActor, MiniMapPos);
 		}
 	}
 }
 
-void ASTBigMapActor::UpdatePlayerOnMiniMap(float DeltaTime)
+void ASTBigMapActor::UpdatePlayerOnBigMap(float DeltaTime)
 {
-	if (!MiniMapWidget) return;
+	if (!BigMapWidget) return;
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
@@ -188,25 +189,25 @@ void ASTBigMapActor::UpdatePlayerOnMiniMap(float DeltaTime)
 	FVector2D Offset(-400.f, -400.f);
 	MiniMapPos += Offset;
 
-	MiniMapWidget->UpdatePlayerIcon(MiniMapPos);
+	BigMapWidget->UpdatePlayerIcon(MiniMapPos);
 }
 
 void ASTBigMapActor::InitWidgetComponent()
 {
-	if (!MiniMapCapture) return;
+	if (!BigMapCapture) return;
 
-	MiniMapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
-	MiniMapCapture->OrthoWidth = 12000.f;
+	BigMapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
+	BigMapCapture->OrthoWidth = 12000.f;
 
-	MiniMapCapture->bCaptureEveryFrame = true;
-	MiniMapCapture->bCaptureOnMovement = true;
-	MiniMapCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	BigMapCapture->bCaptureEveryFrame = true;
+	BigMapCapture->bCaptureOnMovement = true;
+	BigMapCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 
-	MiniMapCapture->LODDistanceFactor = 3.0f;
-	MiniMapCapture->MaxViewDistanceOverride = 5000.f;
-	MiniMapCapture->PostProcessBlendWeight = 0.0f;
+	BigMapCapture->LODDistanceFactor = 3.0f;
+	BigMapCapture->MaxViewDistanceOverride = 5000.f;
+	BigMapCapture->PostProcessBlendWeight = 0.0f;
 
-	auto& Flags = MiniMapCapture->ShowFlags;
+	auto& Flags = BigMapCapture->ShowFlags;
 
 	Flags.SetLighting(false);
 	Flags.SetDynamicShadows(false);
@@ -225,10 +226,10 @@ void ASTBigMapActor::InitWidgetComponent()
 	Flags.SetStaticMeshes(true);
 	Flags.SetLandscape(true);
 
-	MiniMapCapture->CaptureScene();
+	BigMapCapture->CaptureScene();
 }
 
-void ASTBigMapActor::ApplyMiniMapHidden()
+void ASTBigMapActor::ApplyBigMapHidden()
 {
 	TArray<AActor*> AllActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), AllActors);
@@ -239,7 +240,7 @@ void ASTBigMapActor::ApplyMiniMapHidden()
 
 		if (Actor->ActorHasTag(TEXT("MiniMapHidden")))
 		{
-			MiniMapCapture->HiddenActors.Add(Actor);
+			BigMapCapture->HiddenActors.Add(Actor);
 		}
 
 		TArray<UWidgetComponent*> Widgets;
@@ -249,7 +250,7 @@ void ASTBigMapActor::ApplyMiniMapHidden()
 		{
 			if (WidgetComp)
 			{
-				MiniMapCapture->HiddenComponents.Add(WidgetComp);
+				BigMapCapture->HiddenComponents.Add(WidgetComp);
 			}
 		}
 	}

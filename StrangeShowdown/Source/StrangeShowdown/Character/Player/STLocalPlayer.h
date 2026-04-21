@@ -27,10 +27,16 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+// HUD Section
+protected:
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
+
+// Attack Hit Interface Section
 public:
-	// ISTAnimAttackInterface
 	virtual void AttackHitCheck() override;
 
+// Blueprint Function Section
+public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UseItem();
 
@@ -52,6 +58,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void NotEnoughStaminaCostFloatingMessage();
+
+	virtual void HandleStoreSlotClicked(const struct FStoreSlot& InStoreSlot) override; 
 
 	TObjectPtr<class UCameraComponent> GetCameraComp() { return CameraComp; }
 
@@ -149,10 +157,6 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)
 	TObjectPtr<class USoundBase> PistolFireSound;
-
-// HUD Section
-protected:
-	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
 
 // Camera Pose Section
 protected:

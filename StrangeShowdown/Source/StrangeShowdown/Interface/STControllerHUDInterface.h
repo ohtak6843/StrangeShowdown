@@ -23,4 +23,6 @@ class STRANGESHOWDOWN_API ISTControllerHUDInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual class USTChatManagerWidget* GetChatManagerWidget() { return nullptr; }
+	virtual class USTMiniMapWidget* GetMiniMapWidget() { return nullptr; }
+	virtual class USTMiniMapWidget* GetBigMapWidget() { return nullptr; }
 };

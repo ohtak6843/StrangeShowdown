@@ -45,12 +45,9 @@ public:
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> MiniMapTargets;
 
-	UPROPERTY(BlueprintReadOnly)
-	class USTMiniMapWidget* MiniMapWidget;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class USTMiniMapWidget> MiniMapWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	double zPosition = 2000.0f;
-
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<class USTHUDWidget> HUDWidget;
 };

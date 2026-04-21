@@ -71,7 +71,7 @@ void USTStatComponent::AddUseAbleAction(int32 ActionAmount)
 
 void USTStatComponent::AddPrize(int32 PrizeAmount)
 {
-	Prize += PrizeAmount;
+	Bounty += PrizeAmount;
 }
 
 void USTStatComponent::SetIsActive(bool isActive)

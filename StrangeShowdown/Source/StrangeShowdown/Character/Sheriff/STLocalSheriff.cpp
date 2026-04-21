@@ -4,6 +4,7 @@
 #include "Character/Sheriff/STLocalSheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Component/STStatComponent.h"
 #include "Component/STQuickSlotComponent.h"
 #include "Component/STAttackTraceComponent.h"
 #include "Character/Player/STFieldPlayer.h"
@@ -13,6 +14,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Actor/STMiniMapActor.h"
 #include "Actor/STBigMapActor.h"
+#include "UI/STHUDWidget.h"
+#include "UI/Stat/STStatWidget.h"
 
 ASTLocalSheriff::ASTLocalSheriff()
 {
@@ -73,8 +76,6 @@ ASTLocalSheriff::ASTLocalSheriff()
 			break;
 		}
 	}
-
-	AddInputMappingContext();
 }
 
 void ASTLocalSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -97,6 +98,42 @@ void ASTLocalSheriff::BeginPlay()
 	if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+}
+
+void ASTLocalSheriff::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Camera Pose Blending
+	PoseElapsedTime += DeltaTime;
+	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
+
+	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
+
+	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
+
+	FVector Rel = CameraComp->GetRelativeLocation();
+	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
+	CameraComp->SetRelativeLocation(Rel);
+}
+
+void ASTLocalSheriff::SetupHUDWidget(USTHUDWidget* InHUDWidget)
+{
+	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
+
+	if (InHUDWidget)
+	{
+		InHUDWidget->GetStatWidget()->SetStatComponent(StatComp);
+		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
+
+		InHUDWidget->SetWidgetType(EHUDWidgetType::Sheriff);
+
+		InHUDWidget->UpdateStat();
+		InHUDWidget->UpdateQuickSlots();
+
+		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
+		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 	}
 }
 
@@ -125,23 +162,6 @@ void ASTLocalSheriff::ApplyStateSettings(ECameraPose NewState)
 	}
 }
 
-void ASTLocalSheriff::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// Camera Pose Blending
-	PoseElapsedTime += DeltaTime;
-	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
-
-	Alpha = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f);
-
-	SpringArmComp->TargetArmLength = FMath::Lerp(StartPose.SpringArmLength, TargetPose.SpringArmLength, Alpha);
-
-	FVector Rel = CameraComp->GetRelativeLocation();
-	Rel.Y = FMath::Lerp(StartPose.CameraY, TargetPose.CameraY, Alpha);
-	CameraComp->SetRelativeLocation(Rel);
-}
-
 void ASTLocalSheriff::ChangeToIdle()
 {
 	RemoveState(ESheriffState::Aiming);
@@ -156,41 +176,6 @@ void ASTLocalSheriff::ChangeToAiming()
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::Aiming);
-}
-
-void ASTLocalSheriff::AddInputMappingContext()
-{
-	// Input Mapping Context
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/StrangeShowdown/Input/IMC_SheriffInput.IMC_SheriffInput"));
-	if (nullptr != InputMappingContextRef.Object)
-	{
-		DefaultMappingContext = InputMappingContextRef.Object;
-	}
-
-	// Input Actions
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
-	if (nullptr != InputActionShoulderMoveRef.Object)
-	{
-		ShoulderMoveAction = InputActionShoulderMoveRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
-	if (nullptr != InputActionShoulderLookRef.Object)
-	{
-		ShoulderLookAction = InputActionShoulderLookRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolAim.IA_PistolAim'"));
-	if (nullptr != InputActionPistolAimRef.Object)
-	{
-		PistolAimAction = InputActionPistolAimRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPistolFireRef(TEXT("/Script/EnhancedInput.InputAction'/Game/StrangeShowdown/Input/Actions/IA_PistolFire.IA_PistolFire'"));
-	if (nullptr != InputActionPistolFireRef.Object)
-	{
-		PistolFireAction = InputActionPistolFireRef.Object;
-	}
 }
 
 void ASTLocalSheriff::ShoulderMove(const FInputActionValue& Value)
@@ -250,6 +235,6 @@ void ASTLocalSheriff::PistolFire(const FInputActionValue& Value)
 			UDamageType::StaticClass()
 		);
 
-		Fire_BP();
+		PistolFireEffect();
 	}
 }

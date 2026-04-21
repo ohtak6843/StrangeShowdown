@@ -6,6 +6,8 @@
 #include "UI/Store/STStoreSlotWidget.h"
 #include "Component/STStoreComponent.h"
 
+#include "Character/Player/STLocalPlayer.h"
+
 USTStoreWidget::USTStoreWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 }
@@ -32,7 +34,7 @@ void USTStoreWidget::UpdateStore(const TArray<FStoreSlot>& InStoreSlots)
 		SetupStore(StoreItemCount);
 	}
 
-	for(int i=0; i<StoreSlotWrapBox->GetChildrenCount(); i++)
+	for (int i = 0; i < StoreSlotWrapBox->GetChildrenCount(); i++)
 	{
 		USTStoreSlotWidget* StoreSlotWidget = Cast<USTStoreSlotWidget>(StoreSlotWrapBox->GetChildAt(i));
 		if (StoreSlotWidget)

@@ -19,7 +19,6 @@ void USTStoreMenuWidget::NativeConstruct()
 		ExitButton->OnHovered.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonHovered);
 		ExitButton->OnUnhovered.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonUnhovered);
 		ExitButton->OnClicked.AddDynamic(this, &USTStoreMenuWidget::HandleExitButtonClicked);
-		UE_LOG(LogTemp, Log, TEXT("Exit button bound to events"));
 	}
 }
 

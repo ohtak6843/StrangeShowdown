@@ -6,6 +6,7 @@
 #include "Character/Sheriff/STSheriffBase.h"
 #include "InputActionValue.h"
 #include "GameData/STTypes.h"
+#include "Interface/STCharacterHUDInterface.h"
 #include "STLocalSheriff.generated.h"
 
 /**
@@ -13,29 +14,34 @@
  */
 
 UCLASS()
-class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase
+class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase, public ISTCharacterHUDInterface
 {
 	GENERATED_BODY()
 
 public:
 	ASTLocalSheriff();
 
+protected:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
+// HUD Section
+protected:
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
+
+public:
 	void SetCameraPose(ECameraPose NewPose);
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyStateSettings(ECameraPose NewState);
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	// 블루프린트에서 호출할 Fire()
 	UFUNCTION(BlueprintImplementableEvent)
-	void Fire_BP();
+	void PistolFireEffect();
 
+// Component Section
 protected:
-	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaTime) override;
-
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArmComp;
@@ -56,11 +62,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackTrace")
 	TObjectPtr<class USTAttackTraceComponent> AttackTraceComp;
 
-private:
+protected:
 	void ChangeToIdle();
 	void ChangeToAiming();
 
-	void AddInputMappingContext();
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);
 	void PistolAim(const FInputActionValue& Value);

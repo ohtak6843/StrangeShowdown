@@ -8,6 +8,7 @@
 #include "Component/STStoreComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interface/STCharacterHUDInterface.h"
 
 USTStoreSlotWidget::USTStoreSlotWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -31,22 +32,29 @@ void USTStoreSlotWidget::HandleItemSlotButtonHovered()
 		float VolumeMultiplier = 0.8f;
 		UGameplayStatics::PlaySound2D(this, HoverSound, VolumeMultiplier);
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("Item Slot Button Hovered"));
 }
 
 void USTStoreSlotWidget::HandleItemSlotButtonClicked()
 {
-	OnItemSlotButtonClicked.Broadcast();
+	if(StoreSlot.ItemData && false == StoreSlot.bIsSold)
+	{
+		ISTCharacterHUDInterface* HUDInterface = Cast<ISTCharacterHUDInterface>(GetOwningPlayerPawn());
+		if (HUDInterface)
+		{
+			HUDInterface->HandleStoreSlotClicked(StoreSlot);
+		}
+	}
 }
 
 void USTStoreSlotWidget::UpdateSlot(const FStoreSlot& InStoreSlot)
 {
-	if (InStoreSlot.ItemData && !InStoreSlot.bIsSold)
+	StoreSlot = InStoreSlot;
+
+	if (StoreSlot.ItemData && !StoreSlot.bIsSold)
 	{
-		ItemImage->SetBrushFromTexture(InStoreSlot.ItemData->Icon);
-		ItemNameText->SetText(InStoreSlot.ItemData->ItemName);
-		GoldCostText->SetText(FText::AsNumber(InStoreSlot.ItemData->GoldCost));
+		ItemImage->SetBrushFromTexture(StoreSlot.ItemData->Icon);
+		ItemNameText->SetText(StoreSlot.ItemData->ItemName);
+		GoldCostText->SetText(FText::AsNumber(StoreSlot.ItemData->GoldCost));
 
 		ItemImage->SetVisibility(ESlateVisibility::Visible);
 		ItemNameText->SetVisibility(ESlateVisibility::Visible);

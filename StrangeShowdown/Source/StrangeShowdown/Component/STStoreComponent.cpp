@@ -54,7 +54,7 @@ void USTStoreComponent::BuyItem(int32 SlotIndex)
 {
 	if (!CurrentStorekeeper.IsValid()) return;
 
-	CurrentStorekeeper->BuyItem(SlotIndex);
+	CurrentStorekeeper.Get()->BuyItem(SlotIndex);
 }
 
 void USTStoreComponent::RefreshStoreUI()

@@ -5,24 +5,30 @@
 #include "CoreMinimal.h"
 #include "Character/Ghost/STGhostBase.h"
 #include "InputActionValue.h"
+#include "Interface/STCharacterHUDInterface.h"
 #include "STLocalGhost.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTLocalGhost : public ASTGhostBase
+class STRANGESHOWDOWN_API ASTLocalGhost : public ASTGhostBase, public ISTCharacterHUDInterface
 {
 	GENERATED_BODY()
 
 public:
 	ASTLocalGhost();
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 protected:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+// HUD Section
+protected:
+	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
+
+// Component Section
+protected:
 	// Spring Arm Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArmComp;
@@ -39,10 +45,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "QuickSlot")
 	TObjectPtr<class USTQuickSlotComponent> QuickSlotComp;
 
-private:
-	void AddInputMappingContext();
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+// Input Section
+protected:
+	void ShoulderMove(const FInputActionValue& Value);
+	void ShoulderLook(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderMoveAction;

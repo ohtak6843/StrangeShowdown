@@ -51,7 +51,7 @@ ASTLocalPlayer::ASTLocalPlayer()
 	StatComp->MoveSpeed = 500;
 	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
 	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Prize = 0;
+	StatComp->Bounty = 0;
 	StatComp->bAlive = true;
 
 	// Inventory Component
@@ -201,6 +201,8 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InHUDWidget->SetQuickSlotComponent(QuickSlotComp);
 		InHUDWidget->SetStoreComponent(StoreComp);
 
+		InHUDWidget->SetWidgetType(EHUDWidgetType::Player);
+
 		InHUDWidget->UpdateStat();
 		InHUDWidget->UpdateQuickSlots();
 
@@ -208,12 +210,6 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 		StoreComp->OnStoreUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStoreMenu);
-
-		// OnDrop 시 업데이트 연결
-		for (int i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
-		{
-			InHUDWidget->GetQuickSlotWidget(i)->OnQuickSlotWidgetDrop.BindUObject(QuickSlotComp, &USTQuickSlotComponent::AddItem);
-		}
 	}
 }
 
@@ -382,6 +378,14 @@ void ASTLocalPlayer::DropItem()
 	}
 }
 
+void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
+{
+	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
+	{
+		// TODO: 아이템 구매 로직
+	}
+}
+
 void ASTLocalPlayer::ShoulderMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -490,7 +494,6 @@ void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
 
 void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
 {
-	// TODO: 스크롤로 퀵슬롯 번호 변경
 	int32 ScrollValue = FMath::RoundToInt(Value.Get<float>());
 	int32 CurrentIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
 

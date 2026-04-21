@@ -27,9 +27,11 @@ protected:
 public:
 	class USTStatWidget* GetStatWidget() const { return StatWidget; }
 
+	void SetWidgetType(EHUDWidgetType InWidgetType);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-	EHUDWidgetType HUDWidgetType = EHUDWidgetType::Player;
+	EHUDWidgetType HUDWidgetType;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<class USTMissionWidget> Mission;
