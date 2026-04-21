@@ -46,12 +46,14 @@ void ASTLobbyLocalPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC)
-		return;
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
 
 	// LobbyController로 캐스팅
-	ASTLobbyController* STPC = Cast<ASTLobbyController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	ASTLobbyController* STPC = Cast<ASTLobbyController>(PlayerController);
 	if (STPC)
 	{
 		LobbyHUDWidget = STPC->LobbyHUDWidget;
