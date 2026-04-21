@@ -14,6 +14,7 @@
 #include "Widget/STChatManagerWidget.h"
 #include "Widget/STMiniMapWidget.h"
 #include "UI/BountyPoster/STBountyPosterMenuWidget.h"
+#include "UI/Timer/STTimerWidget.h"
 
 DEFINE_LOG_CATEGORY(LogSTHUDWidget);
 

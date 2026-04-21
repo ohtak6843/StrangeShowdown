@@ -17,6 +17,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FText Mission;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsCleared = false;
+
 	void Init(const FText& InTitle, const FText& InMission)
 	{
 		Title = InTitle;

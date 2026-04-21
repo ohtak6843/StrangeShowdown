@@ -82,3 +82,13 @@ enum class EHUDWidgetType : uint8
 	Ghost,
 	Sheriff
 };
+
+UENUM(BlueprintType)
+enum class EAreaType : uint8
+{
+	Bar,
+	Church,
+	Bank,
+	Station,
+	Alter,
+};

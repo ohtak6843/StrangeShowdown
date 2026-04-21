@@ -2,16 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Game/STMissionRowData.h"
 #include "STMissionComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
-	FMissionUpdated,
-	const FText&, Title,
-	const FText&, Description
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FMissionStart,
+	USTMissionRowData*, Data
 );
 
-// 플레이어에 UI로 미션을 전달할 수 있도록 하는 컴포넌트
-// 컴포넌트 내에서 미션의 정보를 저장하고 미션 클리어 여부를 관리할 수 있도록 할 예정
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FMissionClear,
+	USTMissionRowData*, Data
+);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STRANGESHOWDOWN_API USTMissionComponent : public UActorComponent
 {
@@ -20,17 +23,23 @@ class STRANGESHOWDOWN_API USTMissionComponent : public UActorComponent
 public:
 	USTMissionComponent();
 
-	UFUNCTION(BlueprintCallable, Category = "Mission")
-	void SetMission(const FText& NewTitle, const FText& NewDesc);
+	UFUNCTION(BlueprintCallable)
+	void SetMission(const FText& Title, const FText& Desc);
+
+	UFUNCTION(BlueprintCallable)
+	void ClearMission(int32 Index);
+
+	UFUNCTION(BlueprintCallable)
+	void SetTestMission(int32 Index);
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FMissionUpdated OnMissionUpdated;
+	FMissionStart OnMissionStart;
+
+	UPROPERTY(BlueprintAssignable)
+	FMissionClear OnMissionClear;
 
 private:
 	UPROPERTY()
-	FText CurrentTitle;
-
-	UPROPERTY()
-	FText CurrentMission;
+	TArray<USTMissionRowData*> Missions;
 };

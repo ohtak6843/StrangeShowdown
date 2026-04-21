@@ -46,7 +46,7 @@ void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const F
 		MessageTextBlock->SetText(FText::FromString(FormattedMessage));
 
 		// 폰트 크기 조절
-		MessageTextBlock->SetFont(FSlateFontInfo(FPaths::ProjectContentDir() / TEXT("Fonts/F_StrangeShowdown.ttf"), 20));
+		MessageTextBlock->SetFont(FCoreStyle::GetDefaultFontStyle("Regular", 20));
 		
 		MessageTextBlock->SetAutoWrapText(true);
 		MessageTextBlock->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
@@ -59,6 +59,49 @@ void USTChatManagerWidget::AddChatMessage(const FString& SenderNickName, const F
 		float ScrollWidth = ChatScrollBox->GetCachedGeometry().GetLocalSize().X;
 		MessageTextBlock->SetWrapTextAt(ScrollWidth - 20.f);
 		
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+			{
+				if (ChatScrollBox)
+				{
+					ChatScrollBox->ScrollToEnd();
+				}
+			}, 0.01f, false);
+	}
+}
+
+void USTChatManagerWidget::AddSystemMessage(const FString& Message)
+{
+	FChatMessage NewMessage;
+	NewMessage.Message = Message;
+
+	ChatLog.Add(NewMessage);
+
+	if (!ChatScrollBox) return;
+
+	UTextBlock* MessageTextBlock = NewObject<UTextBlock>(this);
+	if (MessageTextBlock)
+	{
+		FString FormattedMessage = FString::Printf(TEXT("%s"),
+			*Message);
+
+		MessageTextBlock->SetText(FText::FromString(FormattedMessage));
+		MessageTextBlock->SetColorAndOpacity(FSlateColor(FLinearColor::Yellow));
+
+		// 폰트 크기 조절
+		MessageTextBlock->SetFont(FCoreStyle::GetDefaultFontStyle("Regular", 20));
+
+		MessageTextBlock->SetAutoWrapText(true);
+		MessageTextBlock->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
+		ChatScrollBox->AddChild(MessageTextBlock);
+
+		// 레이아웃 강제 계산
+		ChatScrollBox->ForceLayoutPrepass();
+
+		// 정확한 폭 가져오기
+		float ScrollWidth = ChatScrollBox->GetCachedGeometry().GetLocalSize().X;
+		MessageTextBlock->SetWrapTextAt(ScrollWidth - 20.f);
+
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 			{

@@ -121,6 +121,35 @@ protected:
 
 #pragma endregion
 
+#pragma region Timer
+public:
+	class USTTimerWidget* GetTimerWidget() const { return TimerWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTTimerWidget> TimerWidget;
+
+#pragma endregion
+
+#pragma region SheriffTimer
+public:
+	class USTSheriffTimer* GetSheriffTimerWidget() const { return SheriffTimerWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTSheriffTimer> SheriffTimerWidget;
+#pragma endregion
+
+#pragma region Area Volume Section
+public:
+	class USTAreaVolumeWidget* GetAreaVolumeWidget() const { return AreaVolumeWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTAreaVolumeWidget> AreaVolumeWidget;
+
+#pragma endregion
+
 #pragma region Map Section
 public:
 	class USTMiniMapWidget* GetMiniMapWidget() const { return MiniMapWidget; }

@@ -1,13 +1,12 @@
 #include "Component/STAttackTraceComponent.h"
+#include "Component/STTargetIndicatorComponent.h"
 #include "Character/Player/STFieldPlayer.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Character/Sheriff/STLocalSheriff.h"
-#include "Character/STCharacter.h"
-#include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+// Sets default values
 USTAttackTraceComponent::USTAttackTraceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -16,20 +15,6 @@ USTAttackTraceComponent::USTAttackTraceComponent()
 void USTAttackTraceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OnTargetAcquired.AddDynamic(this, &USTAttackTraceComponent::HandleTargetAcquired);
-	OnTargetLost.AddDynamic(this, &USTAttackTraceComponent::HandleTargetLost);
-
-	AttackTraceWidgetComponent = NewObject<UWidgetComponent>(GetOwner(), TEXT("AttackTraceWidgetComponent"));
-	AttackTraceWidgetComponent->SetupAttachment(GetOwner()->GetRootComponent());
-	AttackTraceWidgetComponent->RegisterComponent();
-	AttackTraceWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	AttackTraceWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	AttackTraceWidgetComponent->SetDrawSize(FVector2D(100.f, 100.f));
-	// 앞뒤면 모두 렌더링
-	AttackTraceWidgetComponent->SetTwoSided(true);
-	AttackTraceWidgetComponent->SetVisibility(false);
 }
 
 void USTAttackTraceComponent::TickComponent(
@@ -43,6 +28,7 @@ void USTAttackTraceComponent::TickComponent(
 	if (!Owner)
 		return;
 
+	// 조준 상태 체크
 	if (ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(Owner))
 	{
 		if (!LocalPlayer->HasAnyState(EPlayerState::Aiming))
@@ -69,58 +55,31 @@ void USTAttackTraceComponent::TickComponent(
 	SetTracingTarget(NewTarget);
 }
 
-void USTAttackTraceComponent::HandleTargetAcquired(ASTFieldPlayer* NewTarget)
-{
-	if (!NewTarget || !AttackTraceWidgetComponent || !AttackTraceWidgetClass)
-		return;
-
-	if (!AttackTraceWidgetComponent || !AttackTraceWidgetClass)
-		return;
-
-	AttackTraceWidgetComponent->SetWidgetClass(AttackTraceWidgetClass);
-
-	USkeletalMeshComponent* Mesh = NewTarget->GetMesh();
-	if (!Mesh)
-		return;
-
-	AttackTraceWidgetComponent->AttachToComponent(
-		Mesh,
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		TEXT("spine_03")
-	);
-
-	AttackTraceWidgetComponent->SetRelativeLocation(WidgetOffset);
-	AttackTraceWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-	AttackTraceWidgetComponent->SetVisibility(true);
-}
-
-void USTAttackTraceComponent::HandleTargetLost()
-{
-	if (!AttackTraceWidgetComponent)
-		return;
-
-	AttackTraceWidgetComponent->SetVisibility(false);
-	AttackTraceWidgetComponent->DetachFromComponent(
-		FDetachmentTransformRules::KeepWorldTransform
-	);
-}
-
 void USTAttackTraceComponent::SetTracingTarget(ASTFieldPlayer* NewTarget)
 {
 	if (TracingFieldPlayer == NewTarget)
 		return;
 
-	// 새로운 타겟으로 변경
-	TracingFieldPlayer = NewTarget;
-
-	// 델리게이트 브로드캐스트
+	// 이전 타겟 제거
 	if (TracingFieldPlayer)
 	{
-		OnTargetAcquired.Broadcast(TracingFieldPlayer);
+		if (USTTargetIndicatorComponent* Indicator =
+			TracingFieldPlayer->FindComponentByClass<USTTargetIndicatorComponent>())
+		{
+			Indicator->RemoveAttacker(this);
+		}
 	}
-	else
+
+	TracingFieldPlayer = NewTarget;
+
+	// 새로운 타겟 등록
+	if (TracingFieldPlayer)
 	{
-		OnTargetLost.Broadcast();
+		if (USTTargetIndicatorComponent* Indicator =
+			TracingFieldPlayer->FindComponentByClass<USTTargetIndicatorComponent>())
+		{
+			Indicator->AddAttacker(this);
+		}
 	}
 }
 
@@ -141,11 +100,9 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	const FVector Start = CameraLocation;
 	const FVector End = Start + CameraRotation.Vector() * TraceDistance;
 
-	// 설정된 채널로 스윕 트레이스 수행
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
-	// 다중 히트 결과 수집
 	TArray<FHitResult> HitResults;
 	bool bHit = World->SweepMultiByChannel(
 		HitResults,
@@ -160,28 +117,23 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	if (!bHit)
 		return nullptr;
 
-	// 화면 중심 좌표 계산
 	int32 ViewX, ViewY;
 	PC->GetViewportSize(ViewX, ViewY);
 	const FVector2D ScreenCenter(ViewX * 0.5f, ViewY * 0.5f);
 
-	// 가장 적합한 타겟
 	ASTFieldPlayer* BestTarget = nullptr;
 	float BestScore = FLT_MAX;
 
-	// 모든 히트 결과 순회해서 타겟 찾기
 	for (const FHitResult& Hit : HitResults)
 	{
 		ASTFieldPlayer* Player = Cast<ASTFieldPlayer>(Hit.GetActor());
 		if (!Player)
 			continue;
 
-		// 월드 위치를 화면 좌표로 변환
 		FVector2D ScreenPos;
 		if (!PC->ProjectWorldLocationToScreen(Player->GetActorLocation(), ScreenPos))
 			continue;
 
-		// 화면 중심과의 거리 계산
 		const float DistToCenter = FVector2D::Distance(ScreenPos, ScreenCenter);
 		if (DistToCenter < BestScore)
 		{
@@ -191,4 +143,18 @@ ASTFieldPlayer* USTAttackTraceComponent::FindTargetInSight() const
 	}
 
 	return BestTarget;
+}
+
+void USTAttackTraceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (TracingFieldPlayer)
+	{
+		if (USTTargetIndicatorComponent* Indicator =
+			TracingFieldPlayer->FindComponentByClass<USTTargetIndicatorComponent>())
+		{
+			Indicator->RemoveAttacker(this);
+		}
+	}
 }

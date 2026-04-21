@@ -6,11 +6,31 @@ USTMissionComponent::USTMissionComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void USTMissionComponent::SetMission(const FText& Title, const FText& Mission)
+void USTMissionComponent::SetMission(const FText& Title, const FText& Desc)
 {
-	CurrentTitle = Title;
-	CurrentMission = Mission;
+	USTMissionRowData* NewData = NewObject<USTMissionRowData>(this);
+	if (!NewData) return;
 
-	// MissionWidget UI에 미션 정보 업데이트 알림(Add Mission 함수 호출)
-	OnMissionUpdated.Broadcast(CurrentTitle, CurrentMission);
+	NewData->Init(Title, Desc);
+
+	Missions.Add(NewData);
+
+	OnMissionStart.Broadcast(NewData);
+}
+
+void USTMissionComponent::ClearMission(int32 Index)
+{
+	if (!Missions.IsValidIndex(Index))
+		return;
+
+	USTMissionRowData* Data = Missions[Index];
+
+	OnMissionClear.Broadcast(Data);
+
+	Missions.RemoveAt(Index);
+}
+
+void USTMissionComponent::SetTestMission(int32 Index)
+{
+	SetMission(FText::FromString(FString::Printf(TEXT("Mission %d"), Index)), FText::FromString(TEXT("This is a test mission.")));
 }
