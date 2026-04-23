@@ -164,9 +164,9 @@ void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
 {
 	SendMoveDeltaTime += DeltaTime;
 
-	if (SendMoveDeltaTime >= SendMoveMaxTime)
+	if (SendMoveDeltaTime >= Common::SendMoveTime)
 	{
-		SendMoveDeltaTime -= SendMoveMaxTime;
+		SendMoveDeltaTime -= Common::SendMoveTime;
 
 		TArray<uint8> SendBuffer;
 		auto rotation{ GetActorRotation() };

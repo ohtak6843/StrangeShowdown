@@ -26,8 +26,6 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void Move(const FVector& Location, const FRotator& Rotator);
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* StatWidgetComponent;
 
@@ -36,9 +34,6 @@ public:
 
 private:
 	uint64 PlayerID{};
-	FVector TargetLocation{};
-	FRotator TargetRotation{};
-	const float SendMoveMaxTime{ 0.1f };
 	const float MoveSpeed{ 12.f };
 	const float RotationSpeed{ 12.f };
 

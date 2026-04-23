@@ -58,6 +58,7 @@ void USTGameInstance::Init()
 	{
 		DataManager = NewObject<USTDataManager>(this);
 	}
+
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
 	
 	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
@@ -283,6 +284,7 @@ void USTGameInstance::HandleStartGame(const Common::SCStartGame& Packet)
 	UE_LOG(LogTemp, Log, TEXT("Game Start: %s"), Packet.start ? TEXT("true") : TEXT("false"));
 	if (true == Packet.start)
 	{
+		DataManager->HandleStartGame(Packet);
 		ChangeWorld(INVTEXT("L_InGame"));
 	}
 }

@@ -54,39 +54,3 @@ void ASTFieldPlayer::BeginPlay()
 	}
 }
 
-void ASTFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
-{
-
-	// speed 미리 계산
-	float Speed{ 
-		static_cast<float>(FVector::Dist(Location, TargetLocation)) / SendMoveMaxTime
-	};
-
-	if (nullptr == GetMesh())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Mesh is not valid in Move function"));
-		return;
-	}
-
-	SetActorLocation(TargetLocation);
-	SetActorRotation(TargetRotation);
-
-	// 애니메이션
-	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
-	{
-		STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
-
-		// velocity 설정
-		auto* Movement{ GetCharacterMovement() };
-		if (Movement)
-		{
-			FVector Direction{ Location - TargetLocation };
-			Movement->Velocity = Direction * Speed;
-		}
-	}
-	
-
-	TargetLocation = Location;
-	TargetRotation = Rotator;
-}
-

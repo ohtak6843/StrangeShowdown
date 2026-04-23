@@ -9,7 +9,6 @@
 
 #include "STDataManager.generated.h"
 
-class ASTFieldPlayer;
 class ASTPlayerBase;
 
 /**
@@ -23,7 +22,7 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	ASTFieldPlayer* Player;
+	ASTPlayerBase* Player;
 
 	FString NickName;
 
@@ -56,7 +55,7 @@ public:
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	//void HandleReady(const Common::SCReady& Packet);
-	//void HandleStartGame(const Common::SCStartGame& Packet);
+	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
 	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
@@ -73,7 +72,11 @@ private:
 	// --
 
 	// PlayerID로 플레이어 객체를 반환하는 함수
-	ASTFieldPlayer* GetPlayer(const uint64 PlayerID) const;
+	ASTPlayerBase* GetPlayer(const uint64 PlayerID) const;
+	ASTPlayerBase* SpawnPlayer(
+		const FTransform& Transform,
+		const FActorSpawnParameters& SpawnParams
+	);
 
 	// todo cham: 나중에 private화.
 

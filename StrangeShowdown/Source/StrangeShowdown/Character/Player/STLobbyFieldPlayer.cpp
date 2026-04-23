@@ -68,31 +68,3 @@ void ASTLobbyFieldPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	OnFieldPlayerRemoved.Broadcast(PlayerID);
 }
-
-void ASTLobbyFieldPlayer::Move(const FVector& Location, const FRotator& Rotator)
-{
-	// speed 미리 계산
-	float Speed{
-		static_cast<float>(FVector::Dist(Location, TargetLocation)) / SendMoveMaxTime
-	};
-
-	SetActorLocation(TargetLocation);
-	SetActorRotation(TargetRotation);
-
-	// 애니메이션
-	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
-	{
-		STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
-
-		// velocity 설정
-		auto* Movement{ GetCharacterMovement() };
-		if (Movement)
-		{
-			FVector Direction{ Location - TargetLocation };
-			Movement->Velocity = Direction * Speed;
-		}
-	}
-
-	TargetLocation = Location;
-	TargetRotation = Rotator;
-}

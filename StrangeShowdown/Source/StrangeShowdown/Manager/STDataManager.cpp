@@ -6,6 +6,7 @@
 #include "Character/Player/STFieldPlayer.h"
 #include "Character/STCharacter.h"
 #include "Character/Player/STPlayerBase.h"
+#include "Character/Player/STLobbyFieldPlayer.h"
 
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
@@ -16,8 +17,14 @@
 
 void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
-	// UClass
-	if (nullptr == FieldPlayerClass)
+	// blueprint class 예외 처리
+	if (false == bIsInGame && nullptr == LobbyFieldPlayerClass)
+	{
+		UE_LOG(LogTemp, Log, TEXT("LobbyFieldPlayerClass is NOT assigned!"));
+		return;
+	}
+
+	if (true == bIsInGame && nullptr == FieldPlayerClass)
 	{
 		UE_LOG(LogTemp, Log, TEXT("FieldPlayerClass is NOT assigned!"));
 		return;
@@ -34,17 +41,14 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	// spawn player
-	auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
-		FieldPlayerClass,
-		Transform,
-		SpawnParams
-	) };
+	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams)};
 
 	// playerinfo 생성
 	FPlayerInfo PlayerInfo{
-		.Player = player,
+		.Player = Player,
 		.NickName = FString::Printf(TEXT("Player_%llu"), Packet.objectID),
-		.PlayerID = Packet.objectID
+		.PlayerID = Packet.objectID,
+		.bIsHost = (Packet.objectID == HostID)
 	};
 
 	// playerinfoMap에 추가
@@ -79,17 +83,40 @@ void USTDataManager::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 	bIsInGame = false;
 }
 
+void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
+{
+	if (true == Packet.start)
+	{
+		bIsInGame = true;
+	}
+}
+
 void USTDataManager::RefreshPlayers()
 {
-	for(auto& Elem : PlayerInfoMap)
+	// blueprint class 예외 처리
+	if (false == bIsInGame && nullptr == LobbyFieldPlayerClass)
+	{
+		UE_LOG(LogTemp, Log, TEXT("LobbyFieldPlayerClass is NOT assigned!"));
+		return;
+	}
+
+	if (true == bIsInGame && nullptr == FieldPlayerClass)
+	{
+		UE_LOG(LogTemp, Log, TEXT("FieldPlayerClass is NOT assigned!"));
+		return;
+	}
+
+	// 기존 플레이어 객체들을 제거하고 새 객체를 생성하는 로직.
+	// 데이터는 유지한다.
+	for (auto& Elem : PlayerInfoMap)
 	{
 		if (IsValid(Elem.Value.Player) && false == Elem.Value.Player->IsActorBeingDestroyed())
 		{
 			Elem.Value.Player->Destroy();
 		}
 
+		// transform
 		FTransform Transform{ FTransform::Identity };
-
 		Transform.SetLocation(FVector{});
 		Transform.SetRotation(FQuat::Identity);
 
@@ -97,23 +124,20 @@ void USTDataManager::RefreshPlayers()
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+		// spawn player
+		auto* player{ SpawnPlayer(Transform, SpawnParams) };
 
-		auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
-			FieldPlayerClass,
-			Transform,
-			SpawnParams)
-		};
-
+		// playerinfo 업데이트
 		Elem.Value.Player = player;
 	}
 }
 
-ASTFieldPlayer* USTDataManager::GetPlayer(const uint64 PlayerID) const
+ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const
 {
 	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
 	{
 		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
-		ASTFieldPlayer* Player{ InfoPtr->Player };
+		ASTPlayerBase* Player{ InfoPtr->Player };
 
 		if (false == IsValid(Player))
 		{
@@ -123,5 +147,29 @@ ASTFieldPlayer* USTDataManager::GetPlayer(const uint64 PlayerID) const
 		return Player;
 	}
 	return nullptr;
+}
+
+ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams)
+{
+	ASTPlayerBase* player{ nullptr };
+	if (bIsInGame)
+	{
+		player = GetWorld()->SpawnActor<ASTFieldPlayer>(
+			FieldPlayerClass,
+			Transform,
+			SpawnParams
+		);
+		UE_LOG(LogTemp, Log, TEXT("Field Player Spawned"));
+	}
+	else
+	{
+		player = GetWorld()->SpawnActor<ASTLobbyFieldPlayer>(
+			LobbyFieldPlayerClass,
+			Transform,
+			SpawnParams
+		);
+		UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Spawned"));
+	}
+	return player;
 }
 

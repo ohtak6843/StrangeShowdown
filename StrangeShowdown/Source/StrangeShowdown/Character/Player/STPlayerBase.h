@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	
+	void Move(const FVector& Location, const FRotator& Rotator);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -62,4 +65,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
+
+
+protected:
+	FVector TargetLocation{};
+	FRotator TargetRotation{};
+
 };

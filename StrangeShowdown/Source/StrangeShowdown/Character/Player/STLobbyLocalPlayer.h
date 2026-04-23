@@ -63,7 +63,6 @@ private:
 
 	// Network
 	float SendMoveDeltaTime{};
-	const float SendMoveMaxTime{ 0.1f };
 
 	TObjectPtr<class USTLobbyHUD> LobbyHUDWidget;
 };
