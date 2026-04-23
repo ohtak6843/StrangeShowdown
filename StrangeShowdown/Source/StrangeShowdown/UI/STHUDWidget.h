@@ -140,6 +140,15 @@ protected:
 	TObjectPtr<class USTSheriffTimer> SheriffTimerWidget;
 #pragma endregion
 
+#pragma region SheriffChaseTimer
+public:
+	class USTSheriffChaseTimerWidget* GetSheriffChaseTimerWidget() const { return SheriffChaseTimerWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTSheriffChaseTimerWidget> SheriffChaseTimerWidget;
+#pragma endregion
+
 #pragma region Area Volume Section
 public:
 	class USTAreaVolumeWidget* GetAreaVolumeWidget() const { return AreaVolumeWidget; }
