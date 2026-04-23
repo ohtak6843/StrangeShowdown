@@ -50,11 +50,14 @@ void USTGameInstance::Init()
 
 #if NETWORK_ENABLED
 
-	NetworkManager = NewObject<USTNetworkManager>(this);
-	DataManager = NewObject<USTDataManager>(this);
-
-	DataManager->init(OtherPlayerClass);
-
+	if (nullptr == NetworkManager)
+	{
+		NetworkManager = NewObject<USTNetworkManager>(this);
+	}
+	if (nullptr == DataManager)
+	{
+		DataManager = NewObject<USTDataManager>(this);
+	}
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
 	
 	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
@@ -200,6 +203,16 @@ void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 	DataManager->HandleMove(Packet);
 }
 
+void USTGameInstance::HandleCreateRoom(const Common::SCCreateRoom& Packet)
+{
+	UE_LOG(LogTemp, Log, TEXT("Room Create: %s"), Packet.success ? TEXT("true") : TEXT("false"));
+	if (true == Packet.success)
+	{
+		DataManager->HandleCreateRoom(Packet);
+	}
+}
+
+
 void USTGameInstance::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
 	RoomList.Empty();
@@ -251,6 +264,7 @@ void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 	if (true == Packet.success)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Successfully joined the room"));
+		DataManager->HandleJoinRoom(Packet);
 		ChangeWorld(INVTEXT("L_Lobby"));
 	}
 	else

@@ -31,7 +31,7 @@ void RoomManager::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& p
 	if (res == _rooms.end())
 	{
 		// 플레이어 입장 실패을 클라이언트에 알림
-		Common::SCJoinRoom join_packet{ false };
+		Common::SCJoinRoom join_packet{ false, 0 };
 		session->DoSend(join_packet);
 		return;
 	}

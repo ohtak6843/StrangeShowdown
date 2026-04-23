@@ -9,6 +9,8 @@
 #include "Components/EditableTextBox.h"
 #include "Widget/STLobbyHUD.h"
 
+#include "Game/STGameInstance.h"
+
 ASTLobbyController::ASTLobbyController()
 {
 	AddInputAction();
@@ -50,13 +52,14 @@ void ASTLobbyController::SetReady()
 	if (bIsRoomOwner) return;
 
 	bIsReady = !bIsReady;
+
+	GetGameInstance<USTGameInstance>()->Ready(bIsReady);
 	
 	// TEMP: 1번(본인) 슬롯 레디 업데이트
 	// TODO: 1 대신 PlayerID로 슬롯 업데이트
 	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(1, bIsReady);
 	LobbyHUDWidget->ReadyText->SetVisibility(!bIsReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
-	// TODO: 서버에 레디 상태 전달
 }
 
 void ASTLobbyController::UpdateReadyText()

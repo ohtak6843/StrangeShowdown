@@ -159,7 +159,7 @@ void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("Room Create Success: %s"), Packet.success ? TEXT("true") : TEXT("false"));
+	GameInstance->HandleCreateRoom(Packet);
 }
 
 void STPacketHandler::HandleJoinRoom(const Common::SCJoinRoom& Packet)

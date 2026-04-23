@@ -88,7 +88,7 @@ public:
 	// 정적
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
-	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
+	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
@@ -156,8 +156,12 @@ public:
 
 public:
 	// blueprint 다른 플레이어의 타입 지정
-	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTFieldPlayer> OtherPlayerClass{};
+	//UPROPERTY(EditAnywhere, Category = "SpawnData")
+	//TSubclassOf<ASTFieldPlayer> FieldPlayerClass{};
+
+	//UPROPERTY(EditAnywhere, Category = "SpawnData")
+	//TSubclassOf<ASTFieldPlayer> LobbyFieldPlayerClass{};
+
 
 private:
 	FSocket* Socket{};
@@ -171,7 +175,7 @@ private:
 	UPROPERTY()
 	USTNetworkManager* NetworkManager{};
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Instanced, Category = "Manager")
 	USTDataManager* DataManager{};
 
 

@@ -178,15 +178,19 @@ struct CSCreateRoom : Header
 
 // SCJoinRoom
 // Param:
+//  bool success
+//  uint64 hostID
 // Brief:
-//  서버 방 입장 승인
+//  서버 방 입장 승인 및 방 정보 제공
 struct SCJoinRoom : Header
 {
 	bool success{ false };
+	uint64 hostID{};
 	SCJoinRoom() = default;
-	SCJoinRoom(const bool _success) :
+	SCJoinRoom(const bool _success, const uint64 _hostID) :
 		Header{ sizeof(SCJoinRoom), PacketType::SC_JOIN_ROOM },
-		success{ _success }
+		success{ _success },
+		hostID{ _hostID }
 	{
 	}
 };

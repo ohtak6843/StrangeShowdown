@@ -5,6 +5,7 @@
 #include "GameData/STTypes.h"
 #include "Character/Player/STFieldPlayer.h"
 #include "Character/STCharacter.h"
+#include "Character/Player/STPlayerBase.h"
 
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
@@ -13,17 +14,12 @@
 
 
 
-void USTDataManager::init(TSubclassOf<ASTFieldPlayer> InOtherPlayerClass)
-{
-	OtherPlayerClass = InOtherPlayerClass;
-}
-
 void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
 	// UClass
-	if (nullptr == OtherPlayerClass)
+	if (nullptr == FieldPlayerClass)
 	{
-		UE_LOG(LogTemp, Log, TEXT("OtherPlayerClass is NOT assigned!"));
+		UE_LOG(LogTemp, Log, TEXT("FieldPlayerClass is NOT assigned!"));
 		return;
 	}
 
@@ -39,7 +35,7 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 
 	// spawn player
 	auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
-		OtherPlayerClass,
+		FieldPlayerClass,
 		Transform,
 		SpawnParams
 	) };
@@ -59,22 +55,28 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (auto* InfoPtr{ PlayerInfoMap.Find(Packet.id) })
+	if (auto* Player{ GetPlayer(Packet.id) })
 	{
-		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
-		ASTFieldPlayer* Player{ InfoPtr->Player };
-
-		if (false == IsValid(Player))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player with ID %d is not valid"), Packet.id);
-			return;
-		}
-
 		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
 		Player->Move(Location, Rotation);
 		Player->PlayerStateFlag = Packet.state;
 	}
+}
+
+void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)
+{
+	// 방을 만드는데 성공 했으면 방장이므로 호스트 플래그를 켜줌.
+	if (true == Packet.success)
+	{
+		bIsHost = true;
+	}
+}
+
+void USTDataManager::HandleJoinRoom(const Common::SCJoinRoom& Packet)
+{
+	HostID = Packet.hostID;
+	bIsInGame = false;
 }
 
 void USTDataManager::RefreshPlayers()
@@ -97,7 +99,7 @@ void USTDataManager::RefreshPlayers()
 
 
 		auto* player{ GetWorld()->SpawnActor<ASTFieldPlayer>(
-			OtherPlayerClass,
+			FieldPlayerClass,
 			Transform,
 			SpawnParams)
 		};
@@ -105,3 +107,21 @@ void USTDataManager::RefreshPlayers()
 		Elem.Value.Player = player;
 	}
 }
+
+ASTFieldPlayer* USTDataManager::GetPlayer(const uint64 PlayerID) const
+{
+	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
+	{
+		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
+		ASTFieldPlayer* Player{ InfoPtr->Player };
+
+		if (false == IsValid(Player))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player with ID %llu is not valid"), PlayerID);
+			return nullptr;
+		}
+		return Player;
+	}
+	return nullptr;
+}
+

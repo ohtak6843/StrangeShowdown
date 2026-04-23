@@ -10,6 +10,7 @@
 #include "STDataManager.generated.h"
 
 class ASTFieldPlayer;
+class ASTPlayerBase;
 
 /**
 * @brief:
@@ -27,13 +28,16 @@ struct FPlayerInfo
 	FString NickName;
 
 	uint64 PlayerID;
+
+	bool bIsHost;
 };
 
 /**
 * @brief:  
 *  서버와 연동되는 클라이언트의 정보관리
 */
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
+
 class STRANGESHOWDOWN_API USTDataManager : public UObject
 {
 	GENERATED_BODY()
@@ -42,7 +46,6 @@ public:
 
 	// method
 	
-	void init(TSubclassOf<ASTFieldPlayer> InOtherPlayerClass);
 
 	// --
 	// 패킷 처리 함수들
@@ -50,8 +53,8 @@ public:
 
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
-	//void HandleCreateRoom(const Common::SCCreateRoom& Packet);
-	//void HandleJoinRoom(const Common::SCJoinRoom& Packet);
+	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
+	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	//void HandleReady(const Common::SCReady& Packet);
 	//void HandleStartGame(const Common::SCStartGame& Packet);
 
@@ -60,19 +63,49 @@ public:
 	//void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
+	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
 	void RefreshPlayers();
 
+private:
+	
+	// --
+	// 내부 메소드
+	// --
+
+	// PlayerID로 플레이어 객체를 반환하는 함수
+	ASTFieldPlayer* GetPlayer(const uint64 PlayerID) const;
+
 	// todo cham: 나중에 private화.
+
+
+
+private:
+
+	// --
+	// room
+	// --
+
+	bool bIsInGame{ false };
+	bool bIsHost{ false };
+	uint64 HostID{};
+
+	// --
+	// players
+	// --
+
+	//UPROPERTY()
+	//TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
+
 public:
 
-	// 가비지 컬렉터 사라짐 방지 위해 UPROPERTY로 선언
-	//UPROPERTY()
-	//TMap<uint64, ASTFieldPlayer*> PlayerMap{};
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTPlayerBase> FieldPlayerClass;
 
-	UPROPERTY()
-	TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTPlayerBase> LobbyFieldPlayerClass;
 
-	// 가비지 컬렉터 사라짐 방지 위해 UPROPERTY로 선언
+private:
+
 	UPROPERTY()
 	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
 };
