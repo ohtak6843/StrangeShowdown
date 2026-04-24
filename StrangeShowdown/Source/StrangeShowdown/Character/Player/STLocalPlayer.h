@@ -28,8 +28,13 @@ protected:
 	virtual void BeginPlay() override;
 
 // HUD Section
+public:
+	virtual USTHUDWidget* GetHUDWidget(class USTHUDWidget* OutHUDWidget) { return HUDWidget.Get(); }
+
 protected:
 	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
+
+	TWeakObjectPtr<USTHUDWidget> HUDWidget;
 
 // Attack Hit Interface Section
 public:

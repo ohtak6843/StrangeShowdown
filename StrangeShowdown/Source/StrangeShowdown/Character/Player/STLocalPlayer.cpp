@@ -25,6 +25,7 @@
 #include "UI/Stat/STStatWidget.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "UI/QuickSlot/STQuickSlotWidget.h"
+#include "UI/SheriffChaseTimer/STSheriffChaseTimerWidget.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Protocol.h"
@@ -217,6 +218,8 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 		StoreComp->OnStoreUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStoreMenu);
+
+		HUDWidget = InHUDWidget;
 	}
 }
 
@@ -636,7 +639,10 @@ void ASTLocalPlayer::SetFieldSheriff(ASTFieldSheriff* NewSheriff)
 	bIsChasingSheriff = true;
 
 	// SheriffChaseTimerWidget visible
-	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+	if (HUDWidget.IsValid())
+	{
+		HUDWidget->GetSheriffChaseTimerWidget()->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void ASTLocalPlayer::ClearSheriff()
@@ -645,16 +651,23 @@ void ASTLocalPlayer::ClearSheriff()
 	bIsChasingSheriff = false;
 
 	// SheriffChaseTimerWidget Hidden
-	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+	if (HUDWidget.IsValid())
+	{
+		HUDWidget->GetSheriffChaseTimerWidget()->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void ASTLocalPlayer::SheriffChase()
 {
+	UE_LOG(LogTemp, Warning, TEXT("SheriffChase Tick"));
+
 	FVector ToSheriff = FieldSheriff->GetActorLocation() - GetActorLocation();
 	float DistanceToSheriff = ToSheriff.Size();
 
 	// SheriffChaseTimerWidget 업데이트
 	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+	// 타이머위젯->SetTimerWidgetLocation
+	// 타이머위젯->SetTimerWidgetProgress
 }
 
 void ASTLocalPlayer::TestAddSheriffTransform()

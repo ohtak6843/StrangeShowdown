@@ -19,35 +19,22 @@ void USTSheriffChaseTimerWidget::NativeConstruct()
 void USTSheriffChaseTimerWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+}
+
+void USTSheriffChaseTimerWidget::SetTimerWidgetLocation(FVector2D InLocation)
+{
+	SetRenderTranslation(InLocation);
+}
+
+void USTSheriffChaseTimerWidget::SetTimerWidgetProgress(float InCurrentTime, float InMaxTime)
+{
+	CurrentTime = InCurrentTime;
+	MaxTime = InMaxTime;
 
 	if (TimerMID)
 	{
-		CurrentTime += InDeltaTime;
-
 		float Percent = MaxTime > 0.f ? CurrentTime / MaxTime : 0.f;
-
 		Percent = FMath::Clamp(Percent, 0.f, 1.f);
-
 		TimerMID->SetScalarParameterValue(TEXT("Progress"), Percent);
 	}
-}
-
-void USTSheriffChaseTimerWidget::SetTimer(float InMaxTime)
-{
-	SetVisibility(ESlateVisibility::Visible);
-	bIsTimerActive = true;
-	CurrentTime = 0.f;
-	MaxTime = InMaxTime;
-	HeartbeatCurrentTime = 0.f;
-	HeartbeatMaxTime = 1.f;
-}
-
-void USTSheriffChaseTimerWidget::ClearTimer()
-{
-	SetVisibility(ESlateVisibility::Hidden);
-	bIsTimerActive = false;
-	CurrentTime = 0.f;
-	MaxTime = 0.f;
-	HeartbeatCurrentTime = 0.f;
-	HeartbeatMaxTime = 0.f;
 }
