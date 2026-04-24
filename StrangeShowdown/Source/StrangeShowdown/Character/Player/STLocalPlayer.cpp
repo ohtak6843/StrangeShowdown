@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/STLocalPlayer.h"
+#include "Character/Sheriff/STFieldSheriff.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -136,6 +137,12 @@ void ASTLocalPlayer::PostInitializeComponents()
 void ASTLocalPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Sheriff Chase Check
+	if (FieldSheriff)
+	{
+		SheriffChase();
+	}
 
 	// Camera Pose Blending
 	PoseElapsedTime += DeltaTime;
@@ -621,6 +628,41 @@ void ASTLocalPlayer::ChangeToLookingUp()
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::LookingUp);
+}
+
+void ASTLocalPlayer::SetFieldSheriff(ASTFieldSheriff* NewSheriff)
+{
+	FieldSheriff = NewSheriff;
+	bIsChasingSheriff = true;
+
+	// SheriffChaseTimerWidget visible
+	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+}
+
+void ASTLocalPlayer::ClearSheriff()
+{
+	FieldSheriff = nullptr;
+	bIsChasingSheriff = false;
+
+	// SheriffChaseTimerWidget Hidden
+	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+}
+
+void ASTLocalPlayer::SheriffChase()
+{
+	FVector ToSheriff = FieldSheriff->GetActorLocation() - GetActorLocation();
+	float DistanceToSheriff = ToSheriff.Size();
+
+	// SheriffChaseTimerWidget 업데이트
+	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
+}
+
+void ASTLocalPlayer::TestAddSheriffTransform()
+{
+	// 임시용 FieldSheriff 추가
+	ASTFieldSheriff* NewSheriff = NewObject<ASTFieldSheriff>();
+	NewSheriff->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 500.f);
+	SetFieldSheriff(NewSheriff);
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)

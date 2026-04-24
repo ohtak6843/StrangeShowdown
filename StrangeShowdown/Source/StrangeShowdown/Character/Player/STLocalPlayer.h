@@ -179,6 +179,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 
+// Sheriff Chase Section
+public:
+	void SetFieldSheriff(class ASTFieldSheriff* InSheriff);
+	void ClearSheriff();
+	void SheriffChase();
+
+	UFUNCTION(BlueprintCallable)
+	void TestAddSheriffTransform();
+
+protected:
+	TObjectPtr<class ASTFieldSheriff> FieldSheriff;
+	bool bIsChasingSheriff = false;
+
 // Network Section
 private:
 	void SendMovePacket(const float DeltaTime);
