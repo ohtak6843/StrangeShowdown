@@ -10,7 +10,10 @@
 
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Controller/STLobbyController.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Interface/STControllerHUDInterface.h"
 
 
 
@@ -74,6 +77,7 @@ void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 	if (true == Packet.success)
 	{
 		bIsHost = true;
+
 	}
 }
 
@@ -130,6 +134,25 @@ void USTDataManager::RefreshPlayers()
 		// playerinfo 업데이트
 		Elem.Value.Player = player;
 	}
+}
+
+void USTDataManager::TrySetHostPlayer()
+{
+	if (true == bIsHost && false == bIsInGame)
+	{
+		APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
+		ASTLobbyController* LobbyController{ Cast<ASTLobbyController>(PlayerController) };
+		if (nullptr == LobbyController)
+		{
+			UE_LOG(LogTemp, Log, TEXT("PlayerController is not of type ASTLobbyController"));
+			return;
+		}
+		LobbyController->bIsRoomOwner = true;
+		LobbyController->UpdateReadyText();
+		UE_LOG(LogTemp, Log, TEXT("hostplayer set success"));
+	}
+	else
+		UE_LOG(LogTemp, Log, TEXT("host set failed"));
 }
 
 ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const

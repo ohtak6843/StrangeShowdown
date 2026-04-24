@@ -427,6 +427,10 @@ void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
 		UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
 		IsLoadingLevel = false;
 
+		// 플레이어 객체 갱신
 		DataManager->RefreshPlayers();
+
+		// 호스트 플레이어 설정 시도
+		DataManager->TrySetHostPlayer();
 	}
 }

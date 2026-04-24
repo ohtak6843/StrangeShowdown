@@ -79,6 +79,7 @@ void ASTLobbyLocalPlayer::BeginPlay()
 
 	// 자기 자신 AddPlayerInWidget() 호출
 	// TODO: 캐릭터도 ID를 가지고 있도록 해야함
+	// todo cham: 내거야 
 	AddPlayerInWidget(0, PlayerNickName, false);
 
 	// Add Player 델리게이트

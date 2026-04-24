@@ -65,6 +65,9 @@ public:
 	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
 	void RefreshPlayers();
 
+	// 본인 플레이어를 호스트 플레이어로 변경
+	void TrySetHostPlayer();
+
 private:
 	
 	// --

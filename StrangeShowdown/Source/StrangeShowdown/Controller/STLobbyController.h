@@ -35,14 +35,20 @@ protected:
 	void SetReady();
 
 	// 방장일 경우 새로운 플레이어가 들어오면 해당 함수를 호출
+
+public:
 	void UpdateReadyText();
 
 private:
 	void AddInputAction();
 	void FocusChatManager();
 	bool bIsReady = false;
+
+	// todo cham: private로 변경
+public:
 	bool bIsRoomOwner = false;
 
+private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ReadyAction;
 
