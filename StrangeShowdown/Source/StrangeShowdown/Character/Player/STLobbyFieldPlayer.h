@@ -32,6 +32,14 @@ public:
 	static FOnFieldPlayerSpawned OnFieldPlayerSpawned;
 	static FOnFieldPlayerRemoved OnFieldPlayerRemoved;
 
+
+	// --
+	// methods
+	// --
+
+public:
+	void Init(const uint64 InPlayerID);
+
 private:
 	uint64 PlayerID{};
 	const float MoveSpeed{ 12.f };

@@ -44,7 +44,7 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	// spawn player
-	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams)};
+	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams, Packet.objectID)};
 
 	// playerinfo 생성
 	FPlayerInfo PlayerInfo{
@@ -112,11 +112,11 @@ void USTDataManager::RefreshPlayers()
 
 	// 기존 플레이어 객체들을 제거하고 새 객체를 생성하는 로직.
 	// 데이터는 유지한다.
-	for (auto& Elem : PlayerInfoMap)
+	for (auto& [_, PlayerInfo] : PlayerInfoMap)
 	{
-		if (IsValid(Elem.Value.Player) && false == Elem.Value.Player->IsActorBeingDestroyed())
+		if (IsValid(PlayerInfo.Player) && false == PlayerInfo.Player->IsActorBeingDestroyed())
 		{
-			Elem.Value.Player->Destroy();
+			PlayerInfo.Player->Destroy();
 		}
 
 		// transform
@@ -129,10 +129,10 @@ void USTDataManager::RefreshPlayers()
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		// spawn player
-		auto* player{ SpawnPlayer(Transform, SpawnParams) };
+		auto* player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo.PlayerID) };
 
 		// playerinfo 업데이트
-		Elem.Value.Player = player;
+		PlayerInfo.Player = player;
 	}
 }
 
@@ -172,7 +172,7 @@ ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const
 	return nullptr;
 }
 
-ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams)
+ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const uint64 PlayerID)
 {
 	ASTPlayerBase* player{ nullptr };
 	if (bIsInGame)
@@ -186,11 +186,13 @@ ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FA
 	}
 	else
 	{
-		player = GetWorld()->SpawnActor<ASTLobbyFieldPlayer>(
+		auto* LobbyPlayer{ GetWorld()->SpawnActor<ASTLobbyFieldPlayer>(
 			LobbyFieldPlayerClass,
 			Transform,
 			SpawnParams
-		);
+		) };
+		LobbyPlayer->Init(PlayerID);
+		player = LobbyPlayer;
 		UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Spawned"));
 	}
 	return player;

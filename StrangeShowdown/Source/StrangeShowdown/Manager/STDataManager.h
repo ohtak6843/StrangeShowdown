@@ -78,7 +78,8 @@ private:
 	ASTPlayerBase* GetPlayer(const uint64 PlayerID) const;
 	ASTPlayerBase* SpawnPlayer(
 		const FTransform& Transform,
-		const FActorSpawnParameters& SpawnParams
+		const FActorSpawnParameters& SpawnParams,
+		const uint64 PlayerID
 	);
 
 	// todo cham: 나중에 private화.
