@@ -13,9 +13,6 @@ void USTInventoryComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	Slots.SetNum(MaxSlots);
-
-	// MouseDrop이 발생하면 ChangeSlot 실행되도록 바인딩
-	MouseDrop.AddDynamic(this, &USTInventoryComponent::ChangeSlot_FromEvent);
 }
 
 bool USTInventoryComponent::AddItem(FSTItemSlot ItemSlot, int32& OutAddedInventoryIndex)
@@ -191,9 +188,6 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 		}
 	}
 
-	// UI 갱신
-	OnSlotChanged(SlotAIndex, SlotBIndex);
-
 	// WB_Inventory에서 바인드 해둔 UpdateInventoryDrop 이벤트를 호출
 	OnInventoryUpdated.Broadcast();
 
@@ -203,16 +197,6 @@ bool USTInventoryComponent::ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTIn
 	}
 
 	return true;
-}
-
-void USTInventoryComponent::CallMouseDrop(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex)
-{
-	MouseDrop.Broadcast(TargetIndex, BeforeInventorySystem, BeforeIndex);
-}
-
-void USTInventoryComponent::ChangeSlot_FromEvent(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex)
-{
-	ChangeSlot(TargetIndex, BeforeIndex, BeforeInventorySystem);
 }
 
 int32 USTInventoryComponent::FindEmptySlot() const

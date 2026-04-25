@@ -279,6 +279,10 @@ bool USTHUDWidget::CloseStoreMenu()
 
 void USTHUDWidget::UpdateStoreMenu()
 {
+	if(StoreMenuWidget)
+	{
+		StoreMenuWidget->UpdateStoreMenu(SourceStoreComp.Get()->Slots);
+	}
 }
 
 void USTHUDWidget::FocusChatManager()

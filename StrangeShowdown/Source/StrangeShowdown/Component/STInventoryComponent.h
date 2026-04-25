@@ -9,14 +9,6 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
-// MouseDrop 이벤트 디스패처
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
-	FMouseDropEvent,
-	int32, TargetIndex,
-	USTInventoryComponent*, BeforeInventorySystem,
-	int32, BeforeIndex
-);
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STRANGESHOWDOWN_API USTInventoryComponent : public UActorComponent
 {
@@ -44,29 +36,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool ChangeSlot(int32 SlotAIndex, int32 SlotBIndex, USTInventoryComponent* BeforeInventorySystem = nullptr);
 
-	// 변경 UI 갱신 이벤트
-	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory")
-	void OnSlotChanged(int32 SlotA, int32 SlotB);
-
-	// BP에서 함수처럼 호출할 수 있는 MouseDrop wrapper
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void CallMouseDrop(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex);
-
-	// MouseDrop에 의해 호출될 ChangeSlot 처리용 래퍼
-	UFUNCTION()
-	void ChangeSlot_FromEvent(int32 TargetIndex, USTInventoryComponent* BeforeInventorySystem, int32 BeforeIndex);
-
 private:
 	int32 FindEmptySlot() const;
 	int32 FindStackableSlot(class USTItemDataAssetBase* NewItem) const;
 
 public:
-	// MouseDrop 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-	FMouseDropEvent MouseDrop;
-
 	// OnInventoryUpdated 이벤트 디스패처
-
 	FOnInventoryUpdated OnInventoryUpdated;
 
 public:

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Player/STLocalPlayer.h"
@@ -80,7 +80,7 @@ ASTLocalPlayer::ASTLocalPlayer()
 		HitEffect = EffectRef.Object;
 	}
 
-	// MiniMap °Ë»ö
+	// MiniMap ê²€ìƒ‰
 	TArray<AActor*> WorldMiniMapActors;
 	UGameplayStatics::GetAllActorsOfClass(
 		GetWorld(),
@@ -97,7 +97,7 @@ ASTLocalPlayer::ASTLocalPlayer()
 		}
 	}
 
-	// BigMap °Ë»ö
+	// BigMap ê²€ìƒ‰
 	TArray<AActor*> WorldBigMapActors;
 	UGameplayStatics::GetAllActorsOfClass(
 		GetWorld(),
@@ -251,7 +251,7 @@ void ASTLocalPlayer::AttackHitCheck()
 		Hit.ImpactNormal.Rotation()
 	);
 
-	// ½ºÅÂ¹Ì³ª °¨¼Ò
+	// ìŠ¤íƒœë¯¸ë‚˜ ê°ì†Œ
 	StatComp->AddStamina(-1.f);
 
 #if ENABLE_DRAW_DEBUG
@@ -282,10 +282,10 @@ void ASTLocalPlayer::UseItem()
 	if (InventorySlotIndex == INDEX_NONE)
 		return;
 
-	// °á°ú
+	// ê²°ê³¼
 	FSTItemSlot OutSlot;
 
-	// ¾ÆÀÌÅÛ »ç¿ë
+	// ì•„ì´í…œ ì‚¬ìš©
 	EItemUseType Result = InventoryComp->UseItem(
 		InventorySlotIndex,
 		this,
@@ -293,7 +293,7 @@ void ASTLocalPlayer::UseItem()
 		OutSlot
 	);
 
-	// »ç¿ë °á°ú¿¡ µû¸¥ ºĞ±â È¿°ú(Implement)
+	// ì‚¬ìš© ê²°ê³¼ì— ë”°ë¥¸ ë¶„ê¸° íš¨ê³¼(Implement)
 	UseItemEffect(OutSlot, Result);
 
 	if (OutSlot.ItemData)
@@ -301,13 +301,13 @@ void ASTLocalPlayer::UseItem()
 		const int32 Cost = OutSlot.ItemData->StaminaCost;
 		StatComp->AddStamina(-Cost);
 
-		// ¾ÆÀÌÅÛ Á¦°Å
+		// ì•„ì´í…œ ì œê±°
 		InventoryComp->RemoveItem(InventorySlotIndex, 1);
 	}
 
 	InventoryComp->OnInventoryUpdated.Broadcast();
 
-	// ¾ÆÀÌÅÛ »ç¿ë ÈÄ Äü½½·Ô ¾÷µ¥ÀÌÆ®
+	// ì•„ì´í…œ ì‚¬ìš© í›„ í€µìŠ¬ë¡¯ ì—…ë°ì´íŠ¸
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
@@ -383,10 +383,60 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 {
 	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
 	{
-		// TODO: ¾ÆÀÌÅÛ ±¸¸Å ·ÎÁ÷
-		// °ñµå °¨¼Ò
-		// ÀÎº¥Åä¸®¿¡ ¾ÆÀÌÅÛ Ãß°¡
-		// floating message Ãß°¡
+		// TODO: ì•„ì´í…œ êµ¬ë§¤ ë¡œì§
+		if (StatComp->Gold >= InStoreSlot.ItemData->GoldCost)
+		{
+			// ë©”ì„¸ì§€ ì¶œë ¥
+			ShowFloatingMessage(FText::FromString(TEXT("êµ¬ë§¤ ì„±ê³µ!")));
+
+			// ì‚¬ìš´ë“œ ì¬ìƒ
+			if (BuySound.IsValid())
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), BuySound.LoadSynchronous());
+			}
+
+			// ê³¨ë“œ ì°¨ê° ë° ì•„ì´í…œ ì¶”ê°€
+			StatComp->AddGold(-InStoreSlot.ItemData->GoldCost);
+			StoreComp->BuyItem(InStoreSlot.SlotIndex);
+
+			int32 AddedInventoryIndex = -1;
+			FSTItemSlot ItemSlot(InStoreSlot.ItemData, true, 1);
+			bool bAdded = InventoryComp->AddItem(ItemSlot, AddedInventoryIndex);
+			if (bAdded && QuickSlotComp)
+			{
+				for (int32 i = 0; i < QuickSlotComp->QuickSlots.Num(); i++)
+				{
+					FSTItemSlot& QuickSlot = QuickSlotComp->QuickSlots[i];
+					if (QuickSlot.ItemData == InStoreSlot.ItemData)
+					{
+						QuickSlot.Count += 1;
+						QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+						break;
+					}
+				}
+			}
+
+			if (!bAdded || AddedInventoryIndex == -1)
+				return;
+
+			// í€µìŠ¬ë¡¯ì— ì¶”ê°€ëœ ì•„ì´í…œì´ ì—†ìœ¼ë©´ ìë™ìœ¼ë¡œ í€µìŠ¬ë¡¯ì— ì¶”ê°€
+			if (QuickSlotComp)
+			{
+				int32 TargetQuickSlotIndex = -2;
+				bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
+			}
+
+			// ì•„ì´í…œ ì¥ì°©
+			HoldItem();
+		}
+		else
+		{
+			ShowFloatingMessage(FText::FromString(TEXT("ê³¨ë“œ ë¶€ì¡±!")));
+			if (ErrorSound.IsValid())
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
+			}
+		}
 	}
 }
 
@@ -567,14 +617,14 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 
 	PickupItem->Destroy();
 
-	// Äü½½·Ô¿¡ Ãß°¡µÈ ¾ÆÀÌÅÛÀÌ ¾øÀ¸¸é ÀÚµ¿À¸·Î Äü½½·Ô¿¡ Ãß°¡
+	// í€µìŠ¬ë¡¯ì— ì¶”ê°€ëœ ì•„ì´í…œì´ ì—†ìœ¼ë©´ ìë™ìœ¼ë¡œ í€µìŠ¬ë¡¯ì— ì¶”ê°€
 	if (QuickSlotComp)
 	{
 		int32 TargetQuickSlotIndex = -2;
 		bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
 	}
 
-	// ¾ÆÀÌÅÛ ÀåÂø
+	// ì•„ì´í…œ ì¥ì°©
 	HoldItem();
 }
 

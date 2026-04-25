@@ -28,6 +28,8 @@ void USTStatComponent::AddHp(int32 HealAmount)
 void USTStatComponent::AddGold(int32 GoldAmount)
 {
 	Gold += GoldAmount;
+
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::AddKill(int32 KillAmount)

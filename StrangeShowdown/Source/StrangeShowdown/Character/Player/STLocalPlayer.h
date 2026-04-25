@@ -31,6 +31,15 @@ protected:
 protected:
 	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowFloatingMessage(const FText& Message);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD)
+	TSoftObjectPtr<class USoundBase> BuySound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD)
+	TSoftObjectPtr<class USoundBase> ErrorSound;
+
 // Attack Hit Interface Section
 public:
 	virtual void AttackHitCheck() override;

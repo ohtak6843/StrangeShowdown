@@ -52,9 +52,10 @@ void USTStoreComponent::Reroll()
 
 void USTStoreComponent::BuyItem(int32 SlotIndex)
 {
-	if (!CurrentStorekeeper.IsValid()) return;
-
-	CurrentStorekeeper.Get()->BuyItem(SlotIndex);
+	if (CurrentStorekeeper.IsValid())
+	{
+		CurrentStorekeeper.Get()->BuyItem(SlotIndex);
+	}
 }
 
 void USTStoreComponent::RefreshStoreUI()

@@ -107,7 +107,6 @@ bool USTSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEve
 	if (DragDropOperation)
 	{
 		bool bDifferentIndex = DragDropOperation->SourceSlotIndex != SlotIndex;
-		UE_LOG(LogTemp, Log, TEXT("Source Slot Index: %d, Target Slot Index: %d"), DragDropOperation->SourceSlotIndex, SlotIndex);
 		bool bDifferentInventory = DragDropOperation->SourceInventory != GetOwningPlayerPawn()->FindComponentByClass<USTInventoryComponent>();
 
 		if (bDifferentIndex || bDifferentInventory)

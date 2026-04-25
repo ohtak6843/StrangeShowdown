@@ -24,8 +24,6 @@ void USTQuickSlotComponent::InitializeComponent()
 	{
 		InventorySlotIndex[i] = -1;
 	}
-
-	MouseDropToQuickSlot.AddDynamic(this, &USTQuickSlotComponent::AddToQuickSlot_FromEvent);
 }
 
 void USTQuickSlotComponent::SetCurrentSelectIndex(int32 NewIndex)
@@ -121,16 +119,6 @@ bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySyste
 	// Call On QuickSlotUpdated
 	OnQuickSlotUpdated.Broadcast();
 	return true;
-}
-
-void USTQuickSlotComponent::CallMouseDropToQuickSlot(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex)
-{
-	MouseDropToQuickSlot.Broadcast(InventoryItemIndex, BeforeInventorySystem, QuickSlotIndex);
-}
-
-void USTQuickSlotComponent::AddToQuickSlot_FromEvent(int32 InventoryItemIndex, USTInventoryComponent* BeforeInventorySystem, int32 QuickSlotIndex)
-{
-	AddToQuickSlot(BeforeInventorySystem, InventoryItemIndex, QuickSlotIndex);
 }
 
 USTItemDataAssetBase* USTQuickSlotComponent::GetCurrentSelectedQuickSlotItemData() const
