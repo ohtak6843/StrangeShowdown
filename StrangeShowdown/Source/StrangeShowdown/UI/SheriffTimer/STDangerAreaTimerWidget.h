@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "STSheriffTimer.generated.h"
+#include "STDangerAreaTimerWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API USTSheriffTimer : public UUserWidget
+class STRANGESHOWDOWN_API USTDangerAreaTimerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
