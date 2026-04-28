@@ -18,8 +18,9 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+	void SetTimer(float InMaxTime);
+
 	void SetTimerWidgetLocation(FVector2D InLocation);
-	void SetTimerWidgetProgress(float InCurrentTime, float InMaxTime);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class UImage> TimerImage;

@@ -142,7 +142,7 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 	// Sheriff Chase Check
 	if (FieldSheriff)
 	{
-		SheriffChase();
+		SheriffChaseUpdate();
 	}
 
 	// Camera Pose Blending
@@ -638,6 +638,8 @@ void ASTLocalPlayer::SetFieldSheriff(ASTFieldSheriff* NewSheriff)
 	FieldSheriff = NewSheriff;
 	bIsChasingSheriff = true;
 
+	HUDWidget->GetSheriffChaseTimerWidget()->SetTimer(10.f);
+
 	// SheriffChaseTimerWidget visible
 	if (HUDWidget.IsValid())
 	{
@@ -657,17 +659,14 @@ void ASTLocalPlayer::ClearSheriff()
 	}
 }
 
-void ASTLocalPlayer::SheriffChase()
+void ASTLocalPlayer::SheriffChaseUpdate()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SheriffChase Tick"));
 
 	FVector ToSheriff = FieldSheriff->GetActorLocation() - GetActorLocation();
 	float DistanceToSheriff = ToSheriff.Size();
 
-	// SheriffChaseTimerWidget 업데이트
-	// TODO: 컨트롤러 -> HUD -> SheriffChaseTimerWidget 가져오기
-	// 타이머위젯->SetTimerWidgetLocation
-	// 타이머위젯->SetTimerWidgetProgress
+	//HUDWidget->GetSheriffChaseTimerWidget
 }
 
 void ASTLocalPlayer::TestAddSheriffTransform()

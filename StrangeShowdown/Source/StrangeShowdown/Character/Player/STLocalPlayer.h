@@ -188,7 +188,7 @@ protected:
 public:
 	void SetFieldSheriff(class ASTFieldSheriff* InSheriff);
 	void ClearSheriff();
-	void SheriffChase();
+	void SheriffChaseUpdate();
 
 	UFUNCTION(BlueprintCallable)
 	void TestAddSheriffTransform();
