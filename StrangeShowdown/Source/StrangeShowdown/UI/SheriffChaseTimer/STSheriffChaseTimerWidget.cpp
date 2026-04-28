@@ -33,7 +33,6 @@ void USTSheriffChaseTimerWidget::NativeTick(const FGeometry& MyGeometry, float I
 		if (CurrentTime >= MaxTime)
 		{
 			bIsTimerActive = false;
-			// TODO: 로컬 플레이어에서 ClearSheriff() 호출 필요
 		}
 	}
 }

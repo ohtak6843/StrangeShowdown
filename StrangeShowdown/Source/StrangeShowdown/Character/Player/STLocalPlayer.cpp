@@ -26,9 +26,11 @@
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "UI/QuickSlot/STQuickSlotWidget.h"
 #include "UI/SheriffChaseTimer/STSheriffChaseTimerWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Protocol.h"
+
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -661,20 +663,43 @@ void ASTLocalPlayer::ClearSheriff()
 
 void ASTLocalPlayer::SheriffChaseUpdate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SheriffChase Tick"));
+	if (!FieldSheriff) return;
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
 
-	FVector ToSheriff = FieldSheriff->GetActorLocation() - GetActorLocation();
-	float DistanceToSheriff = ToSheriff.Size();
+	FVector SheriffLocation = FieldSheriff->GetActorLocation();
+	FVector2D ScreenPosition;
+	PC->ProjectWorldLocationToScreen(SheriffLocation, ScreenPosition);
 
-	//HUDWidget->GetSheriffChaseTimerWidget
+	// DPI 스케일 보정
+	float DPIScale = UWidgetLayoutLibrary::GetViewportScale(GetWorld());
+
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+	// UMG 좌표계로 변환
+	float UMGScreenX = ViewportSize.X / DPIScale;
+	float UMGScreenY = ViewportSize.Y / DPIScale;
+	float UMGPosX = ScreenPosition.X / DPIScale;
+
+	float Margin = 100.f;
+	float ClampedX = FMath::Clamp(UMGPosX, Margin, UMGScreenX - Margin);
+	float CenterY = UMGScreenY * 0.5f;
+
+	HUDWidget->GetSheriffChaseTimerWidget()->SetTimerWidgetLocation(
+		FVector2D(ClampedX, CenterY)
+	);
 }
 
 void ASTLocalPlayer::TestAddSheriffTransform()
 {
 	// 임시용 FieldSheriff 추가
-	ASTFieldSheriff* NewSheriff = NewObject<ASTFieldSheriff>();
-	NewSheriff->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 500.f);
-	SetFieldSheriff(NewSheriff);
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	FVector SpawnLocation = GetActorLocation() + FVector(1000.f, 0.f, 0.f);
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	ASTFieldSheriff* SpawnedSheriff = GetWorld()->SpawnActor<ASTFieldSheriff>(ASTFieldSheriff::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	SetFieldSheriff(SpawnedSheriff);
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
