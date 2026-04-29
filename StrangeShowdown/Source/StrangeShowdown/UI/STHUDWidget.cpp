@@ -15,6 +15,7 @@
 #include "UI/Map/STMiniMapWidget.h"
 #include "UI/BountyPoster/STBountyPosterMenuWidget.h"
 #include "UI/Timer/STTimerWidget.h"
+#include "UI/Victory/STVictoryWidget.h"
 
 DEFINE_LOG_CATEGORY(LogSTHUDWidget);
 
@@ -373,4 +374,15 @@ bool USTHUDWidget::CloseBountyPoster()
 
 void USTHUDWidget::UpdateBountyPoster()
 {
+}
+
+void USTHUDWidget::ShowVictoryWidget(const FString& WinnerName)
+{
+	VictoryWidget->SetWinnerPlayerName(WinnerName);
+	VictoryWidget->ShowVictoryWidget();
+}
+
+void USTHUDWidget::HideVictoryWidget()
+{
+	VictoryWidget->HideVictoryWidget();
 }

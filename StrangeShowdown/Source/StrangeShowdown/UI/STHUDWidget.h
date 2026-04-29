@@ -180,4 +180,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<class USTBountyPosterMenuWidget> BountyPosterMenuWidget;
+
+#pragma region Victory Section
+public:
+	void ShowVictoryWidget(const FString& WinnerName);
+	void HideVictoryWidget();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTVictoryWidget> VictoryWidget;
+
 };
