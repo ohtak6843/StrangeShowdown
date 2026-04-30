@@ -664,31 +664,59 @@ void ASTLocalPlayer::ClearSheriff()
 void ASTLocalPlayer::SheriffChaseUpdate()
 {
 	if (!FieldSheriff) return;
+
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) return;
 
-	FVector SheriffLocation = FieldSheriff->GetActorLocation();
-	FVector2D ScreenPosition;
-	PC->ProjectWorldLocationToScreen(SheriffLocation, ScreenPosition);
-
-	// DPI 스케일 보정
 	float DPIScale = UWidgetLayoutLibrary::GetViewportScale(GetWorld());
 
 	FVector2D ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 
-	// UMG 좌표계로 변환
-	float UMGScreenX = ViewportSize.X / DPIScale;
-	float UMGScreenY = ViewportSize.Y / DPIScale;
-	float UMGPosX = ScreenPosition.X / DPIScale;
+	FVector2D UMGViewport = ViewportSize / DPIScale;
+	FVector2D ScreenCenter = UMGViewport * 0.5f;
 
-	float Margin = 100.f;
-	float ClampedX = FMath::Clamp(UMGPosX, Margin, UMGScreenX - Margin);
-	float CenterY = UMGScreenY * 0.5f;
+	FVector SheriffLocation = FieldSheriff->GetActorLocation();
+	FVector2D RawScreenPos;
+	bool bProjected = PC->ProjectWorldLocationToScreen(SheriffLocation, RawScreenPos);
 
-	HUDWidget->GetSheriffChaseTimerWidget()->SetTimerWidgetLocation(
-		FVector2D(ClampedX, CenterY)
-	);
+	FVector2D UMGPos = RawScreenPos / DPIScale;
+
+	const float EdgeMargin = 100.f;
+
+	bool bOnScreen = bProjected
+		&& UMGPos.X > EdgeMargin
+		&& UMGPos.X < UMGViewport.X - EdgeMargin
+		&& UMGPos.Y > EdgeMargin
+		&& UMGPos.Y < UMGViewport.Y - EdgeMargin;
+
+	auto* TimerWidget = HUDWidget->GetSheriffChaseTimerWidget();
+
+	if (bOnScreen)
+	{
+		TimerWidget->SetTimerWidgetLocation(UMGPos);
+	}
+	else
+	{
+		FVector2D Direction = UMGPos - ScreenCenter;
+		Direction.Normalize();
+
+		FVector2D HalfBound = ScreenCenter - FVector2D(EdgeMargin, EdgeMargin);
+
+		float ScaleX = (Direction.X != 0.f) ? HalfBound.X / FMath::Abs(Direction.X) : FLT_MAX;
+		float ScaleY = (Direction.Y != 0.f) ? HalfBound.Y / FMath::Abs(Direction.Y) : FLT_MAX;
+
+		FVector2D EdgePos = ScreenCenter + Direction * FMath::Min(ScaleX, ScaleY);
+
+		float ArrowAngle = FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+
+		TimerWidget->SetTimerWidgetLocation(EdgePos);
+	}
+
+	// LocalPlayer의 Head 소켓과 보안관의 Head 소켓을 빨간 줄로 연결
+	FVector LocalPlayerHead = GetMesh()->GetSocketLocation(FName("Head"));
+	FVector SheriffHead = FieldSheriff->GetMesh()->GetSocketLocation(FName("Head"));
+	DrawDebugLine(GetWorld(), LocalPlayerHead, SheriffHead, FColor::Red, false, -1.f, 0, 2.f);
 }
 
 void ASTLocalPlayer::TestAddSheriffTransform()
