@@ -22,13 +22,15 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	ASTPlayerBase* Player;
+	ASTPlayerBase* Player{ nullptr };
 
-	FString NickName;
+	FString NickName{ "NONE" };
 
-	uint64 PlayerID;
+	uint64 PlayerID{ 0 };
 
-	bool bIsHost;
+	bool bIsHost{ false };
+
+	bool bIsReady{ false };
 };
 
 /**
@@ -41,39 +43,41 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 {
 	GENERATED_BODY()
 
+
+	// --
+	// static packet handlers
+	// --
+
 public:
-
-	// method
-	
-
-	// --
-	// 패킷 처리 함수들
-	// --
-
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
-	//void HandleReady(const Common::SCReady& Packet);
+	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
+
 	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 	//void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
 
+	// --
+	// method
+	// --
+
+public:
 	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
 	void RefreshPlayers();
-
 	// 본인 플레이어를 호스트 플레이어로 변경
 	void TrySetHostPlayer();
 
-private:
-	
+
 	// --
 	// 내부 메소드
 	// --
 
+private:
 	// PlayerID로 플레이어 객체를 반환하는 함수
 	ASTPlayerBase* GetPlayer(const uint64 PlayerID) const;
 	ASTPlayerBase* SpawnPlayer(
@@ -86,33 +90,34 @@ private:
 
 
 
+	// --
+	// room variables
+	// --
+
 private:
-
-	// --
-	// room
-	// --
-
 	bool bIsInGame{ false };
 	bool bIsHost{ false };
 	uint64 HostID{};
+
 
 	// --
 	// players
 	// --
 
-	//UPROPERTY()
-	//TSubclassOf<ASTFieldPlayer> OtherPlayerClass;
+private:
+	UPROPERTY()
+	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
+
+
+	// --
+	// spawn data (blueprint)
+	// --
 
 public:
-
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
 	TSubclassOf<ASTPlayerBase> FieldPlayerClass;
 
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
 	TSubclassOf<ASTPlayerBase> LobbyFieldPlayerClass;
 
-private:
-
-	UPROPERTY()
-	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
 };

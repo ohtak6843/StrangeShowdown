@@ -54,6 +54,7 @@ void USTGameInstance::Init()
 	{
 		NetworkManager = NewObject<USTNetworkManager>(this);
 	}
+
 	if (nullptr == DataManager)
 	{
 		DataManager = NewObject<USTDataManager>(this);
@@ -61,30 +62,29 @@ void USTGameInstance::Init()
 
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &USTGameInstance::OnLevelLoaded);
 	
-	TickHandle = FTSTicker::GetCoreTicker().AddTicker(
-		FTickerDelegate::CreateUObject(this, &USTGameInstance::GameInstanceTick)
-	);
 #endif // NETWORK_ENABLED
 }
 
-bool USTGameInstance::GameInstanceTick(float DeltaTime)
+void USTGameInstance::OnStart()
 {
-	HandleRecvPackets();
-	return true;
-}
+	Super::OnStart();
 
+#if NETWORK_ENABLED
+
+	NetworkManager->Start();
+
+#endif // NETWORK_ENABLED
+}
 
 void USTGameInstance::Shutdown()
 {
+	Super::Shutdown();
+
 #ifdef NETWORK_ENABLED
 	FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
-	FTSTicker::GetCoreTicker().RemoveTicker(TickHandle);
-
-
-	DisconnectFromGameServer();
+	
 
 #endif // NETWORK_ENABLED
-	Super::Shutdown();
 }
 
 void USTGameInstance::AddRoom(USTRoomInfoObject* NewRoom)
@@ -96,101 +96,6 @@ void USTGameInstance::AddRoom(USTRoomInfoObject* NewRoom)
 	OnRoomListUpdated.Broadcast();
 }
 
-
-void USTGameInstance::ConnectToGameServer()
-{
-
-#if NETWORK_ENABLED
-	
-	// Socket Subsystem
-	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(TEXT("Stream"), TEXT("Client Socket"));
-
-	// IP
-	FString	IpAddress{ TEXT("127.0.0.1") };
-	FIPv4Address Ip;
-	FIPv4Address::Parse(IpAddress, Ip);
-
-	// Port 
-	int Port{ 7777 };
-	TSharedRef<FInternetAddr> InternetAddr{ ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr() };
-	InternetAddr->SetIp(Ip.Value);
-	InternetAddr->SetPort(Port);
-
-
-	// Connect to server
-	bool Connected{ Socket->Connect(*InternetAddr) };
-
-	// Check Connection
-	if (false == Connected)
-	{
-		// fail message
-		UE_LOG(LogTemp, Log, TEXT("Failed to connect to server"));
-		return;
-	}
-
-	// Handler Init
-	PacketHandler = MakeShared<STPacketHandler>();
-
-	// SocketIO Init
-	SocketIOInstance = MakeShared<SocketIO>(Socket);
-	SocketIOInstance->Init();
-	SocketIOInstance->Start();
-
-	// login packet Àü¼Û
-	Common::CSLogin LoginPacket{};
-	auto Packet{ STSerializer::Serialize(LoginPacket) };
-	SendPacket(Packet);
-
-	UE_LOG(LogTemp, Log, TEXT("Success to connect to Server"));
-
-#else
-
-	UE_LOG(LogTemp, Log, TEXT("NETWORK_ENABLE is not defined."));
-#endif
-}
-
-
-
-void USTGameInstance::DisconnectFromGameServer()
-{
-
-#if NETWORK_ENABLED
-	if (Socket)
-	{
-		SocketIOInstance->Disconnect();
-		Socket->Close();
-		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(Socket);
-		while (false == SocketIOInstance->IsWorkerTerminated())
-		{
-			FPlatformProcess::Sleep(0.1f);
-		}
-		Socket = nullptr;
-	}
-#endif
-}
-
-void USTGameInstance::HandleRecvPackets()
-{
-#if NETWORK_ENABLED
-
-	while (true)
-	{
-		if (nullptr == Socket ||
-			nullptr == SocketIOInstance ||
-			true == IsLoadingLevel)
-		{
-			return;
-		}
-
-		TArray<uint8> Packet;
-		if (false == SocketIOInstance->PopRecvPacket(Packet)) {
-			break;
-		}
-
-		PacketHandler->HandlePacket(Packet);
-	}
-#endif
-}
 
 void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
 {
@@ -250,8 +155,8 @@ void USTGameInstance::HandleChat(const Common::SCChat& Packet, const uint8* Payl
 
 	UE_LOG(LogTemp, Log, TEXT("Chat Message Received By %d length %d : %s"), Packet.id, PayloadSize, *Message);
 
-	APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
-	ISTControllerHUDInterface* HUDInterface{ Cast<ISTControllerHUDInterface>(PlayerController) };
+	auto* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
+	auto* HUDInterface{ Cast<ISTControllerHUDInterface>(PlayerController) };
 	if (nullptr == HUDInterface)
 	{
 		return;
@@ -276,6 +181,7 @@ void USTGameInstance::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 
 void USTGameInstance::HandleReady(const Common::SCReady& Packet)
 {
+	DataManager->HandleReady(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Player %d is %s"), Packet.id, Packet.ready ? TEXT("ready") : TEXT("not ready"));
 }
 
@@ -411,13 +317,9 @@ void USTGameInstance::DevStartGame()
 	StartGame();
 }
 
-
-void USTGameInstance::SendPacket(const TArray<uint8>& data)
+void USTGameInstance::SendPacket(const TArray<uint8>& Packet)
 {
-	if (SocketIOInstance)
-	{
-		SocketIOInstance->PushSendPacket(data);
-	}
+	NetworkManager->SendPacket(Packet);
 }
 
 void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)

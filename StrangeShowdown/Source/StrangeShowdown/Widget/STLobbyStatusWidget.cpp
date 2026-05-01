@@ -17,7 +17,7 @@ void USTLobbyStatusWidget::EnterPlayer(uint64 PlayerID, const FString& NickName,
 		return;
 
 	// 방장 처리 (ID = 0 가정)
-	// todo cham: id를 
+	// todo cham:
 	if (PlayerID == 0)
 	{
 		PlayerMap.Add(PlayerID, FPlayerLobbyData{ PlayerID, NickName, false, true });

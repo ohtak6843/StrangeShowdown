@@ -30,13 +30,15 @@ class STRANGESHOWDOWN_API USTGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-	// client
+	// --
+	// client variables and methods
+	// --
+
 public:
 	// 방 목록이 업데이트되었음을 알리는 델리게이트
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomListUpdated OnRoomListUpdated;
 
-public:
 	// 방 목록을 저장하는 배열
 	UPROPERTY(BlueprintReadWrite)
 	TArray<USTRoomInfoObject*> RoomList;
@@ -59,33 +61,38 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float SFXVolume = 1.0f;
 
-
-public:
-	virtual void Init() override;
-	virtual void Shutdown() override;
-
 	// 새로운 방을 추가
 	void AddRoom(USTRoomInfoObject* NewRoom);
 
 
-	// network
+	// --
+	// virtual method
+	// --
+
 public:
-	// blueprint
+	virtual void Init() override;
+	virtual void OnStart() override;
+	virtual void Shutdown() override;
 
-	UFUNCTION(BlueprintCallable)
-	void ConnectToGameServer();
-
-	void DisconnectFromGameServer();
-
-	void HandleRecvPackets();
-
-	bool GameInstanceTick(float DeltaTime);
 
 	// --
-	// packet handle
+	// network method
+	// --
+
+//public:
+//
+//	void ConnectToGameServer();
+//	void DisconnectFromGameServer();
+//	void HandleRecvPackets();
+//	bool GameInstanceTick(float DeltaTime);
+//
+
+	// --
+	// packet handler
 	// --
 
 	// 정적
+public:
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
@@ -94,12 +101,15 @@ public:
 	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
+public:
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 	void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
+	// --
+	// network method
+	// --
 
-	// blueprint 명령어
-
+public:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void GetRoomList();
 
@@ -123,9 +133,11 @@ public:
 
 
 
+	// --
+	// network method (exec)
+	// --
 
-	// Exec 명령어
-
+public:
 	UFUNCTION(Exec)
 	void DevGetRoomList();
 
@@ -148,41 +160,35 @@ public:
 	void DevStartGame();
 
 
-	// util
+	// --
+	// util method
+	// --
 
-	void SendPacket(const TArray<uint8>& data);
+public:
+	inline void SendPacket(const TArray<uint8>& data);
 	void OnLevelLoaded(UWorld* LoadedWorld);
 	
 
-public:
-	// blueprint 다른 플레이어의 타입 지정
-	//UPROPERTY(EditAnywhere, Category = "SpawnData")
-	//TSubclassOf<ASTFieldPlayer> FieldPlayerClass{};
-
-	//UPROPERTY(EditAnywhere, Category = "SpawnData")
-	//TSubclassOf<ASTFieldPlayer> LobbyFieldPlayerClass{};
-
+	// --
+	// other variable
+	// --
 
 private:
-	FSocket* Socket{};
-	TSharedPtr<SocketIO> SocketIOInstance{};
-	TSharedPtr<STPacketHandler> PacketHandler{};
+	//FSocket* Socket{};
+	//TSharedPtr<SocketIO> SocketIOInstance{};
+	//TSharedPtr<STPacketHandler> PacketHandler{};
+	//// 레벨 로딩 중 여부
+	bool IsLoadingLevel{ false };
+	//FTSTicker::FDelegateHandle TickHandle{};
 
 	// --
-	// manager
+	// manager variable
 	// --
 
+private:
 	UPROPERTY()
 	USTNetworkManager* NetworkManager{};
 
 	UPROPERTY(EditAnywhere, Instanced, Category = "Manager")
 	USTDataManager* DataManager{};
-
-
-	// GameInstance 자체 Ticker
-	FTSTicker::FDelegateHandle TickHandle{};
-
-	// 레벨 로딩 중 여부
-	bool IsLoadingLevel{ false };
-
 };

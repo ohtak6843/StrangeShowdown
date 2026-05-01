@@ -7,10 +7,10 @@
 #include "Character/STCharacter.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Character/Player/STLobbyFieldPlayer.h"
-
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Controller/STLobbyController.h"
+#include "Widget/STLobbyHUD.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Interface/STControllerHUDInterface.h"
@@ -73,10 +73,12 @@ void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 
 void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 {
-	// 방을 만드는데 성공 했으면 방장이므로 호스트 플래그를 켜줌.
 	if (true == Packet.success)
 	{
+		// 방을 만드는데 성공 했으면 방장이므로 호스트 플래그를 켜줌.
 		bIsHost = true;
+
+		// controller에 호스트 정보 전달
 
 	}
 }
@@ -85,6 +87,27 @@ void USTDataManager::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
 	HostID = Packet.hostID;
 	bIsInGame = false;
+}
+
+void USTDataManager::HandleReady(const Common::SCReady& Packet)
+{
+	if (true == bIsInGame)
+	{
+		return;
+	}
+
+	auto* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
+	ASTLobbyController* LobbyController{ Cast<ASTLobbyController>(PlayerController) };
+	if (false == IsValid(LobbyController))
+	{
+		return;
+	}
+
+	if (auto* PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) })
+	{
+		PlayerInfoPtr->bIsReady = Packet.ready;
+		LobbyController->SetReady(Packet.id, Packet.ready);
+	}
 }
 
 void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
