@@ -19,8 +19,6 @@ public:
 
 public:
 	void SetWinnerPlayerName(const FString& PlayerName);
-	void ShowVictoryWidget();
-	void HideVictoryWidget();
 
 protected:
 	UPROPERTY(meta = (BindWidget))

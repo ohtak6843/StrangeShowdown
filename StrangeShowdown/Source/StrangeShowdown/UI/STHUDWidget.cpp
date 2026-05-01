@@ -379,10 +379,10 @@ void USTHUDWidget::UpdateBountyPoster()
 void USTHUDWidget::ShowVictoryWidget(const FString& WinnerName)
 {
 	VictoryWidget->SetWinnerPlayerName(WinnerName);
-	VictoryWidget->ShowVictoryWidget();
+	VictoryWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void USTHUDWidget::HideVictoryWidget()
 {
-	VictoryWidget->HideVictoryWidget();
+	VictoryWidget->SetVisibility(ESlateVisibility::Hidden);
 }

@@ -293,8 +293,30 @@ void ASTLocalPlayer::UseItem()
 		OutSlot
 	);
 
-	// 사용 결과에 따른 분기 효과(Implement)
-	UseItemEffect(OutSlot, Result);
+	switch (Result)
+	{
+	case EItemUseType::CanUse:
+		ShowFloatingMessage(OutSlot.ItemData->ItemName);
+		break;
+	case EItemUseType::NotEnoughStaminaCost:
+		ShowFloatingMessage(FText::FromString(TEXT("스태미나 부족!")));
+		if(ErrorSound.IsValid())
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
+		}
+		break;
+	case EItemUseType::NoEffect:
+		break;
+	case EItemUseType::Exception:
+		ShowFloatingMessage(FText::FromString(TEXT("사용 불가!")));
+		if(ErrorSound.IsValid())
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
+		}
+		break;
+	case EItemUseType::UnValid:
+		break;
+	}
 
 	if (OutSlot.ItemData)
 	{
@@ -348,33 +370,6 @@ void ASTLocalPlayer::HoldItem()
 		RightHandStaticMesh->SetStaticMesh(ItemData->ItemStaticMesh);
 
 		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
-		break;
-	}
-}
-
-void ASTLocalPlayer::DropItem()
-{
-	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
-	if (!ItemData) return;
-
-	switch (ItemData->ItemType)
-	{
-	case EItemType::Pistol:
-		RightHandSkeletalMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		RightHandSkeletalMesh->SetSimulatePhysics(true);
-		RightHandSkeletalMesh->SetEnableGravity(true);
-		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		break;
-	case EItemType::Hammer:
-	case EItemType::Helmet:
-	case EItemType::Meat:
-	case EItemType::Whiskey:
-	case EItemType::EnhancePower:
-	case EItemType::Letter:
-		RightHandStaticMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		RightHandStaticMesh->SetSimulatePhysics(true);
-		RightHandStaticMesh->SetEnableGravity(true);
-		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
 }
@@ -521,7 +516,11 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			}
 			else
 			{
-				NotEnoughStaminaCostFloatingMessage();
+				ShowFloatingMessage(FText::FromString(TEXT("스태미나 부족!")));
+				if (ErrorSound.IsValid())
+				{
+					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
+				}
 			}
 			break;
 		case EItemType::Helmet:
@@ -626,6 +625,33 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 
 	// 아이템 장착
 	HoldItem();
+}
+
+void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
+{
+	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
+	if (!ItemData) return;
+
+	switch (ItemData->ItemType)
+	{
+	case EItemType::Pistol:
+		RightHandSkeletalMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		RightHandSkeletalMesh->SetSimulatePhysics(true);
+		RightHandSkeletalMesh->SetEnableGravity(true);
+		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+	case EItemType::Hammer:
+	case EItemType::Helmet:
+	case EItemType::Meat:
+	case EItemType::Whiskey:
+	case EItemType::EnhancePower:
+	case EItemType::Letter:
+		RightHandStaticMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		RightHandStaticMesh->SetSimulatePhysics(true);
+		RightHandStaticMesh->SetEnableGravity(true);
+		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+	}
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

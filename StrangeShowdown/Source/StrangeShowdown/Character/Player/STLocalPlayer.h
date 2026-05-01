@@ -49,24 +49,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UseItem();
 
-	// 아이템 장착 관련
-	UFUNCTION(BlueprintCallable, Category = "Item")
+	UFUNCTION(BlueprintCallable)
 	void HoldItem();
-
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	void DropItem();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PistolFire();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HammerSmash();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void UseItemEffect(struct FSTItemSlot slot, EItemUseType UseType);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void NotEnoughStaminaCostFloatingMessage();
 
 	virtual void HandleStoreSlotClicked(const struct FStoreSlot& InStoreSlot) override; 
 
@@ -118,6 +108,7 @@ protected:
 	void ChangeQuickSlot(const FInputActionValue& Value);
 	void ScrollQuickSlot(const FInputActionValue& Value);
 	void PickUp(const FInputActionValue& Value);
+	void DropItem(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
@@ -145,6 +136,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> PickUpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<class UInputAction> DropItemAction;
 
 // Montage Section
 protected:
