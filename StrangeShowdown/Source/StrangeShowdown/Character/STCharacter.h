@@ -21,8 +21,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// 패킷 송수신
-
 	// Character Name
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
 	FString PlayerNickName = TEXT("NoName");

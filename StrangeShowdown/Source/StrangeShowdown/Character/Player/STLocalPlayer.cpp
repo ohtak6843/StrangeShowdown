@@ -170,6 +170,7 @@ void ASTLocalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	EnhancedInputComponent->BindAction(ChangeQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ChangeQuickSlot);
 	EnhancedInputComponent->BindAction(ScrollQuickSlotAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::ScrollQuickSlot);
 	EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::PickUp);
+	EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &ASTLocalPlayer::DropItem);
 }
 
 void ASTLocalPlayer::BeginPlay()
@@ -632,28 +633,24 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
-	if (!ItemData) return;
+	if (nullptr == ItemData) return;
 
-	switch (ItemData->ItemType)
+	if (ItemData->ItemType > EItemType::Hammer)
 	{
-	case EItemType::Pistol:
-		RightHandSkeletalMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		RightHandSkeletalMesh->SetSimulatePhysics(true);
-		RightHandSkeletalMesh->SetEnableGravity(true);
-		RightHandSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		break;
-	case EItemType::Hammer:
-	case EItemType::Helmet:
-	case EItemType::Meat:
-	case EItemType::Whiskey:
-	case EItemType::EnhancePower:
-	case EItemType::Letter:
-		RightHandStaticMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		RightHandStaticMesh->SetSimulatePhysics(true);
-		RightHandStaticMesh->SetEnableGravity(true);
-		RightHandStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		break;
+		const FTransform SpawnTransform(GetActorRotation(), GetActorLocation() + GetActorForwardVector() * 100.0f);
+		ASTPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ASTPickupItem>(ASTPickupItem::StaticClass(), SpawnTransform);
+		if (PickupItem)
+		{
+			PickupItem->ItemData = ItemData;
+			PickupItem->FinishSpawning(SpawnTransform);
+		}
 	}
+
+	InventoryComp->RemoveItem(QuickSlotComp->InventorySlotIndex[QuickSlotComp->CurrentSelectQuickSlotIndex], 1);
+	InventoryComp->OnInventoryUpdated.Broadcast();
+	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+
+	HoldItem();
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)
