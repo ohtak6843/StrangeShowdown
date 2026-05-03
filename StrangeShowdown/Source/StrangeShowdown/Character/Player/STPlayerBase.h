@@ -62,4 +62,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
+
+// Network Section
+public:
+	void Move(const FVector& Location, const FRotator& Rotator);
+
+protected:
+	FVector TargetLocation{};
+	FRotator TargetRotation{};
+
 };

@@ -84,6 +84,5 @@ protected:
 	void SendMovePacket(const float DeltaTime);
 
 	float SendMoveDeltaTime{};
-	const float SendMoveMaxTime{ 0.1f };
 
 };

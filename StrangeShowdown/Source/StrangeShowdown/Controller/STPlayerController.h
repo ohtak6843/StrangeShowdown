@@ -24,14 +24,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual class USTChatManagerWidget* GetChatManagerWidget() override;
+
 	class USTHUDWidget* GetHUDWidget() const { return HUDWidget; }
 	virtual class USTMiniMapWidget* GetMiniMapWidget() override;
 	virtual class USTMiniMapWidget* GetBigMapWidget() override;
-
-	void OpenStore();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Store")
-	void CreateStoreWidget();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
@@ -42,14 +39,10 @@ protected:
 
 // Input Section
 protected:
-	void LookingUp(const FInputActionValue& Value);
 	void OpenInventory(const FInputActionValue& Value);
 	void FocusChatManager(const FInputActionValue& Value);
 	void OpenBigMap(const FInputActionValue& Value);
 	void OpenBountyPoster(const FInputActionValue& Value);
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	TObjectPtr<class UInputAction> LookingUpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputAction> OpenInventoryAction;

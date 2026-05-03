@@ -24,7 +24,7 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	if (true == _hasPassword && _password != packet.password)
 	{
 		// 플레이어 입장 실패을 클라이언트에 알림
-		Common::SCJoinRoom join_packet{ false };
+		Common::SCJoinRoom join_packet{ false, 0 };
 		session->DoSend(join_packet);
 		return;
 	}
@@ -33,7 +33,7 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 
 
 	// 플레이어 입장 성공을 클라이언트에 알림
-	Common::SCJoinRoom join_packet{ true };
+	Common::SCJoinRoom join_packet{ true, _hostID };
 	session->DoSend(join_packet);
 
 	// 플레이어 생성 및 방에 추가
@@ -43,13 +43,13 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	session->SetPlayer(player);
 	_players[id] = player;
 
+	// 스폰 패킷 전달
 	Common::SCSpawnObject move_object_packet{
 		id,
 		player->GetPosition(),
 		player->GetDirection(),
 	};
 
-	// 스폰 패킷 전달
 	for (const auto& [other_id, other_player] : _players)
 	{
 		if (other_id == id)
@@ -143,11 +143,12 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 	
 	// message
 	std::vector<uint8> additional_data(payload, payload + payload_size);
+	additional_data.push_back('\0');
 
 	// packet
 	Common::SCChat chat_packet{
 		id,
-		payload_size
+		static_cast<uint16>(payload_size + 1)
 	};
 
 	// 직렬화

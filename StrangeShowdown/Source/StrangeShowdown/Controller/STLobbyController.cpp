@@ -9,6 +9,8 @@
 #include "Components/EditableTextBox.h"
 #include "UI/Lobby/STLobbyHUD.h"
 
+#include "Game/STGameInstance.h"
+
 ASTLobbyController::ASTLobbyController()
 {
 	AddInputAction();
@@ -35,7 +37,7 @@ void ASTLobbyController::BeginPlay()
 	Super::BeginPlay();
 
 	// TODO: 서버에서 현재 플레이어 수 받아오기
-	currentPlayerCount = 2;
+	currentPlayerCount = 5;
 
 	UpdateReadyText();
 }
@@ -47,16 +49,34 @@ void ASTLobbyController::Tick(float DeltaTime)
 
 void ASTLobbyController::SetReady()
 {
-	if (bIsRoomOwner) return;
+	if (bIsRoomOwner)
+	{
+		// 방장일 경우 start
+#if NETWORK_ENABLED
 
+		GetGameInstance<USTGameInstance>()->StartGame();
+
+#endif // NETWORK_ENABLED
+		return;
+	}
 	bIsReady = !bIsReady;
+
+#if NETWORK_ENABLED
+
+	GetGameInstance<USTGameInstance>()->Ready(bIsReady);
+
+#endif // NETWORK_ENABLED
 	
-	// TEMP: 1번(본인) 슬롯 레디 업데이트
-	// TODO: 1 대신 PlayerID로 슬롯 업데이트
-	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(1, bIsReady);
+	// todo cham: 1 대신 PlayerID로 슬롯 업데이트
+	// 본인의 id를 알려주는 것이 필요.
+	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(0, bIsReady);
 	LobbyHUDWidget->ReadyText->SetVisibility(!bIsReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
-	// TODO: 서버에 레디 상태 전달
+}
+
+void ASTLobbyController::SetReady(const uint64 InPlayerID, const bool InReady)
+{
+	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(InPlayerID, InReady);
 }
 
 void ASTLobbyController::UpdateReadyText()
@@ -69,7 +89,7 @@ void ASTLobbyController::UpdateReadyText()
 	}
 	else
 	{
-		LobbyHUDWidget->ReadyText->SetText(FText::FromString(TEXT("Waiting for players... ") + FString::FromInt(currentPlayerCount) + TEXT("/") + FString::FromInt(maxPlayerCount)));
+		LobbyHUDWidget->ReadyText->SetText(FText::FromString(TEXT("Waiting for players... ( ") + FString::FromInt(currentPlayerCount) + TEXT("/") + FString::FromInt(maxPlayerCount) + TEXT(" )")));
 	}
 }
 

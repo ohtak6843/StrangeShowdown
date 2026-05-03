@@ -26,4 +26,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> ReadyText;
+
+	void SetReady(const uint64 InPlayerID, const bool InReady);
 };

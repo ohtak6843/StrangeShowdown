@@ -27,22 +27,35 @@ public:
 	int currentPlayerCount = 1;
 	int maxPlayerCount = 5;
 	
+
+
+	// 외부에서 플레이어의 ready 상태 변경
+	void SetReady(const uint64 InPlayerID, const bool InReady);
+
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
+	// 본인 플레이어의 ready 상태 변경
 	void SetReady();
 
+
 	// 방장일 경우 새로운 플레이어가 들어오면 해당 함수를 호출
+
+public:
 	void UpdateReadyText();
 
 private:
 	void AddInputAction();
 	void FocusChatManager();
 	bool bIsReady = false;
+
+	// todo cham: private로 변경
+public:
 	bool bIsRoomOwner = false;
 
+private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ReadyAction;
 

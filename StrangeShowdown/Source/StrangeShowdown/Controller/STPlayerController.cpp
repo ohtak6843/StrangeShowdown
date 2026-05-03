@@ -18,7 +18,6 @@ void ASTPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	EnhancedInputComponent->BindAction(LookingUpAction, ETriggerEvent::Triggered, this, &ASTPlayerController::LookingUp);
 	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenInventory);
 	EnhancedInputComponent->BindAction(FocusChatManagerAction, ETriggerEvent::Triggered, this, &ASTPlayerController::FocusChatManager);
 	EnhancedInputComponent->BindAction(OpenBigMapAction, ETriggerEvent::Triggered, this, &ASTPlayerController::OpenBigMap);
@@ -35,6 +34,12 @@ void ASTPlayerController::BeginPlay()
 	{
 		HUDWidget->AddToViewport();
 	}
+}
+
+USTChatManagerWidget* ASTPlayerController::GetChatManagerWidget()
+{
+	ISTControllerHUDInterface::GetChatManagerWidget();
+	return HUDWidget->GetChatManagerWidget();
 }
 
 USTMiniMapWidget* ASTPlayerController::GetMiniMapWidget()
@@ -59,23 +64,6 @@ USTMiniMapWidget* ASTPlayerController::GetBigMapWidget()
 	}
 
 	return BigMapWidget;
-}
-
-void ASTPlayerController::OpenStore()
-{
-	if (HUDWidget)
-	{
-		if (!bIsStoreOpen)
-		{
-			bool Result = HUDWidget->OpenStoreMenu();
-			bIsStoreOpen = Result;
-		}
-	}
-}
-
-void ASTPlayerController::LookingUp(const FInputActionValue& Value)
-{
-	// TODO: UI ²ô°í Å°±â
 }
 
 void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
