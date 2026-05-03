@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Item/STPickupItem.h"
+#include "Components/LineBatchComponent.h"
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
@@ -196,6 +197,10 @@ void ASTLocalPlayer::BeginPlay()
 		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<int>(PlayerMeshType)].LoadSynchronous();
 		GetMesh()->SetSkeletalMesh(PlayerMesh);
 	}
+
+	// Sheriff Chase Line
+	LineBatcher = NewObject<ULineBatchComponent>(this, TEXT("LineBatcher"));
+	LineBatcher->RegisterComponent();
 
 	HoldItem();
 }
@@ -722,9 +727,13 @@ void ASTLocalPlayer::SheriffChaseUpdate()
 	}
 
 	// LocalPlayer의 Head 소켓과 보안관의 Head 소켓을 빨간 줄로 연결
+	if (!FieldSheriff) return;
+
 	FVector LocalPlayerHead = GetMesh()->GetSocketLocation(FName("Head"));
 	FVector SheriffHead = FieldSheriff->GetMesh()->GetSocketLocation(FName("Head"));
-	DrawDebugLine(GetWorld(), LocalPlayerHead, SheriffHead, FColor::Red, false, -1.f, 0, 2.f);
+
+	ClearPersistentLines();
+	DrawPersistentLine(LocalPlayerHead, SheriffHead, FColor::Red, 2.f);
 }
 
 void ASTLocalPlayer::TestAddSheriffTransform()
@@ -736,6 +745,19 @@ void ASTLocalPlayer::TestAddSheriffTransform()
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 	ASTFieldSheriff* SpawnedSheriff = GetWorld()->SpawnActor<ASTFieldSheriff>(ASTFieldSheriff::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 	SetFieldSheriff(SpawnedSheriff);
+}
+
+void ASTLocalPlayer::DrawPersistentLine(FVector Start, FVector End, FColor Color, float Thickness)
+{
+	if (!LineBatcher) return;
+
+	LineBatcher->DrawLine(Start, End, Color, 0, Thickness, 0.f);
+}
+
+void ASTLocalPlayer::ClearPersistentLines()
+{
+	if (!LineBatcher) return;
+	LineBatcher->Flush();
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)

@@ -190,12 +190,19 @@ public:
 	void ClearSheriff();
 	void SheriffChaseUpdate();
 
+	void DrawPersistentLine(FVector Start, FVector End, FColor Color, float Thickness = 2.f);
+	void ClearPersistentLines();
+
 	UFUNCTION(BlueprintCallable)
 	void TestAddSheriffTransform();
 
 protected:
 	TObjectPtr<class ASTFieldSheriff> FieldSheriff;
 	bool bIsChasingSheriff = false;
+
+private:
+	UPROPERTY()
+	class ULineBatchComponent* LineBatcher;
 
 // Network Section
 private:

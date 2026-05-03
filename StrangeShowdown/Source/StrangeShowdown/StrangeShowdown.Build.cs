@@ -14,7 +14,7 @@ public class StrangeShowdown : ModuleRules
         string CommonPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../Common/Source"));
         PublicIncludePaths.Add(CommonPath);
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Sockets", "Networking", "Slate", "SlateCore", "Niagara" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Sockets", "Networking", "Slate", "SlateCore", "Niagara", "RenderCore" });
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
         // Uncomment if you are using Slate UI
