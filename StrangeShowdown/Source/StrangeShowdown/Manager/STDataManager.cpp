@@ -10,7 +10,7 @@
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Controller/STLobbyController.h"
-#include "Widget/STLobbyHUD.h"
+#include "UI/Lobby/STLobbyHUD.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Interface/STControllerHUDInterface.h"

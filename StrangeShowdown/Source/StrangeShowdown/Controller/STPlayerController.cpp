@@ -66,6 +66,18 @@ USTMiniMapWidget* ASTPlayerController::GetBigMapWidget()
 	return BigMapWidget;
 }
 
+void ASTPlayerController::OpenStore()
+{
+	if (HUDWidget)
+	{
+		if (!bIsStoreOpen)
+		{
+			bool result = HUDWidget->OpenStoreMenu();
+			bIsStoreOpen = result;
+		}
+	}
+}
+
 void ASTPlayerController::OpenInventory(const FInputActionValue& Value)
 {
 	if (HUDWidget)
