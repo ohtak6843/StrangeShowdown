@@ -198,6 +198,12 @@ ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const
 ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const uint64 PlayerID)
 {
 	ASTPlayerBase* player{ nullptr };
+	if (false == IsValid(GetWorld()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World is not valid. Cannot spawn player."));
+		return nullptr;
+	}
+
 	if (bIsInGame)
 	{
 		player = GetWorld()->SpawnActor<ASTFieldPlayer>(
