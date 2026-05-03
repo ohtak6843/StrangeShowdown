@@ -668,22 +668,28 @@ void ASTLocalPlayer::SheriffChaseUpdate()
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) return;
 
+	// DPI 스케일 및 뷰포트 크기 계산
 	float DPIScale = UWidgetLayoutLibrary::GetViewportScale(GetWorld());
 
 	FVector2D ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 
+	// 픽셀 해상도를 UMG 좌표로 변환
 	FVector2D UMGViewport = ViewportSize / DPIScale;
 	FVector2D ScreenCenter = UMGViewport * 0.5f;
 
+	// 보안관의 월드 위치를 화면 좌표로 변환
 	FVector SheriffLocation = FieldSheriff->GetActorLocation();
 	FVector2D RawScreenPos;
 	bool bProjected = PC->ProjectWorldLocationToScreen(SheriffLocation, RawScreenPos);
 
+	// 보안관의 화면 좌표를 DPI 스케일로 조정하여 UMG 좌표로 변환
 	FVector2D UMGPos = RawScreenPos / DPIScale;
 
+	// 화면 가장자리에서 보안관 아이콘이 너무 가까이 붙는 것을 방지하기 위한 여유 공간
 	const float EdgeMargin = 100.f;
 
+	// 보안관이 화면 내에 있는지 확인
 	bool bOnScreen = bProjected
 		&& UMGPos.X > EdgeMargin
 		&& UMGPos.X < UMGViewport.X - EdgeMargin
@@ -692,6 +698,8 @@ void ASTLocalPlayer::SheriffChaseUpdate()
 
 	auto* TimerWidget = HUDWidget->GetSheriffChaseTimerWidget();
 
+	// 보안관이 화면 내에 있으면 보안관 아이콘을 보안관 위치에 배치
+	// 화면 밖에 있으면 가장자리로 배치
 	if (bOnScreen)
 	{
 		TimerWidget->SetTimerWidgetLocation(UMGPos);
