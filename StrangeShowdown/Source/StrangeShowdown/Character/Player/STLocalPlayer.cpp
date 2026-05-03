@@ -378,7 +378,6 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 {
 	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
 	{
-		// TODO: 아이템 구매 로직
 		if (StatComp->Gold >= InStoreSlot.ItemData->GoldCost)
 		{
 			// 메세지 출력
@@ -392,7 +391,6 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 
 			// 골드 차감 및 아이템 추가
 			StatComp->AddGold(-InStoreSlot.ItemData->GoldCost);
-			StoreComp->BuyItem(InStoreSlot.SlotIndex);
 
 			int32 AddedInventoryIndex = -1;
 			FSTItemSlot ItemSlot(InStoreSlot.ItemData, true, 1);
@@ -423,6 +421,8 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 
 			// 아이템 장착
 			HoldItem();
+
+			StoreComp->BuyItem(InStoreSlot.SlotIndex);
 		}
 		else
 		{
