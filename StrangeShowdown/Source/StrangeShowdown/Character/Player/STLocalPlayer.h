@@ -28,9 +28,15 @@ protected:
 	virtual void BeginPlay() override;
 
 // HUD Section
+public:
+	virtual USTHUDWidget* GetHUDWidget(class USTHUDWidget* OutHUDWidget) { return HUDWidget.Get(); }
+
 protected:
 	virtual void SetupHUDWidget(class USTHUDWidget* InHUDWidget) override;
 
+	TWeakObjectPtr<USTHUDWidget> HUDWidget;
+
+// Message Section
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowFloatingMessage(const FText& Message);
 
@@ -184,6 +190,26 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
+
+// Sheriff Chase Section
+public:
+	void SetFieldSheriff(class ASTFieldSheriff* InSheriff);
+	void ClearSheriff();
+	void SheriffChaseUpdate();
+
+	void DrawPersistentLine(FVector Start, FVector End, FColor Color, float Thickness = 2.f);
+	void ClearPersistentLines();
+
+	UFUNCTION(BlueprintCallable)
+	void TestAddSheriffTransform();
+
+protected:
+	TObjectPtr<class ASTFieldSheriff> FieldSheriff;
+	bool bIsChasingSheriff = false;
+
+private:
+	UPROPERTY()
+	class ULineBatchComponent* LineBatcher;
 
 // Network Section
 private:

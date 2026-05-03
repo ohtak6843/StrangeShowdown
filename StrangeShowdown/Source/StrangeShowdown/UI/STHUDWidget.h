@@ -131,13 +131,22 @@ protected:
 
 #pragma endregion
 
-#pragma region SheriffTimer
+#pragma region DangerAreaTimer
 public:
-	class USTSheriffTimer* GetSheriffTimerWidget() const { return SheriffTimerWidget; }
+	class USTDangerAreaTimerWidget* GetDangerAreaTimerWidget() const { return DangerAreaTimerWidget; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
-	TObjectPtr<class USTSheriffTimer> SheriffTimerWidget;
+	TObjectPtr<class USTDangerAreaTimerWidget> DangerAreaTimerWidget;
+#pragma endregion
+
+#pragma region SheriffChaseTimer
+public:
+	class USTSheriffChaseTimerWidget* GetSheriffChaseTimerWidget() const { return SheriffChaseTimerWidget; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
+	TObjectPtr<class USTSheriffChaseTimerWidget> SheriffChaseTimerWidget;
 #pragma endregion
 
 #pragma region Area Volume Section

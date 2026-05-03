@@ -2,10 +2,12 @@
 
 
 #include "Character/Player/STLocalPlayer.h"
+#include "Character/Sheriff/STFieldSheriff.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Item/STPickupItem.h"
+#include "Components/LineBatchComponent.h"
 #include "Component/STStoreComponent.h" 
 #include "Component/STInventoryComponent.h"
 #include "Component/STQuickSlotComponent.h"
@@ -24,9 +26,12 @@
 #include "UI/Stat/STStatWidget.h"
 #include "UI/Inventory/STInventoryMenuWidget.h"
 #include "UI/QuickSlot/STQuickSlotWidget.h"
+#include "UI/SheriffChaseTimer/STSheriffChaseTimerWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Protocol.h"
+
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -137,6 +142,12 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Sheriff Chase Check
+	if (FieldSheriff)
+	{
+		SheriffChaseUpdate();
+	}
+
 	// Camera Pose Blending
 	PoseElapsedTime += DeltaTime;
 	float Alpha = FMath::Clamp(PoseElapsedTime / PoseBlendTime, 0.f, 1.f);
@@ -190,6 +201,10 @@ void ASTLocalPlayer::BeginPlay()
 		GetMesh()->SetSkeletalMesh(PlayerMesh);
 	}
 
+	// Sheriff Chase Line
+	LineBatcher = NewObject<ULineBatchComponent>(this, TEXT("LineBatcher"));
+	LineBatcher->RegisterComponent();
+
 	HoldItem();
 }
 
@@ -213,6 +228,8 @@ void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InventoryComp->OnInventoryUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateInventoryMenu);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 		StoreComp->OnStoreUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStoreMenu);
+
+		HUDWidget = InHUDWidget;
 	}
 }
 
@@ -696,6 +713,126 @@ void ASTLocalPlayer::ChangeToLookingUp()
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::LookingUp);
+}
+
+void ASTLocalPlayer::SetFieldSheriff(ASTFieldSheriff* NewSheriff)
+{
+	FieldSheriff = NewSheriff;
+	bIsChasingSheriff = true;
+
+	HUDWidget->GetSheriffChaseTimerWidget()->SetTimer(10.f);
+
+	// SheriffChaseTimerWidget visible
+	if (HUDWidget.IsValid())
+	{
+		HUDWidget->GetSheriffChaseTimerWidget()->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void ASTLocalPlayer::ClearSheriff()
+{
+	FieldSheriff = nullptr;
+	bIsChasingSheriff = false;
+
+	// SheriffChaseTimerWidget Hidden
+	if (HUDWidget.IsValid())
+	{
+		HUDWidget->GetSheriffChaseTimerWidget()->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void ASTLocalPlayer::SheriffChaseUpdate()
+{
+	if (!FieldSheriff) return;
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
+
+	// DPI ������ �� ����Ʈ ũ�� ���
+	float DPIScale = UWidgetLayoutLibrary::GetViewportScale(GetWorld());
+
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+	// �ȼ� �ػ󵵸� UMG ��ǥ�� ��ȯ
+	FVector2D UMGViewport = ViewportSize / DPIScale;
+	FVector2D ScreenCenter = UMGViewport * 0.5f;
+
+	// ���Ȱ��� ���� ��ġ�� ȭ�� ��ǥ�� ��ȯ
+	FVector SheriffLocation = FieldSheriff->GetActorLocation();
+	FVector2D RawScreenPos;
+	bool bProjected = PC->ProjectWorldLocationToScreen(SheriffLocation, RawScreenPos);
+
+	// ���Ȱ��� ȭ�� ��ǥ�� DPI �����Ϸ� �����Ͽ� UMG ��ǥ�� ��ȯ
+	FVector2D UMGPos = RawScreenPos / DPIScale;
+
+	// ȭ�� �����ڸ����� ���Ȱ� �������� �ʹ� ������ �ٴ� ���� �����ϱ� ���� ���� ����
+	const float EdgeMargin = 100.f;
+
+	// ���Ȱ��� ȭ�� ���� �ִ��� Ȯ��
+	bool bOnScreen = bProjected
+		&& UMGPos.X > EdgeMargin
+		&& UMGPos.X < UMGViewport.X - EdgeMargin
+		&& UMGPos.Y > EdgeMargin
+		&& UMGPos.Y < UMGViewport.Y - EdgeMargin;
+
+	auto* TimerWidget = HUDWidget->GetSheriffChaseTimerWidget();
+
+	// ���Ȱ��� ȭ�� ���� ������ ���Ȱ� �������� ���Ȱ� ��ġ�� ��ġ
+	// ȭ�� �ۿ� ������ �����ڸ��� ��ġ
+	if (bOnScreen)
+	{
+		TimerWidget->SetTimerWidgetLocation(UMGPos);
+	}
+	else
+	{
+		FVector2D Direction = UMGPos - ScreenCenter;
+		Direction.Normalize();
+
+		FVector2D HalfBound = ScreenCenter - FVector2D(EdgeMargin, EdgeMargin);
+
+		float ScaleX = (Direction.X != 0.f) ? HalfBound.X / FMath::Abs(Direction.X) : FLT_MAX;
+		float ScaleY = (Direction.Y != 0.f) ? HalfBound.Y / FMath::Abs(Direction.Y) : FLT_MAX;
+
+		FVector2D EdgePos = ScreenCenter + Direction * FMath::Min(ScaleX, ScaleY);
+
+		float ArrowAngle = FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+
+		TimerWidget->SetTimerWidgetLocation(EdgePos);
+	}
+
+	// LocalPlayer�� Head ���ϰ� ���Ȱ��� Head ������ ���� �ٷ� ����
+	if (!FieldSheriff) return;
+
+	FVector LocalPlayerHead = GetMesh()->GetSocketLocation(FName("Head"));
+	FVector SheriffHead = FieldSheriff->GetMesh()->GetSocketLocation(FName("Head"));
+
+	ClearPersistentLines();
+	DrawPersistentLine(LocalPlayerHead, SheriffHead, FColor::Red, 2.f);
+}
+
+void ASTLocalPlayer::TestAddSheriffTransform()
+{
+	// �ӽÿ� FieldSheriff �߰�
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	FVector SpawnLocation = GetActorLocation() + FVector(1000.f, 0.f, 0.f);
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	ASTFieldSheriff* SpawnedSheriff = GetWorld()->SpawnActor<ASTFieldSheriff>(ASTFieldSheriff::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	SetFieldSheriff(SpawnedSheriff);
+}
+
+void ASTLocalPlayer::DrawPersistentLine(FVector Start, FVector End, FColor Color, float Thickness)
+{
+	if (!LineBatcher) return;
+
+	LineBatcher->DrawLine(Start, End, Color, 0, Thickness, 0.f);
+}
+
+void ASTLocalPlayer::ClearPersistentLines()
+{
+	if (!LineBatcher) return;
+	LineBatcher->Flush();
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)

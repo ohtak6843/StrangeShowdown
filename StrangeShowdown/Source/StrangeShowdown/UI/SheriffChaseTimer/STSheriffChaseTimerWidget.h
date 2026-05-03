@@ -4,25 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "STSheriffTimer.generated.h"
+#include "STSheriffChaseTimerWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API USTSheriffTimer : public UUserWidget
+class STRANGESHOWDOWN_API USTSheriffChaseTimerWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
 	void SetTimer(float InMaxTime);
 
-	UFUNCTION(BlueprintCallable)
-	void ClearTimer();
+	void SetTimerWidgetLocation(FVector2D InLocation);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (BindWidget))
 	TObjectPtr<class UImage> TimerImage;

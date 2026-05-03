@@ -16,9 +16,8 @@ class STRANGESHOWDOWN_API ASTFieldSheriff : public ASTSheriffBase
 
 public:
 	ASTFieldSheriff();
-
 protected:
 
 private:
-	
+
 };

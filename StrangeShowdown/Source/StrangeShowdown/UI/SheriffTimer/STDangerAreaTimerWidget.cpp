@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/SheriffTimer/STSheriffTimer.h"
+#include "UI/SheriffTimer/STDangerAreaTimerWidget.h"
 #include "Components/Image.h"
 
-void USTSheriffTimer::NativeConstruct()
+void USTDangerAreaTimerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -16,7 +16,7 @@ void USTSheriffTimer::NativeConstruct()
 	}
 }
 
-void USTSheriffTimer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void USTDangerAreaTimerWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
@@ -32,7 +32,7 @@ void USTSheriffTimer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	}
 }
 
-void USTSheriffTimer::SetTimer(float InMaxTime)
+void USTDangerAreaTimerWidget::SetTimer(float InMaxTime)
 {
 	SetVisibility(ESlateVisibility::Visible);
 	bIsTimerActive = true;
@@ -42,7 +42,7 @@ void USTSheriffTimer::SetTimer(float InMaxTime)
 	HeartbeatMaxTime = 1.f;
 }
 
-void USTSheriffTimer::ClearTimer()
+void USTDangerAreaTimerWidget::ClearTimer()
 {
 	SetVisibility(ESlateVisibility::Hidden);
 	bIsTimerActive = false;
