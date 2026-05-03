@@ -21,13 +21,8 @@ enum class PlayerType : uint8_t
 enum class PlayerState : uint8_t
 {
 	None = 0,
-	Idle = 1 << 0,
-	Jumping = 1 << 1,
-	Falling = 1 << 2,
-	HoldItem = 1 << 3,
-	Aiming = 1 << 4,
-	LookingUp = 1 << 5,
-	Dead = 1 << 6,
+	Aiming = 1 << 0,
+	LookingUp = 1 << 1,
 };
 
 COMMON_END

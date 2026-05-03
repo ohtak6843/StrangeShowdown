@@ -44,13 +44,8 @@ UENUM(meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EPlayerState : uint8
 {
 	None			= Common::PlayerState::None			UMETA(DisplayName = "None"),
-	Idle			= Common::PlayerState::Idle			UMETA(DisplayName = "Idle"),
-	Jumping			= Common::PlayerState::Jumping		UMETA(DisplayName = "Jumping"),
-	Falling			= Common::PlayerState::Falling		UMETA(DisplayName = "Falling"),
-	HoldItem		= Common::PlayerState::HoldItem		UMETA(DisplayName = "HoldItem"),
 	Aiming			= Common::PlayerState::Aiming		UMETA(DisplayName = "Aiming"),
 	LookingUp		= Common::PlayerState::LookingUp	UMETA(DisplayName = "LookingUp"),
-	Dead			= Common::PlayerState::Dead			UMETA(DisplayName = "Dead"),
 };
 ENUM_CLASS_FLAGS(EPlayerState)
 
