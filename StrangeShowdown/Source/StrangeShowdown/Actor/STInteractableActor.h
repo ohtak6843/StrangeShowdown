@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "STInteractableActor.generated.h"
 
+class APawn;
+
 UINTERFACE(Blueprintable)
 class STRANGESHOWDOWN_API UInteractable : public UInterface
 {
