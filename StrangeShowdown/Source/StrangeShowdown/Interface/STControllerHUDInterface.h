@@ -25,4 +25,7 @@ public:
 	virtual class USTChatManagerWidget* GetChatManagerWidget() { return nullptr; }
 	virtual class USTMiniMapWidget* GetMiniMapWidget() { return nullptr; }
 	virtual class USTMiniMapWidget* GetBigMapWidget() { return nullptr; }
+
+	virtual void OpenStore() {}
+	virtual void CloseStore() {}
 };

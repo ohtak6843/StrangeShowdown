@@ -5,6 +5,7 @@
 #include "UI/Store/STStoreWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interface/STControllerHUDInterface.h"
 
 USTStoreMenuWidget::USTStoreMenuWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -60,9 +61,10 @@ void USTStoreMenuWidget::HandleExitButtonUnhovered()
 
 void USTStoreMenuWidget::HandleExitButtonClicked()
 {
-	if(OnExitButtonClicked.IsBound())
+	ISTControllerHUDInterface* Controller = Cast<ISTControllerHUDInterface>(GetOwningPlayer());
+	if (Controller)
 	{
-		bool Result = OnExitButtonClicked.Execute();
+		Controller->CloseStore();
 	}
 }
 

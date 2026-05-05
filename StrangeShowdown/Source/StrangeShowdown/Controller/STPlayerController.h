@@ -30,7 +30,8 @@ public:
 	virtual class USTMiniMapWidget* GetMiniMapWidget() override;
 	virtual class USTMiniMapWidget* GetBigMapWidget() override;
 
-	void OpenStore();
+	virtual void OpenStore() override;
+	virtual void CloseStore() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)

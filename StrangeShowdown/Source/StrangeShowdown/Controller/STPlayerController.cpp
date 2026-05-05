@@ -68,12 +68,28 @@ USTMiniMapWidget* ASTPlayerController::GetBigMapWidget()
 
 void ASTPlayerController::OpenStore()
 {
+	ISTControllerHUDInterface::OpenStore();
+
 	if (HUDWidget)
 	{
 		if (!bIsStoreOpen)
 		{
 			bool result = HUDWidget->OpenStoreMenu();
 			bIsStoreOpen = result;
+		}
+	}
+}
+
+void ASTPlayerController::CloseStore()
+{
+	ISTControllerHUDInterface::CloseStore();
+
+	if (HUDWidget)
+	{
+		if (bIsStoreOpen)
+		{
+			bool result = HUDWidget->CloseStoreMenu();
+			bIsStoreOpen = !result;
 		}
 	}
 }

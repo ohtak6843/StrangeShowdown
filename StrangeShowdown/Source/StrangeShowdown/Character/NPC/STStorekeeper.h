@@ -25,6 +25,13 @@ class STRANGESHOWDOWN_API ASTStorekeeper : public ASTCharacter, public IInteract
 public:
 	ASTStorekeeper();
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
+
+public:
 	virtual void Interact_Implementation(APawn* Interactor) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Store")
@@ -48,6 +55,7 @@ public:
 	UFUNCTION()
 	void BuyItem(int32 SlotIndex);
 
+	// TODO: 상점 업데이트 방법 수정하기
 	UFUNCTION(BlueprintCallable)
 	void UnregisterStore(USTStoreComponent* StoreComp);
 
@@ -57,11 +65,6 @@ public:
 	// 아이템과 오버랩 중인 플레이어 저장
 	UPROPERTY()
 	ASTCharacter* OverlappedPlayer = nullptr;
-
-protected:
-	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	UFUNCTION()

@@ -6,7 +6,7 @@
 #include "Component/STStoreComponent.h"
 #include "Item/STItemDataAssetBase.h"
 #include "Character/Player/STLocalPlayer.h"
-#include "Controller/STPlayerController.h"
+#include "Interface/STControllerHUDInterface.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Prop/STCarriage.h"
 #include "Kismet/GameplayStatics.h"
@@ -83,7 +83,7 @@ void ASTStorekeeper::Interact_Implementation(APawn* Interactor)
 			OpenedStores.Add(StoreComp);
 		}
 
-		if (ASTPlayerController* PC = Cast<ASTPlayerController>(Player->GetController()))
+		if (ISTControllerHUDInterface* PC = Cast<ISTControllerHUDInterface>(Player->GetController()))
 		{
 			PC->OpenStore();
 		}

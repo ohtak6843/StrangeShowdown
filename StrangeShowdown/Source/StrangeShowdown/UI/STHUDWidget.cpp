@@ -228,7 +228,6 @@ bool USTHUDWidget::OpenStoreMenu()
 			StoreMenuWidget = CreateWidget<USTStoreMenuWidget>(this, StoreMenuClass);
 			if (StoreMenuWidget)
 			{
-				StoreMenuWidget->OnExitButtonClicked.BindUObject(this, &USTHUDWidget::CloseStoreMenu);
 				StoreMenuWidget->AddToViewport();
 				StoreMenuWidget->UpdateStoreMenu(SourceStoreComp.Get()->Slots);
 				APlayerController* PC = GetOwningPlayer();
