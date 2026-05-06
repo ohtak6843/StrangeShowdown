@@ -2,7 +2,6 @@
 
 
 #include "Actor/MapObject/STBankFirstMapObject.h"
-#include "STBankFirstMapObject.h"
 
 void ASTBankFirstMapObject::ActivationMapObject(APawn* Interactor)
 {

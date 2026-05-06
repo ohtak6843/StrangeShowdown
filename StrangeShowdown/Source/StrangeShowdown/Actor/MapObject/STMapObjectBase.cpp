@@ -74,8 +74,6 @@ void ASTMapObjectBase::HandleBeginOverlap(UPrimitiveComponent* OverlappedCompone
 {
 	if (ASTCharacter* Player = Cast<ASTCharacter>(OtherActor))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Player entered interaction range"));
-
 		// À§Á¬ Ç¥½Ã
 		if (InteractWidgetComponent)
 			InteractWidgetComponent->SetVisibility(true);
