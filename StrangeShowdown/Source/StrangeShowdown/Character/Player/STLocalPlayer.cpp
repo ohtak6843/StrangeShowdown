@@ -835,6 +835,31 @@ void ASTLocalPlayer::ClearPersistentLines()
 	LineBatcher->Flush();
 }
 
+void ASTLocalPlayer::ActiveAlterFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Alter First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveBankFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Bank First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveChurchFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Church First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveStationFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Station First Map Object"));
+}
+
+void ASTLocalPlayer::ActivePubFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Pub First Map Object"));
+}
+
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
 {
 	SendMoveDeltaTime += DeltaTime;

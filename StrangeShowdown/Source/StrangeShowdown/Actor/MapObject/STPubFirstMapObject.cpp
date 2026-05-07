@@ -2,8 +2,18 @@
 
 
 #include "Actor/MapObject/STPubFirstMapObject.h"
+#include "Character/Player/STLocalPlayer.h"
 
 void ASTPubFirstMapObject::ActivationMapObject(APawn* Interactor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Activated Pub First Map Object"));
+	// Interactor을 LocalPlayer로 캐스팅
+	APlayerController* PC = Cast<APlayerController>(Interactor->GetController());
+	if (PC)
+	{
+		ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn());
+		if (LocalPlayer)
+		{
+			LocalPlayer->ActivePubFirstMapObject();
+		}
+	}
 }

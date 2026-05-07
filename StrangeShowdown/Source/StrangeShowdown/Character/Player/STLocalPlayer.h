@@ -211,6 +211,14 @@ private:
 	UPROPERTY()
 	class ULineBatchComponent* LineBatcher;
 
+// MapObject Section
+public:
+	void ActiveAlterFirstMapObject();
+	void ActiveBankFirstMapObject();
+	void ActiveChurchFirstMapObject();
+	void ActiveStationFirstMapObject();
+	void ActivePubFirstMapObject();
+
 // Network Section
 private:
 	void SendMovePacket(const float DeltaTime);
