@@ -24,7 +24,7 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	if (true == _hasPassword && _password != packet.password)
 	{
 		// 플레이어 입장 실패을 클라이언트에 알림
-		Common::SCJoinRoom join_packet{ false, 0 };
+		Common::SCJoinRoom join_packet{ false };
 		session->DoSend(join_packet);
 		return;
 	}
@@ -33,11 +33,11 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 
 
 	// 플레이어 입장 성공을 클라이언트에 알림
-	Common::SCJoinRoom join_packet{ true, _hostID };
+	auto id{ session->GetSessionID() };
+	Common::SCJoinRoom join_packet{ true, _hostID, id };
 	session->DoSend(join_packet);
 
-	// 플레이어 생성 및 방에 추가
-	auto id{ session->GetSessionID() };
+	// 플레이어 생성 및 방에 추가;
 	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
 	player->SetOwnerSession(session);
 	session->SetPlayer(player);
@@ -110,12 +110,14 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어가 준비중인지 검사.
 	for (const auto& [id, player] : _players)
 	{
-		// 방장은 시작을 보냄.
+		// 방장은 시작을 보내므로 검사에서 제외.
 		if (id == _hostID)
 		{
 			continue;
 		}
-		if (!player->IsReady())
+
+		// 준비가 안된 플레이어가 있을 경우
+		if (false == player->GetReady())
 		{
 			// 시작 실패 패킷을 보냄.
 			session->DoSend(Common::SCStartGame{ false });

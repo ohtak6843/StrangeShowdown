@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Controller/STBaseController.h"
 #include "Interface/STControllerHUDInterface.h"
+#include "protocol.h"
 #include "STLobbyController.generated.h"
 
 /**
@@ -27,10 +28,11 @@ public:
 	int currentPlayerCount = 1;
 	int maxPlayerCount = 5;
 	
+	// 클라이언트가 방 입장 시 데이터 초기화
+	void InitData(const uint64 InHostPlayerID, const uint64 InMyPlayerID);
 
-
-	// 외부에서 플레이어의 ready 상태 변경
-	void SetReady(const uint64 InPlayerID, const bool InReady);
+	// 외부 플레이어의 ready 상태 변경
+	void SetOtherPlayerReady(const uint64 InPlayerID, const bool InReady);
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,9 +53,11 @@ private:
 	void FocusChatManager();
 	bool bIsReady = false;
 
-	// todo cham: private로 변경
-public:
+
+private:
 	bool bIsRoomOwner = false;
+	uint64 MyPlayerID = 0;
+	uint64 HostPlayerID = 0;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))

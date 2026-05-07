@@ -47,6 +47,17 @@ void ASTLobbyController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ASTLobbyController::InitData(const uint64 InHostPlayerID, const uint64 InMyPlayerID)
+{
+	// 초기 정보 설정
+	HostPlayerID = InHostPlayerID;
+	MyPlayerID = InMyPlayerID;
+	bIsRoomOwner = (HostPlayerID == MyPlayerID);
+
+	// 받아온 정보로 플레이어 갱신
+	UpdateReadyText();
+}
+
 void ASTLobbyController::SetReady()
 {
 	if (bIsRoomOwner)
@@ -59,6 +70,7 @@ void ASTLobbyController::SetReady()
 #endif // NETWORK_ENABLED
 		return;
 	}
+
 	bIsReady = !bIsReady;
 
 #if NETWORK_ENABLED
@@ -67,16 +79,14 @@ void ASTLobbyController::SetReady()
 
 #endif // NETWORK_ENABLED
 	
-	// todo cham: 1 대신 PlayerID로 슬롯 업데이트
-	// 본인의 id를 알려주는 것이 필요.
-	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(0, bIsReady);
-	LobbyHUDWidget->ReadyText->SetVisibility(!bIsReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-
+	// hud 갱신
+	LobbyHUDWidget->SetReady(MyPlayerID, bIsReady);
+	UE_LOG(LogTemp, Log, TEXT("Player %llu is %s"), MyPlayerID, bIsReady ? TEXT("ready") : TEXT("not ready"));
 }
 
-void ASTLobbyController::SetReady(const uint64 InPlayerID, const bool InReady)
+void ASTLobbyController::SetOtherPlayerReady(const uint64 InPlayerID, const bool InReady)
 {
-	LobbyHUDWidget->LobbyStatusWidget->SetPlayerReady(InPlayerID, InReady);
+	LobbyHUDWidget->SetOtherPlayerReady(InPlayerID, InReady);
 }
 
 void ASTLobbyController::UpdateReadyText()

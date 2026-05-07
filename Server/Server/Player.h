@@ -4,11 +4,16 @@
 
 class Player
 {
+	// --
+	// handler method
+	// --
 public:
-
-
+	void HandleMove(const Common::CSMovePlayer& packet);
+	
+	// --
 	// getter and setter 
-
+	// --
+public:
 	const Vec3f& GetPosition() const
 	{
 		return _position;
@@ -34,21 +39,20 @@ public:
 	}
 
 
-	void HandleMove(const Common::CSMovePlayer& packet);
 
-	// getter and setter
-	bool IsReady() const { return ready; }
-	void SetReady(bool _ready) { ready = _ready; }
+	bool GetReady() const { return _ready; }
+	void SetReady(const bool ready) { _ready = ready; }
 
+
+
+	// --
+	// player ingame variables
+	// --
 private:
-
-	// player ingame info
 	Vec3f _position{};
 	Vec3f _direction{};
-
 	uint8 _state{};
-
-	bool ready{ false };
+	bool _ready{ false };
 
 	// owner
 	SessionPtr _ownerSession{ nullptr };

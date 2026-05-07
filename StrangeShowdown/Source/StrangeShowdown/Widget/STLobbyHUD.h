@@ -28,4 +28,5 @@ public:
 	TObjectPtr<UTextBlock> ReadyText;
 
 	void SetReady(const uint64 InPlayerID, const bool InReady);
+	void SetOtherPlayerReady(const uint64 InPlayerID, const bool InReady);
 };

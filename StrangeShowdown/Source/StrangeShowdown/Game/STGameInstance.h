@@ -33,7 +33,6 @@ class STRANGESHOWDOWN_API USTGameInstance : public UGameInstance
 	// --
 	// client variables and methods
 	// --
-
 public:
 	// 방 목록이 업데이트되었음을 알리는 델리게이트
 	UPROPERTY(BlueprintAssignable)
@@ -68,24 +67,11 @@ public:
 	// --
 	// virtual method
 	// --
-
 public:
 	virtual void Init() override;
 	virtual void OnStart() override;
 	virtual void Shutdown() override;
 
-
-	// --
-	// network method
-	// --
-
-//public:
-//
-//	void ConnectToGameServer();
-//	void DisconnectFromGameServer();
-//	void HandleRecvPackets();
-//	bool GameInstanceTick(float DeltaTime);
-//
 
 	// --
 	// packet handler
@@ -108,7 +94,6 @@ public:
 	// --
 	// network method
 	// --
-
 public:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void GetRoomList();
@@ -136,7 +121,6 @@ public:
 	// --
 	// network method (exec)
 	// --
-
 public:
 	UFUNCTION(Exec)
 	void DevGetRoomList();
@@ -163,28 +147,25 @@ public:
 	// --
 	// util method
 	// --
-
 public:
 	inline void SendPacket(const TArray<uint8>& data);
+
+	// brief:
+	//  레벨이 로드된 후 호출되는 함수.
+	//  새로운 객체를 만들고, 기존 객체를 초기화하는 등의 작업을 수행.
 	void OnLevelLoaded(UWorld* LoadedWorld);
-	
+
 
 	// --
-	// other variable
+	// getter and setter
 	// --
+public:
+	USTDataManager* GetDataManager() const { return DataManager; }
 
-private:
-	//FSocket* Socket{};
-	//TSharedPtr<SocketIO> SocketIOInstance{};
-	//TSharedPtr<STPacketHandler> PacketHandler{};
-	//// 레벨 로딩 중 여부
-	bool IsLoadingLevel{ false };
-	//FTSTicker::FDelegateHandle TickHandle{};
 
 	// --
 	// manager variable
 	// --
-
 private:
 	UPROPERTY()
 	USTNetworkManager* NetworkManager{};

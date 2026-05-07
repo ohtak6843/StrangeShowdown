@@ -25,14 +25,18 @@ public:
 	void EnterPlayer(uint64 PlayerID, const FString& NickName, bool bReady);
 	void LeavePlayer(uint64 PlayerID);
 	void RebuildSlots();
-	uint64 GetSlotIndex(uint64 PlayerID);
 	void SetPlayerReady(uint64 PlayerID, bool bReady);
+
+	// 슬롯 업데이트 (특정 플레이어 변경 시 호출)
+	void UpdateSlot(const uint64 PlayerID);
+	// 슬롯 업데이트 (플레이어 입장, 퇴장, 준비 상태 변경 시 호출)
+	void UpdateSlot();
 
 private:
 	const int MaxPlayerCount = 5;
 
-	// PlayerID → 슬롯 번호 (0 = 방장)
 	TMap<uint64, FPlayerLobbyData> PlayerMap;
+	TMap<uint64, int32> PlayerIDToSlotIndexMap;
 
 	// 다음 슬롯 (1부터 시작)
 	int32 NextSlotIndex = 1;
