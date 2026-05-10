@@ -68,6 +68,6 @@ private:
 		{ ObjectType::Room, 100 }
 	};
 
-	std::array<ObjectPool, static_cast<size_t>(ObjectType::END) > _objectPool{};
+	std::array<ObjectPool, static_cast<size_t>(ObjectType::END)> _objectPool{};
 
 };

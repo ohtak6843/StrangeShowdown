@@ -18,12 +18,6 @@ private:
 			type,
 			[logic_func](SessionPtr session, const RecvBuffer& data)
 			{
-				//const uint16 PacketSize{ sizeof(T) };
-				//if (data.size() < sizeof(T))
-				//{
-				//	return;
-				//}
-
 				T Pkt{ Serializer::Deserialize<T>(data) };
 				logic_func(session, Pkt);
 			}
@@ -53,11 +47,12 @@ private:
 		);
 	}
 
-	// todo: thread unsafe한 것들 정상화 시키기
+
+	
 	// --
 	// static handler
 	// --
-
+	// todo: thread unsafe한 것들 정상화 시키기
 	static void HandleMovePlayer(SessionPtr session, const Common::CSMovePlayer& packet);
 	static void HandleLogin(SessionPtr session, const Common::CSLogin& packet);
 	static void HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet);

@@ -239,7 +239,7 @@ void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 
 void USTGameInstance::ChangeWorld(const FText& Level)
 {
-	IsLoadingLevel = true;
+	DataManager->SetLoadingLevel(true);
 
 	FName LevelName(*Level.ToString());
 	UGameplayStatics::OpenLevel(this, LevelName);
@@ -324,15 +324,20 @@ void USTGameInstance::SendPacket(const TArray<uint8>& Packet)
 
 void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
 {
-	if (LoadedWorld)
+	while (false == IsValid(LoadedWorld))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
-		IsLoadingLevel = false;
-
-		// 플레이어 객체 갱신
-		DataManager->RefreshPlayers();
-
-		// 호스트 플레이어 설정 시도
-		DataManager->TrySetHostPlayer();
+		UE_LOG(LogTemp, Warning, TEXT("Waiting for level to load..."));
+		FPlatformProcess::Sleep(0.05f);
+		LoadedWorld = GetWorld();
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
+	DataManager->SetLoadingLevel(false);
+
+	// 플레이어 객체 갱신
+	DataManager->RefreshPlayers();
+
+	// 호스트 플레이어 설정 시도
+	DataManager->InitController();
+	
 }

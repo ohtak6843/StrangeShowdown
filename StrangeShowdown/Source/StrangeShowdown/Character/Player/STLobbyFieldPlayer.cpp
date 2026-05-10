@@ -57,7 +57,6 @@ void ASTLobbyFieldPlayer::BeginPlay()
 	}
 
 	// TODO: 서버에서 받은 ID와 NickName으로
-	UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Spawned:"));
 
 }
 
@@ -68,9 +67,9 @@ void ASTLobbyFieldPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OnFieldPlayerRemoved.Broadcast(PlayerID);
 }
 
-void ASTLobbyFieldPlayer::Init(const uint64 InPlayerID)
+void ASTLobbyFieldPlayer::Init(const FPlayerInfo& PlayerInfo)
 {
-	PlayerID = InPlayerID;
-	OnFieldPlayerSpawned.Broadcast(PlayerID, FString("Temp" + FString::FromInt(PlayerID)), false);
+	PlayerID = PlayerInfo.PlayerID;
+	OnFieldPlayerSpawned.Broadcast(PlayerID, PlayerInfo.NickName, false);
 	UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Initialized: PlayerID=%llu"), PlayerID);
 }

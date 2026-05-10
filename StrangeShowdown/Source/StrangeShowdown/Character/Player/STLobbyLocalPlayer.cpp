@@ -11,6 +11,9 @@
 #include "Controller/STLobbyController.h"
 #include "UI/Lobby/STLobbyHUD.h"
 
+#include "Game/STGameInstance.h"
+#include "Manager/STDataManager.h"
+
 ASTLobbyLocalPlayer::ASTLobbyLocalPlayer()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -64,10 +67,23 @@ void ASTLobbyLocalPlayer::BeginPlay()
 		}
 	}
 
-	// 자기 자신 AddPlayerInWidget() 호출
-	// TODO: 캐릭터도 ID를 가지고 있도록 해야함
-	// todo cham: 내거야 
-	AddPlayerInWidget(0, PlayerNickName, false);
+	uint64 MyId{ 0 };
+
+	// todo cham: 이름도 가져와야 함.
+#if NETWORK_ENABLED
+	
+	auto* GameInstance{ Cast<USTGameInstance>(GetWorld()->GetGameInstance()) };
+	auto* DataManager{ GameInstance ? GameInstance->GetDataManager() : nullptr };
+	if (DataManager)
+	{
+		MyId = DataManager->GetMyPlayerInfo().PlayerID;
+		PlayerNickName = DataManager->GetMyPlayerInfo().NickName;
+	}
+
+#endif
+
+
+	AddPlayerInWidget(MyId, PlayerNickName, false);
 
 	// Add Player 델리게이트
 	ASTLobbyFieldPlayer::OnFieldPlayerSpawned.AddUObject(

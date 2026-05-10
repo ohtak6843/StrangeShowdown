@@ -133,7 +133,7 @@ void PacketHandler::HandleMovePlayer(SessionPtr session, const Common::CSMovePla
 			id,
 			player->GetPosition(),
 			player->GetDirection(),
-			player->GetState()
+			player->GetAnimationState()
 		};
 		other_player->GetOwnerSession()->DoSend(move_object_packet);
 	}

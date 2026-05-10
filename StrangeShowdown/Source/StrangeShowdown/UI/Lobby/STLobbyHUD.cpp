@@ -15,3 +15,11 @@ void USTLobbyHUD::SetReady(const uint64 InPlayerID, const bool InReady)
 		ReadyText->SetVisibility(!InReady ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
+
+void USTLobbyHUD::SetOtherPlayerReady(const uint64 InPlayerID, const bool InReady)
+{
+	if (IsValid(LobbyStatusWidget))
+	{
+		LobbyStatusWidget->SetPlayerReady(InPlayerID, InReady);
+	}
+}

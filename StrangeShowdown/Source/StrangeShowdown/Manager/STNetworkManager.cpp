@@ -99,7 +99,8 @@ void USTNetworkManager::HandleRecvPackets()
 		}
 
 		TArray<uint8> Packet;
-		if (false == SocketIOInstance->PopRecvPacket(Packet)) {
+		if (false == SocketIOInstance->PopRecvPacket(Packet))
+		{
 			break;
 		}
 

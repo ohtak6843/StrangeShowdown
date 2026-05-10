@@ -16,34 +16,38 @@ void Room::HandleCreateRoom(const uint32 roomID, const SessionPtr session, const
 	_hasPassword = packet.hasPassword;
 	_password = packet.password;
 	_hostID = session->GetSessionID();
+	_state = RoomState::LOBBY;
 }
 
 void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet)
 {
-	// 입력한 비밀번호 비교
-	if (true == _hasPassword && _password != packet.password)
+	// 예외 처리
+	const bool is_lobby{ RoomState::LOBBY != _state };
+	const bool is_wrong_password{ _hasPassword && _password != packet.password };
+	const bool is_room_full{ _players.size() >= Common::MaxPlayerCount };
+
+	if (is_lobby || is_wrong_password || is_room_full)
 	{
-		// 플레이어 입장 실패을 클라이언트에 알림
-		Common::SCJoinRoom join_packet{ false, 0 };
+		// 입장 실패를 클라이언트에 알림
+		Common::SCJoinRoom join_packet{ false };
 		session->DoSend(join_packet);
 		return;
 	}
 
-	// todo: 방 허용량이 다 찼을 경우엔 실패 반환
 
-
-	// 플레이어 입장 성공을 클라이언트에 알림
-	Common::SCJoinRoom join_packet{ true, _hostID };
-	session->DoSend(join_packet);
-
-	// 플레이어 생성 및 방에 추가
+	// 플레이어 생성 및 방에 추가;
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
 	player->SetOwnerSession(session);
+	player->Init(PlayerState::LOBBY);
 	session->SetPlayer(player);
 	_players[id] = player;
 
-	// 스폰 패킷 전달
+	// 플레이어 입장 성공을 클라이언트에 알림
+	Common::SCJoinRoom join_packet{ true, _hostID, id };
+	session->DoSend(join_packet);
+
+	// 다른 플레이어에게 스폰 패킷 전달
 	Common::SCSpawnObject move_object_packet{
 		id,
 		player->GetPosition(),
@@ -72,6 +76,14 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 
 void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 {
+	// 예외 처리
+
+	// 방이 로비인지	
+	if (RoomState::LOBBY != _state)
+	{
+		return;
+	}
+	
 	auto player{ session->GetPlayer() };
 	if (player == nullptr)
 	{
@@ -101,7 +113,15 @@ void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 
 void Room::HandleStart(const SessionPtr session)
 {
-	// todo: 플레이어가 방장인지 검사.
+	// 예외 처리
+
+	// 방이 로비 상태인지 검사.
+	if (RoomState::LOBBY != _state)
+	{
+		return;
+	}
+
+	// 플레이어가 방장인지 검사.
 	if (session->GetSessionID() != _hostID)
 	{
 		return;
@@ -110,12 +130,14 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어가 준비중인지 검사.
 	for (const auto& [id, player] : _players)
 	{
-		// 방장은 시작을 보냄.
+		// 방장은 시작을 보내므로 검사에서 제외.
 		if (id == _hostID)
 		{
 			continue;
 		}
-		if (!player->IsReady())
+
+		// 준비가 안된 플레이어가 있을 경우
+		if (false == player->GetReady())
 		{
 			// 시작 실패 패킷을 보냄.
 			session->DoSend(Common::SCStartGame{ false });
@@ -124,13 +146,17 @@ void Room::HandleStart(const SessionPtr session)
 	}
 
 	// 게임 시작.
+	
+	// 플레이어를 인게임 플레이어로 변경
+
 	// todo: 게임 시작 하기 전 클라이언트 로딩을 기다려야 함.
-	_inGame = true;
+	_state = RoomState::INGAME;
 
 
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
+		player->Init(PlayerState::INGAME);
 		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
 	}
 

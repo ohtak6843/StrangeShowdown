@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Components/WidgetComponent.h"
-#include "InputActionValue.h"
+
+#include "Manager/STDataManager.h"
+
 #include "STLobbyFieldPlayer.generated.h"
 
 /**
@@ -37,7 +39,7 @@ public:
 
 // Network Section
 public:
-	void Init(const uint64 InPlayerID);
+	void Init(const FPlayerInfo& PlayerInfo);
 
 private:
 	uint64 PlayerID{};

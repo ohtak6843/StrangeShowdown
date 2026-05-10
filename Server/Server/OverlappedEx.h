@@ -15,7 +15,9 @@ class OverlappedEx
 public:
 	OverlappedEx();
 
+	// --
 	// method
+	// --
 	void Clear();
 	void Reset();
 
@@ -23,7 +25,9 @@ public:
 	void PrepareSend(const SendBuffer& packet, const int index);
 	void PrepareAccept();
 
+	// --
 	// getter and setter
+	// --
 	IOOperation GetOperation() const { return _operation; }
 	WSAOVERLAPPED& GetOverlapped() { return _overlapped; }
 	WSABUF& GetWsabuf() { return _wsabuf; }

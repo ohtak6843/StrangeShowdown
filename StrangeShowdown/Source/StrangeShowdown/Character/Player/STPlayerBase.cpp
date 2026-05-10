@@ -90,7 +90,7 @@ void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)
 	// 애니메이션
 	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
 	{
-		STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
+		// STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
 
 		// velocity 설정
 		auto* Movement{ GetCharacterMovement() };

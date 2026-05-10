@@ -53,7 +53,9 @@ enum class PacketType : uint16
 	SC_MOVE_OBJECT,
 
 	SC_MOVE_PLAYER,
-	CS_MOVE_PLAYER
+	CS_MOVE_PLAYER,
+
+	SC_TELEPORT_PLAYER,
 };
 
 
@@ -186,11 +188,13 @@ struct SCJoinRoom : Header
 {
 	bool success{ false };
 	uint64 hostID{};
+	uint64 MyID{};
 	SCJoinRoom() = default;
-	SCJoinRoom(const bool _success, const uint64 _hostID) :
+	SCJoinRoom(const bool _success, const uint64 _hostID = 0, const uint64 _myID = 0) :
 		Header{ sizeof(SCJoinRoom), PacketType::SC_JOIN_ROOM },
 		success{ _success },
-		hostID{ _hostID }
+		hostID{ _hostID },
+		MyID{ _myID }
 	{
 	}
 };

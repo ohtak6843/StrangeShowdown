@@ -33,6 +33,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BigMap")
 	TObjectPtr<class ASTBigMapActor> BigMapActor;
 
+
+	// --
+	// method
+	// --
+public:
+	void Move(const FVector& Location, const FRotator& Rotator);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

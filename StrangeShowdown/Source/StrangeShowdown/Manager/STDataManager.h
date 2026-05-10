@@ -11,6 +11,8 @@
 
 class ASTPlayerBase;
 
+using PlayerWeakPtr = TWeakObjectPtr<ASTPlayerBase>;
+
 /**
 * @brief:
 *  레벨이 바뀌어도 유지되는 플레이어 정보를 담는 구조체
@@ -22,15 +24,20 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	ASTPlayerBase* Player{ nullptr };
+	PlayerWeakPtr Player;
 
-	FString NickName{ "NONE" };
+	FString NickName{ UTF8_TO_TCHAR(std::string(Common::PlayerConstants::Name).c_str()) };
 
 	uint64 PlayerID{ 0 };
 
 	bool bIsHost{ false };
 
 	bool bIsReady{ false };
+
+	// -- 
+	// player stats
+	// --
+
 };
 
 /**
@@ -47,7 +54,6 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 	// --
 	// static packet handlers
 	// --
-
 public:
 	void HandleSpawn(const Common::SCSpawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
@@ -57,7 +63,6 @@ public:
 	void HandleStartGame(const Common::SCStartGame& Packet);
 
 	// 동적
-
 	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 	//void HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
 
@@ -65,25 +70,35 @@ public:
 	// --
 	// method
 	// --
-
 public:
 	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
 	void RefreshPlayers();
 	// 본인 플레이어를 호스트 플레이어로 변경
-	void TrySetHostPlayer();
+	void InitController();
+
+
+	// --
+	// getter and setter
+	// --
+public:
+	bool GetLoddingLevel() const { return bIsInGame; }
+	void SetLoadingLevel(bool Value) { bIsInGame = Value; }
+
+	uint64 GetHostID() const { return HostID; }
+
+	FPlayerInfo GetMyPlayerInfo() const { return MyPlayerInfo; }
 
 
 	// --
 	// 내부 메소드
 	// --
-
 private:
 	// PlayerID로 플레이어 객체를 반환하는 함수
-	ASTPlayerBase* GetPlayer(const uint64 PlayerID) const;
+	PlayerWeakPtr GetPlayer(const uint64 PlayerID) const;
 	ASTPlayerBase* SpawnPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,
-		const uint64 PlayerID
+		const FPlayerInfo& PlayerInfo
 	);
 
 	// todo cham: 나중에 private화.
@@ -105,8 +120,14 @@ private:
 	// --
 
 private:
+
+	// 다른 플레이어가 저장되어 있는 맵
 	UPROPERTY()
 	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
+
+	// 본인 플레이어 정보
+	UPROPERTY()
+	FPlayerInfo MyPlayerInfo{};
 
 
 	// --

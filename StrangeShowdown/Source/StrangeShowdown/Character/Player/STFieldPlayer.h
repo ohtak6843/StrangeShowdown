@@ -25,7 +25,7 @@ public:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
-	TObjectPtr<USTWidgetComponent> StatWidgetComponent;
+	TObjectPtr<class USTWidgetComponent> StatWidgetComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<USTTargetIndicatorComponent> TargetIndicatorComponent;

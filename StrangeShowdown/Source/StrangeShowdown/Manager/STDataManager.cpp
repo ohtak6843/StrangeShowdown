@@ -43,16 +43,17 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	// spawn player
-	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams, Packet.objectID)};
-
 	// playerinfo 생성
 	FPlayerInfo PlayerInfo{
-		.Player = Player,
 		.NickName = FString::Printf(TEXT("Player_%llu"), Packet.objectID),
 		.PlayerID = Packet.objectID,
 		.bIsHost = (Packet.objectID == HostID)
 	};
+
+	// spawn player
+	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo) };
+
+	PlayerInfo.Player = Player;
 
 	// playerinfoMap에 추가
 	PlayerInfoMap.Add(Packet.objectID, PlayerInfo);
@@ -62,7 +63,8 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (auto* Player{ GetPlayer(Packet.id) })
+	auto Player{ GetPlayer(Packet.id) };
+	if (Player.IsValid())
 	{
 		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
@@ -86,7 +88,16 @@ void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 void USTDataManager::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
 	HostID = Packet.hostID;
+	MyPlayerInfo.PlayerID = Packet.MyID;
+	MyPlayerInfo.bIsHost = (MyPlayerInfo.PlayerID == HostID);
 	bIsInGame = false;
+
+	APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
+	ASTLobbyController* LobbyController{ Cast<ASTLobbyController>(PlayerController) };
+	if (nullptr == LobbyController)
+	{
+		return;
+	}
 }
 
 void USTDataManager::HandleReady(const Common::SCReady& Packet)
@@ -106,7 +117,7 @@ void USTDataManager::HandleReady(const Common::SCReady& Packet)
 	if (auto* PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) })
 	{
 		PlayerInfoPtr->bIsReady = Packet.ready;
-		LobbyController->SetReady(Packet.id, Packet.ready);
+		LobbyController->SetOtherPlayerReady(Packet.id, Packet.ready);
 	}
 }
 
@@ -137,7 +148,7 @@ void USTDataManager::RefreshPlayers()
 	// 데이터는 유지한다.
 	for (auto& [_, PlayerInfo] : PlayerInfoMap)
 	{
-		if (IsValid(PlayerInfo.Player) && false == PlayerInfo.Player->IsActorBeingDestroyed())
+		if (PlayerInfo.Player.IsValid())
 		{
 			PlayerInfo.Player->Destroy();
 		}
@@ -152,16 +163,16 @@ void USTDataManager::RefreshPlayers()
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		// spawn player
-		auto* player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo.PlayerID) };
+		auto* player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo) };
 
 		// playerinfo 업데이트
 		PlayerInfo.Player = player;
 	}
 }
 
-void USTDataManager::TrySetHostPlayer()
+void USTDataManager::InitController()
 {
-	if (true == bIsHost && false == bIsInGame)
+	if (false == bIsInGame)
 	{
 		APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
 		ASTLobbyController* LobbyController{ Cast<ASTLobbyController>(PlayerController) };
@@ -170,32 +181,24 @@ void USTDataManager::TrySetHostPlayer()
 			UE_LOG(LogTemp, Log, TEXT("PlayerController is not of type ASTLobbyController"));
 			return;
 		}
-		LobbyController->bIsRoomOwner = true;
-		LobbyController->UpdateReadyText();
+		LobbyController->InitData(HostID, MyPlayerInfo.PlayerID);
 		UE_LOG(LogTemp, Log, TEXT("hostplayer set success"));
 	}
-	else
-		UE_LOG(LogTemp, Log, TEXT("host set failed"));
 }
 
-ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const
+PlayerWeakPtr USTDataManager::GetPlayer(const uint64 PlayerID) const
 {
 	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
 	{
 		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
-		ASTPlayerBase* Player{ InfoPtr->Player };
+		auto Player{ InfoPtr->Player };
 
-		if (false == IsValid(Player))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player with ID %llu is not valid"), PlayerID);
-			return nullptr;
-		}
 		return Player;
 	}
 	return nullptr;
 }
 
-ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const uint64 PlayerID)
+ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo)
 {
 	ASTPlayerBase* player{ nullptr };
 	if (false == IsValid(GetWorld()))
@@ -220,7 +223,7 @@ ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FA
 			Transform,
 			SpawnParams
 		) };
-		LobbyPlayer->Init(PlayerID);
+		LobbyPlayer->Init(PlayerInfo);
 		player = LobbyPlayer;
 		UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Spawned"));
 	}
