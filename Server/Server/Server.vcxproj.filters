@@ -4,9 +4,6 @@
     <Filter Include="main">
       <UniqueIdentifier>{fe7d549a-72ab-4b34-8d70-59d1a3e1a3a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core">
-      <UniqueIdentifier>{5f9ab189-b82b-48ad-ad4a-9aabf83b5302}</UniqueIdentifier>
-    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{365e947b-bb0f-4f62-b7b2-268a1cb148a3}</UniqueIdentifier>
     </Filter>
@@ -22,7 +19,13 @@
     <Filter Include="Game\Content">
       <UniqueIdentifier>{e2fa8e42-b286-4726-82f8-b9313fa0126f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="common">
+    <Filter Include="Game\Room">
+      <UniqueIdentifier>{1df3da56-5881-4ce0-9153-63fb837f9007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{5f9ab189-b82b-48ad-ad4a-9aabf83b5302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
       <UniqueIdentifier>{34d7b18d-0052-462e-8b9d-5f4ec57f49ef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -31,42 +34,42 @@
       <Filter>main</Filter>
     </ClCompile>
     <ClCompile Include="IOCP.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="PacketHandler.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="Job.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="OverlappedEx.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Serializer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomManager.cpp">
+      <Filter>Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>Game\Room</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Game\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Room.cpp">
-      <Filter>Game\Content</Filter>
-    </ClCompile>
-    <ClCompile Include="RoomManager.cpp">
-      <Filter>Game\Content</Filter>
-    </ClCompile>
-    <ClCompile Include="Serializer.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IOCP.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>pch</Filter>
@@ -78,46 +81,46 @@
       <Filter>pch</Filter>
     </ClInclude>
     <ClInclude Include="PacketHandler.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="Job.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="define.h">
       <Filter>pch</Filter>
     </ClInclude>
     <ClInclude Include="OverlappedEx.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\Protocol.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\BasicStruct.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonDefine.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonEnum.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Source\CommonNamespace.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomManager.h">
+      <Filter>Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>Game\Room</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Game\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Room.h">
-      <Filter>Game\Content</Filter>
-    </ClInclude>
-    <ClInclude Include="RoomManager.h">
-      <Filter>Game\Content</Filter>
-    </ClInclude>
-    <ClInclude Include="Serializer.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Source\Protocol.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Source\BasicStruct.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Source\CommonDefine.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Source\CommonEnum.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Source\CommonNamespace.h">
-      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
