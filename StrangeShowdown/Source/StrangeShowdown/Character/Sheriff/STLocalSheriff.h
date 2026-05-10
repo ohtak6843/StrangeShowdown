@@ -21,6 +21,8 @@ class STRANGESHOWDOWN_API ASTLocalSheriff : public ASTSheriffBase, public ISTCha
 public:
 	ASTLocalSheriff();
 
+	virtual void PossessedBy(AController* NewController) override;
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;

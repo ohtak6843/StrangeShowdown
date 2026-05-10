@@ -105,3 +105,8 @@ void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)
 	TargetRotation = Rotator;
 }
 
+void ASTPlayerBase::HandleDamage(float DamageAmount)
+{
+	StatComp->AddHp(-DamageAmount);
+}
+

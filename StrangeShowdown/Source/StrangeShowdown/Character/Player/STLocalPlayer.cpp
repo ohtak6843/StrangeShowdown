@@ -654,12 +654,19 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 
 	if (ItemData->ItemType > EItemType::Hammer)
 	{
-		const FTransform SpawnTransform(GetActorRotation(), GetActorLocation() + GetActorForwardVector() * 100.0f);
+		const FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
 		ASTPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ASTPickupItem>(ASTPickupItem::StaticClass(), SpawnTransform);
 		if (PickupItem)
 		{
 			PickupItem->ItemData = ItemData;
 			PickupItem->FinishSpawning(SpawnTransform);
+			UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(PickupItem->GetRootComponent());
+			if (PrimComp)
+			{
+				PrimComp->SetSimulatePhysics(true);
+				PrimComp->SetEnableGravity(true);
+				PrimComp->AddImpulse(GetActorForwardVector() * 200.0f, NAME_None, true);
+			}
 		}
 	}
 

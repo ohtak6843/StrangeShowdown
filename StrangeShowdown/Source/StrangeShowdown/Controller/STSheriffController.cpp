@@ -13,6 +13,17 @@ ASTSheriffController::ASTSheriffController()
 {
 }
 
+void ASTSheriffController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
+	if (HUDWidget)
+	{
+		HUDWidget->AddToViewport();
+	}
+}
+
 void ASTSheriffController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -24,13 +35,6 @@ void ASTSheriffController::SetupInputComponent()
 void ASTSheriffController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
-
-	if (HUDWidget)
-	{
-		HUDWidget->AddToViewport();
-	}
 }
 
 USTMiniMapWidget* ASTSheriffController::GetMiniMapWidget()

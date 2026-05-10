@@ -49,10 +49,21 @@ protected:
 protected:
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);
+	void PossessSheriff(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderLookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PossessSheriffAction;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Possess)
+	TSubclassOf<class ASTSheriffController> SheriffControllerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Possess)
+	TSubclassOf<class ASTLocalSheriff> SheriffClass;
 };

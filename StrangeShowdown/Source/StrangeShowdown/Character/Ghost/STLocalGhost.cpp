@@ -15,6 +15,11 @@
 #include "UI/STHUDWidget.h"
 #include "UI/Stat/STStatWidget.h"
 
+#include "Controller/STSheriffController.h"
+#include "Character/Sheriff/STLocalSheriff.h"
+#include "Character/Sheriff/STFieldSheriff.h"
+#include "GameFramework/GameModeBase.h"
+
 ASTLocalGhost::ASTLocalGhost()
 {
 	// Spring Arm Component
@@ -76,6 +81,7 @@ void ASTLocalGhost::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::ShoulderLook);
+	EnhancedInputComponent->BindAction(PossessSheriffAction, ETriggerEvent::Triggered, this, &ASTLocalGhost::PossessSheriff);
 }
 
 void ASTLocalGhost::BeginPlay()
@@ -127,4 +133,60 @@ void ASTLocalGhost::ShoulderLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void ASTLocalGhost::PossessSheriff(const FInputActionValue& Value)
+{
+	APlayerController* OldPC = Cast<APlayerController>(GetController());
+	if (!OldPC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Controller is not valid in PossessSheriff function"));
+		return;
+	}
+
+	FVector ViewLocation;
+	FRotator ViewRotation;
+	OldPC->GetPlayerViewPoint(ViewLocation, ViewRotation);
+
+	float TraceDistance = 500.f;
+	FVector TraceEnd = ViewLocation + (ViewRotation.Vector() * TraceDistance);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	FHitResult HitResult;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ViewLocation, TraceEnd, ECC_Pawn, QueryParams);
+
+#if ENABLE_DRAW_DEBUG
+	FColor LineColor = bHit ? FColor::Green : FColor::Red;
+	DrawDebugLine(GetWorld(), ViewLocation, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+#endif
+
+	// Possess Logic
+	if (bHit)
+	{
+		ASTFieldSheriff* HitSheriff = Cast<ASTFieldSheriff>(HitResult.GetActor());
+		if (HitSheriff)
+		{
+			FTransform SpawnTransform = HitSheriff->GetActorTransform();
+			HitSheriff->Destroy();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+			ASTLocalSheriff* NewSheriff = GetWorld()->SpawnActor<ASTLocalSheriff>(SheriffClass, SpawnTransform, SpawnParams);
+			if (NewSheriff)
+			{
+				ASTSheriffController* NewPC = GetWorld()->SpawnActor<ASTSheriffController>(SheriffControllerClass, ViewLocation, ViewRotation);
+				if (NewPC)
+				{
+					OldPC->UnPossess();
+					UGameplayStatics::GetGameMode(GetWorld())->SwapPlayerControllers(OldPC, NewPC);
+					OldPC->Destroy();
+					NewPC->Possess(NewSheriff);
+					this->Destroy();
+				}
+			}
+		}
+	}
 }

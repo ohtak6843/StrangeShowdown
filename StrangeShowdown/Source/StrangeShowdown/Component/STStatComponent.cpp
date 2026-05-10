@@ -11,18 +11,9 @@ USTStatComponent::USTStatComponent()
 
 void USTStatComponent::AddHp(int32 HealAmount)
 {
-	CurrentHp += HealAmount;
+	CurrentHp = FMath::Clamp(CurrentHp + HealAmount, 0.f, MaxHp);
 
-	if (CurrentHp <= 0)
-	{
-		CurrentHp = 0;
-		bAlive = false;
-	}
-
-	if(CurrentHp > MaxHp)
-	{
-		CurrentHp = MaxHp;
-	}
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::AddGold(int32 GoldAmount)

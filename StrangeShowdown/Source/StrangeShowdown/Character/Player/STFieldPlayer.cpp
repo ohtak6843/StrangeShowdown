@@ -5,11 +5,12 @@
 #include "Animation/STAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/STWidgetComponent.h"
 
 ASTFieldPlayer::ASTFieldPlayer()
 {
 	// Stat Widget Component
-	StatWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatWidgetComponent"));
+	StatWidgetComponent = CreateDefaultSubobject<USTWidgetComponent>(TEXT("StatWidgetComponent"));
 	StatWidgetComponent->SetupAttachment(RootComponent);
 	StatWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 

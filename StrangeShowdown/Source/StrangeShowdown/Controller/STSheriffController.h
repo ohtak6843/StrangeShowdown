@@ -19,6 +19,8 @@ class STRANGESHOWDOWN_API ASTSheriffController : public ASTBaseController, publi
 public:
 	ASTSheriffController();
 
+	virtual void OnPossess(APawn* InPawn) override;
+
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;

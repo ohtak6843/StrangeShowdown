@@ -19,6 +19,8 @@ class STRANGESHOWDOWN_API ASTGhostController : public ASTBaseController, public 
 public:
 	ASTGhostController();
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;

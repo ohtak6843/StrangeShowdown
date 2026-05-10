@@ -12,6 +12,17 @@ ASTGhostController::ASTGhostController()
 {
 }
 
+void ASTGhostController::Destroyed()
+{
+	if (HUDWidget)
+	{
+		HUDWidget->RemoveFromParent();
+		HUDWidget = nullptr;
+	}
+
+	Super::Destroyed();
+}
+
 void ASTGhostController::SetupInputComponent()
 {
 	Super::SetupInputComponent();

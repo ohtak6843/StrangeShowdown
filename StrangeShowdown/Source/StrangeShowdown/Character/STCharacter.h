@@ -37,7 +37,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-private:
-
+public:
+	// Handle Damage when Get Damage Packet from Server
+	virtual void HandleDamage(float DamageAmount) {}
 
 };
