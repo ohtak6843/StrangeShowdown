@@ -63,7 +63,8 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	if (auto* Player{ GetPlayer(Packet.id) })
+	auto Player{ GetPlayer(Packet.id) };
+	if (Player.IsValid())
 	{
 		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
@@ -147,7 +148,7 @@ void USTDataManager::RefreshPlayers()
 	// 데이터는 유지한다.
 	for (auto& [_, PlayerInfo] : PlayerInfoMap)
 	{
-		if (IsValid(PlayerInfo.Player) && false == PlayerInfo.Player->IsActorBeingDestroyed())
+		if (PlayerInfo.Player.IsValid())
 		{
 			PlayerInfo.Player->Destroy();
 		}
@@ -185,18 +186,13 @@ void USTDataManager::InitController()
 	}
 }
 
-ASTPlayerBase* USTDataManager::GetPlayer(const uint64 PlayerID) const
+PlayerWeakPtr USTDataManager::GetPlayer(const uint64 PlayerID) const
 {
 	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
 	{
 		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
-		ASTPlayerBase* Player{ InfoPtr->Player };
+		auto Player{ InfoPtr->Player };
 
-		if (false == IsValid(Player))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player with ID %llu is not valid"), PlayerID);
-			return nullptr;
-		}
 		return Player;
 	}
 	return nullptr;

@@ -11,6 +11,8 @@
 
 class ASTPlayerBase;
 
+using PlayerWeakPtr = TWeakObjectPtr<ASTPlayerBase>;
+
 /**
 * @brief:
 *  레벨이 바뀌어도 유지되는 플레이어 정보를 담는 구조체
@@ -22,7 +24,7 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	ASTPlayerBase* Player{ nullptr };
+	PlayerWeakPtr Player;
 
 	FString NickName{ UTF8_TO_TCHAR(std::string(Common::PlayerConstants::Name).c_str()) };
 
@@ -92,7 +94,7 @@ public:
 	// --
 private:
 	// PlayerID로 플레이어 객체를 반환하는 함수
-	ASTPlayerBase* GetPlayer(const uint64 PlayerID) const;
+	PlayerWeakPtr GetPlayer(const uint64 PlayerID) const;
 	ASTPlayerBase* SpawnPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,

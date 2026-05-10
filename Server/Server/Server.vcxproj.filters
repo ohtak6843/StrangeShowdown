@@ -28,6 +28,9 @@
     <Filter Include="Common">
       <UniqueIdentifier>{34d7b18d-0052-462e-8b9d-5f4ec57f49ef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Item">
+      <UniqueIdentifier>{398c4e35-2775-42b5-bd6a-800261f7b7af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
