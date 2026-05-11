@@ -15,6 +15,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 public:
 	// 슬라이스 되었는지
 	bool bIsSliced;
@@ -30,4 +32,10 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
 	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
+	UStaticMeshComponent* OutLineMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UMaterialInterface* OutLineMaterial;
 };
