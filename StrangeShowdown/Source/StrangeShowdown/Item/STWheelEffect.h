@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Item/STItemUseEffect.h"
-#include "STWhiskeyEffect.generated.h"
+#include "STWheelEffect.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API USTWhiskeyEffect : public USTItemUseEffect
+class STRANGESHOWDOWN_API USTWheelEffect : public USTItemUseEffect
 {
 	GENERATED_BODY()
 	
 public:
-	USTWhiskeyEffect();
+	USTWheelEffect();
 
 	virtual bool Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData) override;
 };
