@@ -20,6 +20,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 public:
 	virtual void Slice(const FVector& HitLocation, const FVector& HitNormal, class ASTPlayerBase* Player) override;
@@ -45,6 +46,12 @@ public:
 
 	// 미니맵에 보이는 아이콘
 	TObjectPtr<UTexture2D> MiniMapIcon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Slice")
+	UStaticMeshComponent* SubMineralOutLineMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UMaterialInterface* SubMineralOutLineMaterial;
 
 private:
 	bool bIsSubSliced;
