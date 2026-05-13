@@ -2,9 +2,18 @@
 
 
 #include "Actor/MapObject/STBankFirstMapObject.h"
-#include "STBankFirstMapObject.h"
+#include "Character/Player/STLocalPlayer.h"
 
 void ASTBankFirstMapObject::ActivationMapObject(APawn* Interactor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Activated Bank First Map Object"));
+	// Interactor을 LocalPlayer로 캐스팅
+	APlayerController* PC = Cast<APlayerController>(Interactor->GetController());
+	if (PC)
+	{
+		ASTLocalPlayer* LocalPlayer = Cast<ASTLocalPlayer>(PC->GetPawn());
+		if (LocalPlayer)
+		{
+			LocalPlayer->ActiveBankFirstMapObject();
+		}
+	}
 }

@@ -45,7 +45,7 @@ ASTStorekeeper::ASTStorekeeper()
 
 	// Widget Component
 	InteractWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
-	InteractWidgetComponent->SetupAttachment(InteractCollision);
+	InteractWidgetComponent->SetupAttachment(RootComponent);
 	InteractWidgetComponent->InitWidget();
 	InteractWidgetComponent->SetVisibility(false);
 
@@ -150,12 +150,10 @@ void ASTStorekeeper::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!InteractWidgetComponent) return;
-	if (!CachedCameraManager) return;
+	if (!InteractWidgetComponent || !CachedCameraManager) return;
 
 	FVector CameraLocation;
 	FRotator CameraRotation;
-
 	CachedCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
 
 	FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();

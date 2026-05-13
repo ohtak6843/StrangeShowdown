@@ -79,6 +79,9 @@ ASTLocalPlayer::ASTLocalPlayer()
 	PoseSettings.Add(ECameraPose::Aiming, FCameraPoseSetting{ 100.f, 70.f });
 	PoseSettings.Add(ECameraPose::LookingUp, FCameraPoseSetting{ 200.f, 40.f });
 
+	BuySound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Buy.SW_Buy'"));
+	ErrorSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Error.SW_Error'"));
+
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> EffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Prop/SmashFX/NS_Smash.NS_Smash'"));
 	if (EffectRef.Object)
 	{
@@ -548,6 +551,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::Whiskey:
 		case EItemType::EnhancePower:
 		case EItemType::Letter:
+		case EItemType::Wheel:
 			UseItem();
 			break;
 	}
@@ -840,6 +844,31 @@ void ASTLocalPlayer::ClearPersistentLines()
 {
 	if (!LineBatcher) return;
 	LineBatcher->Flush();
+}
+
+void ASTLocalPlayer::ActiveAlterFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Alter First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveBankFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Bank First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveChurchFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Church First Map Object"));
+}
+
+void ASTLocalPlayer::ActiveStationFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Station First Map Object"));
+}
+
+void ASTLocalPlayer::ActivePubFirstMapObject()
+{
+	UE_LOG(LogTemp, Log, TEXT("Activated Pub First Map Object"));
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)

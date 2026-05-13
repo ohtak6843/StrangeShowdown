@@ -50,6 +50,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	UStaticMeshComponent* SubMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
+	UStaticMeshComponent* OutLineMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UMaterialInterface* OutLineMaterial;
+
 	// ÄÝ¸®Àü
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item")
 	USphereComponent* PickupCollision;

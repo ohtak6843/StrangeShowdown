@@ -3,6 +3,7 @@
 
 #include "Actor/MapObject/STMapObjectBase.h"
 #include "Character/Player/STLocalPlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASTMapObjectBase::ASTMapObjectBase()
@@ -12,16 +13,16 @@ ASTMapObjectBase::ASTMapObjectBase()
 
 	// Collision Component
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
-	SphereCollision->SetupAttachment(RootComponent);
+	RootComponent = SphereCollision;
 	SphereCollision->InitSphereRadius(100.f);
 
 	InteractCollision = CreateDefaultSubobject<USphereComponent>(TEXT("InteractCollision"));
-	InteractCollision->SetupAttachment(RootComponent);
+	InteractCollision->SetupAttachment(SphereCollision);
 	InteractCollision->InitSphereRadius(200.f);
 
 	// Widget Component
 	InteractWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
-	InteractWidgetComponent->SetupAttachment(InteractCollision);
+	InteractWidgetComponent->SetupAttachment(RootComponent);
 	InteractWidgetComponent->InitWidget();
 	InteractWidgetComponent->SetVisibility(false);
 	InteractWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
@@ -37,6 +38,13 @@ void ASTMapObjectBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// CameraManager 캐싱
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		CachedCameraManager = PC->PlayerCameraManager;
+	}
+
 	InteractCollision->OnComponentBeginOverlap.AddDynamic(this, &ASTMapObjectBase::HandleBeginOverlap);
 	InteractCollision->OnComponentEndOverlap.AddDynamic(this, &ASTMapObjectBase::HandleEndOverlap);
 	
@@ -47,6 +55,18 @@ void ASTMapObjectBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!InteractWidgetComponent) return;
+	if (!CachedCameraManager) return;
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+
+	CachedCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+
+	// 카메라를 향하도록 회전
+	FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();
+	FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+	InteractWidgetComponent->SetWorldRotation(LookAtRotation);
 }
 
 void ASTMapObjectBase::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -54,8 +74,6 @@ void ASTMapObjectBase::HandleBeginOverlap(UPrimitiveComponent* OverlappedCompone
 {
 	if (ASTCharacter* Player = Cast<ASTCharacter>(OtherActor))
 	{
-		OnPlayerEnter.Broadcast();
-
 		// 위젯 표시
 		if (InteractWidgetComponent)
 			InteractWidgetComponent->SetVisibility(true);
@@ -67,8 +85,6 @@ void ASTMapObjectBase::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent
 {
 	if (ASTCharacter* Player = Cast<ASTCharacter>(OtherActor))
 	{
-		OnPlayerExit.Broadcast();
-
 		// UI 숨기기
 		if (InteractWidgetComponent)
 			InteractWidgetComponent->SetVisibility(false);

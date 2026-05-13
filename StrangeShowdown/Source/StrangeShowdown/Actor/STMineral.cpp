@@ -14,6 +14,12 @@ ASTMineral::ASTMineral()
 	SubMineralMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMineralMeshComponent"));
 	SubMineralMeshComponent->SetupAttachment(RootComponent);
 
+	SubMineralOutLineMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMineralOutLineMesh"));
+	SubMineralOutLineMesh->SetupAttachment(SubMineralMeshComponent);
+
+	SubMineralOutLineMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/StrangeShowdown/OutLine/M_OutLine1.M_OutLine1"));
+
+
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	SkeletalMeshComponent->SetupAttachment(RootComponent);
 
@@ -61,6 +67,21 @@ void ASTMineral::BeginPlay()
 		{
 			LocalPlayer->BigMapActor->RegisterBigMapTarget(this);
 		}
+	}
+}
+
+void ASTMineral::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (SubMineralOutLineMesh && SubMineralMeshComponent)
+	{
+		SubMineralOutLineMesh->SetStaticMesh(SubMineralMeshComponent->GetStaticMesh());
+	}
+
+	if (SubMineralOutLineMaterial)
+	{
+		SubMineralOutLineMesh->SetMaterial(0, SubMineralOutLineMaterial);
 	}
 }
 

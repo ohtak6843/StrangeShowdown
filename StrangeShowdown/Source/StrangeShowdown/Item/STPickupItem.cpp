@@ -18,6 +18,11 @@ ASTPickupItem::ASTPickupItem()
 	SubMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SubMesh"));
 	SubMesh->SetupAttachment(Mesh);
 
+	OutLineMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OutLineMesh"));
+	OutLineMesh->SetupAttachment(Mesh);
+
+	OutLineMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/StrangeShowdown/OutLine/M_OutLine1.M_OutLine1"));
+
 	PickupCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
 	PickupCollision->SetupAttachment(RootComponent);
 	PickupCollision->InitSphereRadius(50.f);
@@ -43,11 +48,21 @@ void ASTPickupItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (Mesh && ItemData)
+	if (ItemData)
 	{
 		Mesh->SetStaticMesh(ItemData->ItemStaticMesh);
 		Mesh->SetRelativeScale3D(ItemData->MeshScale);
 		Mesh->SetRelativeLocation(ItemData->MeshPos);
+	}
+
+	if (OutLineMesh && ItemData)
+	{
+		OutLineMesh->SetStaticMesh(ItemData->ItemStaticMesh);
+	}
+
+	if (OutLineMaterial)
+	{
+		OutLineMesh->SetMaterial(0, OutLineMaterial);
 	}
 }
 

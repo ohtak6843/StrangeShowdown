@@ -15,7 +15,7 @@ class STRANGESHOWDOWN_API USTWhiskeyEffect : public USTItemUseEffect
 	GENERATED_BODY()
 	
 public:
-		USTWhiskeyEffect();
+	USTWhiskeyEffect();
 
-		virtual bool Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData) override;
+	virtual bool Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData) override;
 };

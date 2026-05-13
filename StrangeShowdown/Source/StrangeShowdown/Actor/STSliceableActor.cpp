@@ -14,6 +14,11 @@ ASTSliceableActor::ASTSliceableActor()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(RootComponent);
 
+	OutLineMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OutLineMesh"));
+	OutLineMesh->SetupAttachment(MeshComponent);
+
+	OutLineMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/StrangeShowdown/OutLine/M_OutLine1.M_OutLine1"));
+
 	MeshComponent->SetIsReplicated(true);
 
 	bIsSliced = false;
@@ -22,6 +27,21 @@ ASTSliceableActor::ASTSliceableActor()
 void ASTSliceableActor::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ASTSliceableActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (OutLineMesh && MeshComponent)
+	{
+		OutLineMesh->SetStaticMesh(MeshComponent->GetStaticMesh());
+	}
+
+	if (OutLineMaterial)
+	{
+		OutLineMesh->SetMaterial(0, OutLineMaterial);
+	}
 }
 
 void ASTSliceableActor::Slice(const FVector& HitLocation, const FVector& HitNormal, ASTPlayerBase* Player)
