@@ -27,21 +27,44 @@ public:
 	// handler method
 	// --
 public:
+	// static
+	
 	void HandleCreateRoom(const uint32 roomID, const SessionPtr session, const Common::CSCreateRoom& packet);
 	void HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& packet);
 	void HandleReady(const SessionPtr session, const Common::CSReady& packet);
 	void HandleStart(const SessionPtr session);
-	void HandleChat(const SessionPtr session, const Common::CSChat& packet,
-		const uint8* payload, const uint16 payload_size);
+	void HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet);
+
+	// dynamic 
+
+	void HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size);
+
+
 
 
 	// --
-	// other method
+	// method
 	// -- 
 public:
 	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }
 	void AddPlayer(const uint64 playerId, const std::shared_ptr<Player>& player) { _players[playerId] = player; }
-
+	
+	template<typename T>
+	void Broadcast(const T& packet, const uint64 exclude_id = 0)
+	{
+		for (const auto& [other_id, other_player] : _players)
+		{
+			if (other_id == exclude_id)
+			{
+				continue;
+			}
+			auto session{ other_player->GetOwnerSession() };
+			if (nullptr != session)
+			{
+				session->DoSend(packet);
+			}
+		}
+	}
 	
 	// --
 	// getter and setter
@@ -81,4 +104,3 @@ private:
 	// 임시. 이후 enum으로 변경
 	RoomState _state{ RoomState::WAITING };
 };
-

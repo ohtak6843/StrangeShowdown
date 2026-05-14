@@ -32,7 +32,7 @@ enum class PacketType : uint16
 	CS_JOIN_ROOM,
 
 	// -- 
-	// ingame system
+	// lobby
 	// --
 
 	SC_READY,
@@ -55,7 +55,18 @@ enum class PacketType : uint16
 	SC_MOVE_PLAYER,
 	CS_MOVE_PLAYER,
 
-	SC_TELEPORT_PLAYER,
+	SC_TELEPORT,
+
+	// --
+	// content
+	// --
+
+	SC_USE_ITEM,
+	CS_USE_ITEM,
+
+	SC_DAMAGE,
+	
+
 };
 
 
@@ -79,9 +90,9 @@ struct Header
 	PacketType	type{ PacketType::NONE };
 
 	Header() = default;
-	Header(const uint16 size, const PacketType type) :
-		size{ size },
-		type{ type }
+	Header(const uint16 in_size, const PacketType in_type) :
+		size{ in_size },
+		type{ in_type }
 	{
 	}
 };
@@ -120,9 +131,9 @@ struct SCGiveRoomList : Header
 	uint16 roomCount{};
 
 	SCGiveRoomList() = default;
-	SCGiveRoomList(const uint16 _roomCount) :
+	SCGiveRoomList(const uint16 in_room_count) :
 		Header{ sizeof(SCGiveRoomList), PacketType::SC_GIVE_ROOM_LIST },
-		roomCount{ _roomCount }
+		roomCount{ in_room_count }
 	{
 	}
 };
@@ -147,9 +158,9 @@ struct SCCreateRoom : Header
 {
 	bool success{ false };
 	SCCreateRoom() = default;
-	SCCreateRoom(const bool _success) :
+	SCCreateRoom(const bool in_success) :
 		Header{ sizeof(SCCreateRoom), PacketType::SC_CREATE_ROOM },
-		success{ _success }
+		success{ in_success }
 	{
 	}
 };
@@ -166,14 +177,14 @@ struct CSCreateRoom : Header
 	char password[21]{};
 
 	CSCreateRoom() = default;
-	CSCreateRoom(const char* _name, bool _hasPassword, const char* _password = "") :
+	CSCreateRoom(const char* in_name, bool in_hasPassword, const char* in_password = "") :
 		Header{ sizeof(CSCreateRoom), PacketType::CS_CREATE_ROOM },
-		hasPassword{ _hasPassword }
+		hasPassword{ in_hasPassword }
 	{
-		strncpy_s(name, _name, sizeof(name) - 1);
-		if (_hasPassword && _password != nullptr)
+		strncpy_s(name, in_name, sizeof(name) - 1);
+		if (in_hasPassword && in_password != nullptr)
 		{
-			strncpy_s(password, _password, sizeof(password) - 1);
+			strncpy_s(password, in_password, sizeof(password) - 1);
 		}
 	}
 };
@@ -190,11 +201,11 @@ struct SCJoinRoom : Header
 	uint64 hostID{};
 	uint64 MyID{};
 	SCJoinRoom() = default;
-	SCJoinRoom(const bool _success, const uint64 _hostID = 0, const uint64 _myID = 0) :
+	SCJoinRoom(const bool in_success, const uint64 in_hostID = 0, const uint64 in_myID = 0) :
 		Header{ sizeof(SCJoinRoom), PacketType::SC_JOIN_ROOM },
-		success{ _success },
-		hostID{ _hostID },
-		MyID{ _myID }
+		success{ in_success },
+		hostID{ in_hostID },
+		MyID{ in_myID }
 	{
 	}
 };
@@ -205,13 +216,13 @@ struct CSJoinRoom : Header
 	uint32 roomID{};
 	char password[21]{};
 	CSJoinRoom() = default;
-	CSJoinRoom(const uint32 _roomID, const char* _password = "") :
+	CSJoinRoom(const uint32 in_roomID, const char* in_password = "") :
 		Header{ sizeof(CSJoinRoom), PacketType::CS_JOIN_ROOM },
-		roomID{ _roomID }
+		roomID{ in_roomID }
 	{
-		if (_password != nullptr)
+		if (in_password != nullptr)
 		{
-			strncpy_s(password, _password, sizeof(password) - 1);
+			strncpy_s(password, in_password, sizeof(password) - 1);
 		}
 	}
 };
@@ -225,10 +236,10 @@ struct SCReady : Header
 	uint64 id{};
 	bool ready{ false };
 	SCReady() = default;
-	SCReady(const uint64 _id, const bool _ready) :
+	SCReady(const uint64 in_id, const bool in_ready) :
 		Header{ sizeof(SCReady), PacketType::SC_READY },
-		id{ _id },
-		ready{ _ready }
+		id{ in_id },
+		ready{ in_ready }
 	{
 	}
 };
@@ -242,9 +253,9 @@ struct CSReady : Header
 {
 	bool ready{ false };
 	CSReady() = default;
-	CSReady(const bool _ready) :
+	CSReady(const bool in_ready) :
 		Header{ sizeof(CSReady), PacketType::CS_READY },
-		ready{ _ready }
+		ready{ in_ready }
 	{
 	}
 };
@@ -259,9 +270,9 @@ struct SCStartGame : Header
 {
 	bool start{ false };
 	SCStartGame() = default;
-	SCStartGame(const bool _start) :
+	SCStartGame(const bool in_start) :
 		Header{ sizeof(SCStartGame), PacketType::SC_START_GAME },
-		start{ _start }
+		start{ in_start }
 	{
 	}
 };
@@ -286,9 +297,9 @@ struct SCChat : Header
 {
 	uint64 id{};
 	SCChat() = default;
-	SCChat(const uint64 _id, const uint16 _size) :
-		Header{ static_cast<uint16>(sizeof(SCChat) + _size), PacketType::SC_CHAT },
-		id{ _id }
+	SCChat(const uint64 in_id, const uint16 in_size) :
+		Header{ static_cast<uint16>(sizeof(SCChat) + in_size), PacketType::SC_CHAT },
+		id{ in_id }
 	{
 	}
 };
@@ -301,15 +312,16 @@ struct SCChat : Header
 struct CSChat : Header
 {
 	CSChat() = default;
-	CSChat(const uint16 _size) :
-		Header{ static_cast<uint16>(sizeof(CSChat) + _size), PacketType::CS_CHAT }
+	CSChat(const uint16 in_size) :
+		Header{ static_cast<uint16>(sizeof(CSChat) + in_size), PacketType::CS_CHAT }
 	{
 	}
 };
 
 // Param:
 //	Vec3f dir
-// 클라이언트 로그인 요청
+// Brief:
+//  클라이언트 로그인 요청
 struct SCSpawnObject : Header
 {
 	uint64 objectID{};
@@ -317,11 +329,11 @@ struct SCSpawnObject : Header
 	Vec3f dir{};
 
 	SCSpawnObject() = default;
-	SCSpawnObject(const uint64 _objectID, const Vec3f& _pos, const Vec3f& _dir) :
+	SCSpawnObject(const uint64 in_objectID, const Vec3f& in_pos, const Vec3f& in_dir) :
 		Header{ sizeof(SCSpawnObject), PacketType::SC_SPAWN_OBJECT },
-		objectID{ _objectID },
-		pos{ _pos },
-		dir{ _dir }
+		objectID{ in_objectID },
+		pos{ in_pos },
+		dir{ in_dir }
 	{
 	}
 };
@@ -339,12 +351,12 @@ struct SCMovePlayer : Header
 	uint8 state{};
 
 	SCMovePlayer() = default;
-	SCMovePlayer(const uint64 _id, const Vec3f& _pos, const Vec3f& _dir, const uint8 _state) :
+	SCMovePlayer(const uint64 in_id, const Vec3f& in_pos, const Vec3f& in_dir, const uint8 in_state) :
 		Header{ sizeof(SCMovePlayer), PacketType::SC_MOVE_PLAYER },
-		id{ _id },
-		pos{ _pos },
-		dir{ _dir },
-		state{ _state }
+		id{ in_id },
+		pos{ in_pos },
+		dir{ in_dir },
+		state{ in_state }
 	{
 	}
 };
@@ -361,15 +373,88 @@ struct CSMovePlayer : Header
 	uint8 state{};
 
 	CSMovePlayer() = default;
-	CSMovePlayer(const Vec3f& _pos, const Vec3f& _dir, const uint8 _state) :
+	CSMovePlayer(const Vec3f& in_pos, const Vec3f& in_dir, const uint8 in_state) :
 		Header{ sizeof(CSMovePlayer), PacketType::CS_MOVE_PLAYER },
-		pos{ _pos },
-		dir{ _dir },
-		state{ _state }
+		pos{ in_pos },
+		dir{ in_dir },
+		state{ in_state }
 	{
 	}
 };
 
+
+// Param:
+//  uint64 id
+//  Vec3f pos
+struct SCTeleport: Header
+{
+	uint64 id{};
+	Vec3f pos{};
+	SCTeleport() = default;
+	SCTeleport(const uint64 in_id, const Vec3f& in_pos) :
+		Header{ sizeof(SCTeleport), PacketType::SC_TELEPORT },
+		id{ in_id },
+		pos{ in_pos }
+	{
+	}
+};
+
+// Param:
+//  uint64 id : 아이템을 사용하는 주체 id
+//  uint64 targetID : 아이템을 적용하는 대상
+//  ItemType itemType : 사용하는 아이템의 타입, 실패 시 ItemType::None 반환
+//  
+struct SCUseItem : Header
+{
+	uint64 id{};
+	uint64 targetID{};
+
+	ItemType itemType{ ItemType::None };
+
+	SCUseItem() = default;
+	SCUseItem(const uint64 in_id, const uint64 in_targetID, const ItemType in_itemType) :
+		Header{ sizeof(SCUseItem), PacketType::SC_USE_ITEM },
+		id{ in_id },
+		targetID{ in_targetID },
+		itemType{ in_itemType }
+	{
+	}
+};
+
+
+// Param:
+//  uint64 targetID : 아이템을 적용하는 대상
+//  ItemType itemType : 사용하는 아이템의 타입
+struct CSUseItem : Header
+{
+	uint64 targetID{};
+
+	ItemType itemType{ ItemType::None };
+
+	CSUseItem() = default;
+	CSUseItem(const uint64 in_targetID, const ItemType in_itemType) :
+		Header{ sizeof(CSUseItem), PacketType::CS_USE_ITEM },
+		targetID{ in_targetID },
+		itemType{ in_itemType }
+	{
+	}
+};
+
+struct SCDamage : Header
+{
+	uint64 attakerID{};
+	uint64 targetID{};
+	float damage{};
+
+	SCDamage() = default;
+	SCDamage(const uint64 in_attakerID, const uint64 in_targetID, const float in_damage) :
+		Header{ sizeof(SCDamage), PacketType::SC_DAMAGE },
+		attakerID{ in_attakerID },
+		targetID{ in_targetID },
+		damage{ in_damage }
+	{
+	}
+};
 
 #pragma pack(pop)
 COMMON_END

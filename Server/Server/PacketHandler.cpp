@@ -66,6 +66,14 @@ void PacketHandler::Init()
 		}
 	);
 
+	RegisterHandler<Common::CSUseItem>(
+		Common::PacketType::CS_USE_ITEM,
+		[](SessionPtr session, const auto& packet)
+		{
+			HandleUseItem(session, packet);
+		}
+	);
+
 	// dynamic handler µî·Ï
 
 	RegisterDynamicHandler<Common::CSChat>(
@@ -75,6 +83,7 @@ void PacketHandler::Init()
 			HandleChat(session, packet, payload, payload_size);
 		}
 	);
+
 }
 
 void PacketHandler::HandlePacket(SessionPtr session, const RecvBuffer& buffer)
@@ -183,6 +192,14 @@ void PacketHandler::HandleStartGame(SessionPtr session, const Common::CSStartGam
 	if (auto room{ session->GetRoom() }; nullptr != room)
 	{
 		room->HandleStart(session);
+	}
+}
+
+void PacketHandler::HandleUseItem(SessionPtr session, const Common::CSUseItem& packet)
+{
+	if (auto room{ session->GetRoom() }; nullptr != room)
+	{
+		room->HandleUseItem(session, packet);
 	}
 }
 
