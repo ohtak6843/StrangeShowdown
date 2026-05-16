@@ -6,6 +6,7 @@
 #include "Character/Player/STPlayerBase.h"
 #include "Components/WidgetComponent.h"
 #include "Component/STTargetIndicatorComponent.h"
+#include "Manager/STDataManager.h"
 #include "STFieldPlayer.generated.h"
 
 /**
@@ -30,7 +31,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<USTTargetIndicatorComponent> TargetIndicatorComponent;
 
+	void Init(const FPlayerInfo& PlayerInfo);
+
+	// getters
+public:
+	uint64 GetPlayerID() const { return PlayerID; }
+
 private:
+
+	uint64 PlayerID{};
 
 	UPROPERTY()
 	APlayerCameraManager* CachedCameraManager = nullptr;

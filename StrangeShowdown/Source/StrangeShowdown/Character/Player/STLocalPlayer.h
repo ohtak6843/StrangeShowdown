@@ -212,6 +212,10 @@ private:
 	class ULineBatchComponent* LineBatcher;
 
 // Network Section
+public:
+	void Init();
+
+
 private:
 	void SendMovePacket(const float DeltaTime);
 

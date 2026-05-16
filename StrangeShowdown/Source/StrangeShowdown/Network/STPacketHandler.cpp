@@ -82,6 +82,22 @@ STPacketHandler::STPacketHandler()
 			HandleStartGame(Packet);
 		}
 	);
+
+	RegisterHandler<Common::SCUseItem>(
+		Common::PacketType::SC_USE_ITEM,
+		[this](const auto& Packet)
+		{
+			HandleUseItem(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCDamage>(
+		Common::PacketType::SC_DAMAGE,
+		[this](const auto& Packet)
+		{
+			HandleDamage(Packet);
+		}
+	);
 }
 
 STPacketHandler::~STPacketHandler()
@@ -100,83 +116,56 @@ void STPacketHandler::HandlePacket(const TArray<uint8>& Data)
 
 void STPacketHandler::HandleSpawnObject(const Common::SCSpawnObject& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleSpawn(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Spawn Success"));
 }
 
 void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleMove(Packet);
 }
 
 void STPacketHandler::HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleGiveRoomList(Packet, PayloadPtr, PayloadSize);
 }
 
 void STPacketHandler::HandleReady(const Common::SCReady& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleReady(Packet);
 }
 
 void STPacketHandler::HandleStartGame(const Common::SCStartGame& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleStartGame(Packet);
 }
 
 void STPacketHandler::HandleChat(const Common::SCChat& Packet, const uint8* PayloadPtr, const uint16 PayloadSize)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleChat(Packet, PayloadPtr, PayloadSize);	
 }
 
 void STPacketHandler::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleCreateRoom(Packet);
 }
 
 void STPacketHandler::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	GameInstance->HandleJoinRoom(Packet);
-	UE_LOG(LogTemp, Log, TEXT("Room Join Success. roomID: %s"), Packet.success ? TEXT("true") : TEXT("false"));
 }
 
 void STPacketHandler::HandleLogin(const Common::SCLogin& Packet)
 {
-	if (nullptr == GameInstance)
-	{
-		return;
-	}
 	UE_LOG(LogTemp, Log, TEXT("Login Success"));
+}
+
+void STPacketHandler::HandleUseItem(const Common::SCUseItem& Packet)
+{
+	GameInstance->HandleUseItem(Packet);
+}
+
+void STPacketHandler::HandleDamage(const Common::SCDamage& Packet)
+{
+	GameInstance->HandleDamage(Packet);
 }

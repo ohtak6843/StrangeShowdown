@@ -185,6 +185,12 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 		return;
 	}
 
+	if (0 == packet.targetID)
+	{
+		return;
+
+	}
+
 	switch (packet.itemType)
 	{
 		case Common::ItemType::Gun:
@@ -192,6 +198,7 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 			// todo: 검증
 			//  타겟 존재 여부
 			//  아이템 사용 가능 여부
+
 
 			// 아이템 사용 패킷 전달
 			Common::SCUseItem use_item_packet{

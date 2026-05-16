@@ -28,6 +28,8 @@ private:
 	void HandleLogin(const Common::SCLogin& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
+	void HandleUseItem(const Common::SCUseItem& Packet);
+	void HandleDamage(const Common::SCDamage& Packet);
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
@@ -40,8 +42,13 @@ private:
 	{
 		HandlerMap.Add(
 			Type,
-			[LogicFunc](const TArray<uint8>& Data)
+			[this, LogicFunc](const TArray<uint8>& Data)
 			{
+				if (nullptr == GameInstance)
+				{
+					return;
+				}
+
 				T Packet{ STSerializer::Deserialize<T>(Data) };
 				LogicFunc(Packet);
 			}
@@ -54,11 +61,15 @@ private:
 	{
 		HandlerMap.Add(
 			Type,
-			[LogicFunc](const TArray<uint8>& Data)
+			[this, LogicFunc](const TArray<uint8>& Data)
 			{
 				// 방어: 버퍼 크기가 최소 헤더 크기도 안 되면 무시
 				const uint16 PacketSize{ sizeof(T) };
 				if (Data.Num() < sizeof(T))
+				{
+					return;
+				}
+				if (nullptr == GameInstance)
 				{
 					return;
 				}

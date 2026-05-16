@@ -51,6 +51,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void SetIsActive(bool isActive);
 
+
+	// network methods
+public:
+
+	// 게임 시작 전 플레이어의 스탯 초기화
+	void InitPlayerStats();
+
+
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")

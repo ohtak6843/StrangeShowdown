@@ -85,6 +85,8 @@ public:
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
+	void HandleUseItem(const Common::SCUseItem& Packet);
+	void HandleDamage(const Common::SCDamage& Packet);
 
 	// 동적
 public:
@@ -107,14 +109,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void ChangeWorld(const FText& Level);
 
-	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Chat(const FText& Message);
 
-	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Ready(bool Value);
 
-	UFUNCTION(BlueprintCallable, Category = "Network")
 	void StartGame();
+	
+	void UseItem(uint64 TargetID, Common::ItemType ItemID);
+
+
 
 
 
@@ -143,6 +146,9 @@ public:
 	UFUNCTION(Exec)
 	void DevStartGame();
 
+	UFUNCTION(Exec)
+	void DevUseItem(uint32 TargetID, uint32 ItemType);
+
 
 	// --
 	// util method
@@ -150,9 +156,9 @@ public:
 public:
 	inline void SendPacket(const TArray<uint8>& data);
 
-	// brief:
-	//  레벨이 로드된 후 호출되는 함수.
-	//  새로운 객체를 만들고, 기존 객체를 초기화하는 등의 작업을 수행.
+
+	// 레벨이 로드된 후 호출되는 함수.
+	// 새로운 객체를 만들고, 기존 객체를 초기화하는 등의 작업을 수행.
 	void OnLevelLoaded(UWorld* LoadedWorld);
 
 

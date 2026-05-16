@@ -16,6 +16,8 @@ ASTFieldPlayer::ASTFieldPlayer()
 
 	// Target Indicator Component
 	TargetIndicatorComponent = CreateDefaultSubobject<USTTargetIndicatorComponent>(TEXT("TargetIndicatorComponent"));
+
+	UE_LOG(LogTemp, Warning, TEXT("ASTFieldPlayer Constructor called"));
 }
 
 void ASTFieldPlayer::Tick(float DeltaTime)
@@ -58,3 +60,9 @@ void ASTFieldPlayer::BeginPlay()
 	}
 }
 
+void ASTFieldPlayer::Init(const FPlayerInfo& PlayerInfo)
+{
+	PlayerID = PlayerInfo.PlayerID;
+
+	StatComp->InitPlayerStats();
+}

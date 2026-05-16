@@ -61,6 +61,8 @@ public:
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
+	void HandleDamage(const Common::SCDamage& Packet);
+	void HandleUseItem(const Common::SCUseItem& Packet);
 
 	// 동적
 	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);
@@ -72,17 +74,24 @@ public:
 	// --
 public:
 	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
+	void OnLevelChanged();
+
+
+private:
+	// 레벨이 바뀌었을 때 기존 플레이어 객체들을 새로 만드는 함수.
 	void RefreshPlayers();
 	// 본인 플레이어를 호스트 플레이어로 변경
 	void InitController();
+	// 레벨이 로드 완료된 후 본인의 플레이어 객체를 가져오는 함수
+	void GetMyPlayer();
 
 
 	// --
 	// getter and setter
 	// --
 public:
-	bool GetLoddingLevel() const { return bIsInGame; }
-	void SetLoadingLevel(bool Value) { bIsInGame = Value; }
+	//bool GetLoddingLevel() const { return bIsInGame; }
+	//void SetLoadingLevel(bool Value) { bIsInGame = Value; }
 
 	uint64 GetHostID() const { return HostID; }
 
@@ -95,7 +104,7 @@ public:
 private:
 	// PlayerID로 플레이어 객체를 반환하는 함수
 	PlayerWeakPtr GetPlayer(const uint64 PlayerID) const;
-	ASTPlayerBase* SpawnPlayer(
+	ASTPlayerBase* SpawnFieldPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,
 		const FPlayerInfo& PlayerInfo
@@ -140,5 +149,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
 	TSubclassOf<ASTPlayerBase> LobbyFieldPlayerClass;
+
 
 };
