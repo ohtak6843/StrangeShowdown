@@ -39,6 +39,7 @@ protected:
 
 #pragma region Stat Section
 public:
+	UFUNCTION()
 	void UpdateStat();
 
 protected:
