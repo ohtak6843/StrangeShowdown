@@ -48,7 +48,7 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	session->DoSend(join_packet);
 
 	// 다른 플레이어에게 스폰 패킷 전달
-	Common::SCSpawnObject move_object_packet{
+	Common::SCSpawnObject spawn_packet{
 		id,
 		player->GetPosition(),
 		player->GetDirection(),
@@ -61,8 +61,8 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 			continue;
 		}
 
-		// 다른 플레이어에게 내 위치 전달
-		other_player->GetOwnerSession()->DoSend(move_object_packet);
+		// 다른 플레이어에게 스폰 패킷 전달
+		other_player->GetOwnerSession()->DoSend(spawn_packet);
 
 		Common::SCSpawnObject other_spawn_packet{
 			other_id,
@@ -101,14 +101,7 @@ void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 		packet.ready
 	};
 
-	for (const auto& [other_id, other_player] : _players)
-	{
-		if (other_id == id)
-		{
-			continue;
-		}
-		other_player->GetOwnerSession()->DoSend(ready_packet);
-	}
+	Broadcast(ready_packet, id);
 }
 
 void Room::HandleStart(const SessionPtr session)
@@ -181,16 +174,55 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 	auto buffer{ Serializer::Serialize(chat_packet, additional_data) };
 
 	// 모든 다른 플레이어에게 직렬화된 데이터 전송
-	for (const auto& [other_id, other_player] : _players)
-	{
-		if (other_id == id)
-		{
-			continue;
-		}
-		other_player->GetOwnerSession()->DoSend(buffer);
-	}
+	Broadcast(buffer, id);
 }
 
+void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet)
+{
+	// 예외 처리
+	if (RoomState::INGAME != _state)
+	{
+		return;
+	}
+
+	if (0 == packet.targetID)
+	{
+		return;
+
+	}
+
+	switch (packet.itemType)
+	{
+		case Common::ItemType::Gun:
+		{
+			// todo: 검증
+			//  타겟 존재 여부
+			//  아이템 사용 가능 여부
+
+
+			// 아이템 사용 패킷 전달
+			Common::SCUseItem use_item_packet{
+				session->GetSessionID(),
+				packet.targetID,
+				packet.itemType
+			};
+			
+			Broadcast(use_item_packet);
+			
+			// 아이템 효과 적용
+			Common::SCDamage damage_packet{
+				session->GetSessionID(),
+				packet.targetID,
+				10.f
+			};
+			
+			Broadcast(damage_packet);
+		}
+		break;
+	default:
+		break;
+	}
+}
 
 void Room::Update()
 {

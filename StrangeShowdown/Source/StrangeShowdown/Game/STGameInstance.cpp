@@ -195,6 +195,20 @@ void USTGameInstance::HandleStartGame(const Common::SCStartGame& Packet)
 	}
 }
 
+void USTGameInstance::HandleDamage(const Common::SCDamage& Packet)
+{
+	// 여기부터 작업하시오
+	DataManager->HandleDamage(Packet);
+	UE_LOG(LogTemp, Log, TEXT("Damage: TargetID=%d, Damage=%.2f"), Packet.targetID, Packet.damage);
+}
+
+
+void USTGameInstance::HandleUseItem(const Common::SCUseItem& Packet)
+{
+	DataManager->HandleUseItem(Packet);
+	UE_LOG(LogTemp, Log, TEXT("Use ID=%d, Use Item: target ID=%d, ItemID=%d"), Packet.id, Packet.targetID, static_cast<uint32>(Packet.itemType));
+}
+
 void USTGameInstance::GetRoomList()
 {
 	Common::CSGetRoomList GetRoomListPacket{};
@@ -239,7 +253,7 @@ void USTGameInstance::CreateRoom(const FText& Name, const FText& Password)
 
 void USTGameInstance::ChangeWorld(const FText& Level)
 {
-	DataManager->SetLoadingLevel(true);
+	//DataManager->SetLoadingLevel(true);
 
 	FName LevelName(*Level.ToString());
 	UGameplayStatics::OpenLevel(this, LevelName);
@@ -276,6 +290,14 @@ void USTGameInstance::StartGame()
 	auto Packet{ STSerializer::Serialize(StartGamePacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("StartGame called"));
+}
+
+void USTGameInstance::UseItem(uint64 TargetID, Common::ItemType ItemType)
+{
+	Common::CSUseItem UseItemPacket{ TargetID, ItemType };
+	auto Packet{ STSerializer::Serialize(UseItemPacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("UseItem called: ItemType=%d"), static_cast<uint32>(ItemType));
 }
 
 void USTGameInstance::DevGetRoomList()
@@ -317,6 +339,11 @@ void USTGameInstance::DevStartGame()
 	StartGame();
 }
 
+void USTGameInstance::DevUseItem(uint32 TargetID, uint32 ItemType)
+{
+	UseItem(static_cast<uint64>(TargetID), static_cast<Common::ItemType>(ItemType));
+}
+
 void USTGameInstance::SendPacket(const TArray<uint8>& Packet)
 {
 	NetworkManager->SendPacket(Packet);
@@ -332,12 +359,8 @@ void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
-	DataManager->SetLoadingLevel(false);
+	//DataManager->SetLoadingLevel(false);
 
 	// 플레이어 객체 갱신
-	DataManager->RefreshPlayers();
-
-	// 호스트 플레이어 설정 시도
-	DataManager->InitController();
-	
+	DataManager->OnLevelChanged();
 }

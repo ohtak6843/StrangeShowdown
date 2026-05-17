@@ -67,6 +67,8 @@ protected:
 public:
 	void Move(const FVector& Location, const FRotator& Rotator);
 
+
+
 	// Handle Damage when Get Damage Packet from Server
 	virtual void HandleDamage(float DamageAmount) override;
 

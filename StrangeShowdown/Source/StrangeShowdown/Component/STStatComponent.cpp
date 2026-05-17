@@ -2,6 +2,7 @@
 
 
 #include "Component/STStatComponent.h"
+#include "CommonDefine.h"
 
 // Sets default values for this component's properties
 USTStatComponent::USTStatComponent()
@@ -65,4 +66,18 @@ void USTStatComponent::AddPrize(int32 PrizeAmount)
 void USTStatComponent::SetIsActive(bool isActive)
 {
 	bAlive = isActive;
+}
+
+void USTStatComponent::InitPlayerStats()
+{
+	CurrentHp = Common::PlayerConstants::Hp;
+	MaxHp = Common::PlayerConstants::MaxHp;
+	Gold = Common::PlayerConstants::Gold;
+	// armor
+	Kill = 0;
+	// movespeed
+	CurrentStamina = Common::PlayerConstants::Stamina;
+	MaxStamina = Common::PlayerConstants::MaxStamina;
+
+	OnStatChanged.Broadcast();
 }

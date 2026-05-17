@@ -530,6 +530,18 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (HasAnyState(EPlayerState::Aiming) && AttackTraceComp->TracingFieldPlayer)
 			{
 				PistolFire();
+#if NETWORK_ENABLED
+
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->UseItem(
+						AttackTraceComp->TracingFieldPlayer->GetPlayerID(),
+						Common::ItemType::Gun
+					);
+				}
+
+#endif // NETWORK_ENABLED
 			}
 			break;
 		case EItemType::Hammer:
@@ -869,6 +881,12 @@ void ASTLocalPlayer::ActiveStationFirstMapObject()
 void ASTLocalPlayer::ActivePubFirstMapObject()
 {
 	UE_LOG(LogTemp, Log, TEXT("Activated Pub First Map Object"));
+}
+
+void ASTLocalPlayer::Init()
+{
+	StatComp->InitPlayerStats();
+	UE_LOG(LogTemp, Log, TEXT("Player Stats Initialized"));
 }
 
 void ASTLocalPlayer::SendMovePacket(const float DeltaTime)

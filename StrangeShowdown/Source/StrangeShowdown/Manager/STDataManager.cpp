@@ -7,6 +7,8 @@
 #include "Character/STCharacter.h"
 #include "Character/Player/STPlayerBase.h"
 #include "Character/Player/STLobbyFieldPlayer.h"
+#include "Character/Player/STLocalPlayer.h"
+#include "Character/Player/STLobbyLocalPlayer.h"
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Controller/STLobbyController.h"
@@ -51,7 +53,7 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 	};
 
 	// spawn player
-	ASTPlayerBase* Player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo) };
+	ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo) };
 
 	PlayerInfo.Player = Player;
 
@@ -129,6 +131,42 @@ void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
 	}
 }
 
+void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
+{
+	// 본인 플레이어가 데미지를 입었을 경우
+	if (Packet.targetID == MyPlayerInfo.PlayerID)
+	{
+		if (MyPlayerInfo.Player.IsValid())
+		{
+			MyPlayerInfo.Player->HandleDamage(Packet.damage);
+		}
+		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
+		return;
+	}
+
+	// 다른 플레이어가 데미지를 입었을 경우
+	auto Player{ GetPlayer(Packet.targetID) };
+	if (true == Player.IsValid())
+	{
+		Player->HandleDamage(Packet.damage);
+		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
+	}
+
+	
+}
+
+void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
+{
+	// 연출 재생
+}
+
+void USTDataManager::OnLevelChanged()
+{
+	RefreshPlayers();
+	InitController();
+	GetMyPlayer();
+}
+
 void USTDataManager::RefreshPlayers()
 {
 	// blueprint class 예외 처리
@@ -163,7 +201,7 @@ void USTDataManager::RefreshPlayers()
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		// spawn player
-		auto* player{ SpawnPlayer(Transform, SpawnParams, PlayerInfo) };
+		auto* player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo) };
 
 		// playerinfo 업데이트
 		PlayerInfo.Player = player;
@@ -186,6 +224,41 @@ void USTDataManager::InitController()
 	}
 }
 
+void USTDataManager::GetMyPlayer()
+{
+	// 플레이어 폰 가져오기
+	APawn* Pawn{ UGameplayStatics::GetPlayerPawn(GetWorld(), 0) };
+	if (nullptr == Pawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerPawn is null. Cannot get player."));
+		return;
+	}
+
+	// 플레이어 객체가 게임 중인지 로비 중인지에 따라 캐스팅을 다르게 함.
+	if (true == bIsInGame)
+	{
+		auto* Player{ Cast<ASTLocalPlayer>(Pawn) };
+		if (nullptr == Player)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerPawn is not of type ASTLocalPlayer. Cannot get player."));
+			return;
+		}
+		MyPlayerInfo.Player = Player;
+		Player->Init();
+	}
+	else
+	{
+		auto* Player{ Cast<ASTLobbyLocalPlayer>(Pawn) };
+		if (nullptr == Player)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerPawn is not of type ASTLobbyLocalPlayer. Cannot get player."));
+			return;
+		}
+		MyPlayerInfo.Player = Player;
+	}
+
+}
+
 PlayerWeakPtr USTDataManager::GetPlayer(const uint64 PlayerID) const
 {
 	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
@@ -198,7 +271,7 @@ PlayerWeakPtr USTDataManager::GetPlayer(const uint64 PlayerID) const
 	return nullptr;
 }
 
-ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo)
+ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo)
 {
 	ASTPlayerBase* player{ nullptr };
 	if (false == IsValid(GetWorld()))
@@ -207,13 +280,15 @@ ASTPlayerBase* USTDataManager::SpawnPlayer(const FTransform& Transform, const FA
 		return nullptr;
 	}
 
-	if (bIsInGame)
+	if (true == bIsInGame)
 	{
-		player = GetWorld()->SpawnActor<ASTFieldPlayer>(
+		auto* IngamePlayer = GetWorld()->SpawnActor<ASTFieldPlayer>(
 			FieldPlayerClass,
 			Transform,
 			SpawnParams
 		);
+		IngamePlayer->Init(PlayerInfo);
+		player = IngamePlayer;
 		UE_LOG(LogTemp, Log, TEXT("Field Player Spawned"));
 	}
 	else

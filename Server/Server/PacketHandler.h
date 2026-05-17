@@ -60,6 +60,7 @@ private:
 	static void HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet);
 	static void HandleReady(SessionPtr session, const Common::CSReady& packet);
 	static void HandleStartGame(SessionPtr session, const Common::CSStartGame& packet);
+	static void HandleUseItem(SessionPtr session, const Common::CSUseItem& packet);
 
 	// --
 	// dynamic handler

@@ -220,6 +220,10 @@ public:
 	void ActivePubFirstMapObject();
 
 // Network Section
+public:
+	void Init();
+
+
 private:
 	void SendMovePacket(const float DeltaTime);
 
