@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "STStatComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnStatChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class STRANGESHOWDOWN_API USTStatComponent : public UActorComponent
@@ -18,6 +18,7 @@ public:
 	USTStatComponent();
 
 public:
+	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
 
 public:

@@ -137,7 +137,7 @@ void ASTLocalSheriff::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 		InHUDWidget->UpdateStat();
 		InHUDWidget->UpdateQuickSlots();
 
-		StatComp->OnStatChanged.AddUObject(InHUDWidget, &USTHUDWidget::UpdateStat);
+		StatComp->OnStatChanged.AddDynamic(InHUDWidget, &USTHUDWidget::UpdateStat);
 		QuickSlotComp->OnQuickSlotUpdated.AddUObject(InHUDWidget, &USTHUDWidget::UpdateQuickSlots);
 	}
 }
