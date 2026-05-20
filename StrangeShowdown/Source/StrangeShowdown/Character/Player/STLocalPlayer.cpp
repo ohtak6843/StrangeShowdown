@@ -486,12 +486,14 @@ void ASTLocalPlayer::PistolAim(const FInputActionValue& Value)
 	if (bIsAiming)
 	{
 		RemoveState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::Idle);
 		bUseControllerRotationYaw = false;
 	}
 	else
 	{
 		AddState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::Aiming);
 		bUseControllerRotationYaw = true;
 
@@ -506,15 +508,19 @@ void ASTLocalPlayer::LookingUp(const FInputActionValue& Value)
 	bool bIsLookingUp = HasAnyState(EPlayerState::LookingUp);
 	if (bIsLookingUp)
 	{
+		RemoveState(EPlayerState::Aiming);
 		RemoveState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::Idle);
 		bUseControllerRotationYaw = false;
+		OnLookingUpStateDeactivated.Broadcast();
 	}
 	else
 	{
+		RemoveState(EPlayerState::Aiming);
 		AddState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::LookingUp);
 		bUseControllerRotationYaw = true;
+		OnLookingUpStateActivated.Broadcast();
 	}
 }
 

@@ -11,6 +11,9 @@
 #include "Interface/STAnimAttackInterface.h"
 #include "STLocalPlayer.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLookingUpStateActivated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLookingUpStateDeactivated);
+
 UCLASS()
 class STRANGESHOWDOWN_API ASTLocalPlayer : public ASTPlayerBase, public ISTAnimAttackInterface, public ISTCharacterHUDInterface
 {
@@ -26,6 +29,13 @@ public:
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+
+// DELEGATE Section
+public:
+	UPROPERTY(BlueprintAssignable, Category = Delegate)
+	FOnLookingUpStateActivated OnLookingUpStateActivated;
+	UPROPERTY(BlueprintAssignable, Category = Delegate)
+	FOnLookingUpStateDeactivated OnLookingUpStateDeactivated;
 
 // HUD Section
 public:

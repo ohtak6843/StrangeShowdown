@@ -23,8 +23,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+protected:
 	virtual void BeginPlay() override;
 
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<class USTWidgetComponent> StatWidgetComponent;
 	
@@ -33,7 +35,7 @@ public:
 
 	void Init(const FPlayerInfo& PlayerInfo);
 
-	// getters
+// getters
 public:
 	uint64 GetPlayerID() const { return PlayerID; }
 
