@@ -614,7 +614,8 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
-
+	
+	// Hit Check
 	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		Start,
@@ -626,6 +627,7 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 	if (!bIsHit)
 		return;
 
+	// PickUp Item Logic
 	ASTPickupItem* PickupItem = Cast<ASTPickupItem>(HitResult.GetActor());
 	if (!PickupItem || !InventoryComp || !PickupItem->ItemData)
 		return;
