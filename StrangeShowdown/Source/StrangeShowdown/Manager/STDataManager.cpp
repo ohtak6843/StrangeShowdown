@@ -17,6 +17,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Interface/STControllerHUDInterface.h"
 
+#include "Engine/DamageEvents.h"
+
 
 
 
@@ -138,7 +140,7 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 	{
 		if (MyPlayerInfo.Player.IsValid())
 		{
-			MyPlayerInfo.Player->HandleDamage(Packet.damage);
+			MyPlayerInfo.Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
 		}
 		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
 		return;
@@ -148,7 +150,7 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 	auto Player{ GetPlayer(Packet.targetID) };
 	if (true == Player.IsValid())
 	{
-		Player->HandleDamage(Packet.damage);
+		Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
 		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
 	}
 
