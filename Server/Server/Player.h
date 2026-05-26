@@ -25,7 +25,7 @@ public:
 		// todo: state에 따른 status 초기화
 
 		hp = Common::PlayerConstants::Hp;
-		stamina = Common::PlayerConstants::Stamina;
+		stamina = 100.f;
 		attack = Common::PlayerConstants::Attack;
 		bullet = Common::PlayerConstants::Bullet;
 		gold = Common::PlayerConstants::Gold;

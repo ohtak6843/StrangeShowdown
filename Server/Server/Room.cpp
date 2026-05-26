@@ -185,12 +185,6 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 		return;
 	}
 
-	if (0 == packet.targetID)
-	{
-		return;
-
-	}
-
 	// 아이템 사용 가능 여부 검사 및 사용 처리
 	auto player{ session->GetPlayer() };
 	if (nullptr == player)
@@ -216,9 +210,13 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 
 	// 효과 적용
 	const auto& player_status{ player->GetStatus() };
+
+	// debug: 아이템 패킷 종류 출력
+	std::println("Player {} used item {} on target {}", session->GetSessionID(), static_cast<int>(packet.itemType), packet.targetID);
+	std::println("Player {} status: stamina {}, bullet {}", session->GetSessionID(), player_status.stamina, player_status.bullet);
 	switch (packet.itemType)
 	{
-		case Common::ItemType::Gun:
+		case Common::ItemType::Pistol:
 		{
 
 
@@ -246,17 +244,15 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 				player_status.bullet,
 				target->GetItemCount(packet.itemType)
 			};
-			
-			
 			session->DoSend(use_item_packet_self);
 			
+
 			// 아이템 효과 적용 패킷 전달
 			Common::SCDamage damage_packet{
 				session->GetSessionID(),
 				packet.targetID,
 				10.f
 			};
-			
 			Broadcast(damage_packet);
 		}
 		break;

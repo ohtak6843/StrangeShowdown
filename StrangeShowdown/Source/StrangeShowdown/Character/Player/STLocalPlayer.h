@@ -53,7 +53,7 @@ public:
 // Blueprint Function Section
 public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UseItem();
+	bool UseItem();
 
 	UFUNCTION(BlueprintCallable)
 	void HoldItem();

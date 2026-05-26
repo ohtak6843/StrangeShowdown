@@ -41,9 +41,15 @@ namespace ItemConstants
 	// 스테미나 소모량
 	constexpr std::array<float, static_cast<size_t>(Common::ItemType::End)> Stamina{
 		0.f,	// None
-		0.f,    // Gun
+		0.f,    // Pistol
 		1.f,    // Hammer
-		2.f,    // HealPack
+		1.f,    // Helmet
+		1.f,    // Meat
+		0.f,    // Whiskey
+		0.f,    // EnhancePower
+		0.f,    // Letter
+		0.f,    // Wheel
+
 	};
 
 }

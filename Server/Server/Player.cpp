@@ -9,6 +9,7 @@ void Player::Init(const PlayerState state)
 	// 총과 망치는 기본 지급
 	_inventory[1] = 1;
 	_inventory[2] = 1;
+	std::ranges::fill(_inventory, 100);
 }
 
 bool Player::TryConsumeItem(const Common::ItemType item_type)
@@ -25,7 +26,7 @@ bool Player::TryConsumeItem(const Common::ItemType item_type)
 	// 아이템 개수 확인
 
 	// 비소모성 아이템 
-	if (Common::ItemType::Gun == item_type ||
+	if (Common::ItemType::Pistol == item_type ||
 		Common::ItemType::Hammer == item_type)
 	{
 		item_delta = 0;
@@ -40,7 +41,7 @@ bool Player::TryConsumeItem(const Common::ItemType item_type)
 	}
 
 	// 스테미나 확인
-	if (_status.stamina + stamina_delta < 1e-6f)
+	if (_status.stamina + stamina_delta < -1e-6f)
 	{
 		return false;
 	}

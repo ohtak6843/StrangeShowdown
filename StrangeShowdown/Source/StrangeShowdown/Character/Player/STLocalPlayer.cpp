@@ -292,18 +292,17 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	PoseElapsedTime = 0.f;
 }
 
-void ASTLocalPlayer::UseItem()
+bool ASTLocalPlayer::UseItem()
 {
 	if (!InventoryComp || !QuickSlotComp)
-		return;
+		return false;
 
 	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
 	if (QuickSlotIndex == INDEX_NONE)
-		return;
-
+		return false;
 	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
 	if (InventorySlotIndex == INDEX_NONE)
-		return;
+		return false;
 
 	// 결과
 	FSTItemSlot OutSlot;
@@ -359,6 +358,12 @@ void ASTLocalPlayer::UseItem()
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
+	
+	if (EItemUseType::CanUse == Result)
+	{
+		return true;
+	}
+	return false;
 }
 
 void ASTLocalPlayer::HoldItem()
@@ -533,6 +538,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (HasAnyState(EPlayerState::Aiming) && AttackTraceComp->TracingFieldPlayer)
 			{
 				PistolFire();
+
 #if NETWORK_ENABLED
 
 				auto GameInstance{ GetGameInstance<USTGameInstance>() };
@@ -540,7 +546,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 				{
 					GameInstance->UseItem(
 						AttackTraceComp->TracingFieldPlayer->GetPlayerID(),
-						Common::ItemType::Gun
+						/*static_cast<Common::ItemType>(CurrentItemData->ItemType)*/
+						Common::ItemType::Pistol
 					);
 				}
 
@@ -552,7 +559,19 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			{
 				HammerSmash();
 
-				// todo cham: 해머 성공 시
+
+#if NETWORK_ENABLED
+
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->UseItem(
+						0,
+						static_cast<Common::ItemType>(CurrentItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 			}
 			else
 			{
@@ -562,6 +581,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
 				}
 			}
+
+
 			break;
 		case EItemType::Helmet:
 		case EItemType::Meat:
@@ -569,8 +590,22 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::EnhancePower:
 		case EItemType::Letter:
 		case EItemType::Wheel:
-			UseItem();
-			// todo cham: 반환
+		{
+			auto ItemResult{ UseItem() };
+
+#if NETWORK_ENABLED
+
+			auto GameInstance{ GetGameInstance<USTGameInstance>() };
+			if (GameInstance && true == ItemResult)
+			{
+				GameInstance->UseItem(
+					0,
+					static_cast<Common::ItemType>(CurrentItemData->ItemType)
+				);
+			}
+
+#endif // NETWORK_ENABLED
+		}
 			break;
 	}
 }

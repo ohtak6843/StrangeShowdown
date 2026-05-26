@@ -5,19 +5,20 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "STItemUseEffect.h"
+#include "CommonEnum.h"
 #include "STItemDataAssetBase.generated.h"
 
 UENUM()
 enum class EItemType : uint16
 {
-	Pistol				UMETA(DisplayName = "Pistol"),
-	Hammer				UMETA(DisplayName = "Hammer"),
-	Helmet				UMETA(DisplayName = "Helmet"),
-	Meat				UMETA(DisplayName = "Meat"),
-	Whiskey				UMETA(DisplayName = "Whiskey"),
-	EnhancePower		UMETA(DisplayName = "EnhancePower"),
-	Letter				UMETA(DisplayName = "Letter"),
-	Wheel				UMETA(DisplayName = "Wheel"),
+	Pistol					UMETA(DisplayName = "Pistol"),
+	Hammer	= Common::ItemType::Hammer				UMETA(DisplayName = "Hammer"),
+	Helmet	= Common::ItemType::Helmet				UMETA(DisplayName = "Helmet"),
+	Meat	= Common::ItemType::Meat				UMETA(DisplayName = "Meat"),
+	Whiskey	= Common::ItemType::Whiskey				UMETA(DisplayName = "Whiskey"),
+	EnhancePower	= Common::ItemType::EnhancePower		UMETA(DisplayName = "EnhancePower"),
+	Letter	= Common::ItemType::Letter				UMETA(DisplayName = "Letter"),
+	Wheel	= Common::ItemType::Wheel				UMETA(DisplayName = "Wheel"),
 };
 
 UCLASS(BlueprintType, Blueprintable)
