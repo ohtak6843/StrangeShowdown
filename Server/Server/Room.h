@@ -36,14 +36,21 @@ public:
 	void HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet);
 
 	// dynamic 
-
 	void HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size);
+
+
+
+	// --
+	// item method
+	// --
+public:
+	bool UseGun(const PlayerPtr target);
 
 
 
 
 	// --
-	// method
+	// network method
 	// -- 
 public:
 	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }

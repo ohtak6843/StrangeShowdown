@@ -43,6 +43,14 @@ public:
 	void Init(const PlayerState state);
 
 
+	// 아이템을 사용 가능한지 여부 검사하고, 가능 시 사용 처리까지 하는 메서드.
+	// 아이템이 사용 불가능하다면 false를 반환한다.
+	bool TryConsumeItem(const Common::ItemType item_type);
+
+
+public:	
+	
+
 
 	// --
 	// handler method
@@ -68,25 +76,38 @@ public:
 	bool GetReady() const { return _ready; }
 	void SetReady(const bool ready) { _ready = ready; }
 
+	PlayerStatus GetStatus() const { return _status; }
 
+	int GetItemCount(const Common::ItemType item_type) const;
 
 	// --
 	// player ingame variables
 	// --
 private:
+
+	// move
+
 	Vec3f _position{};
 	Vec3f _direction{};
 	uint8 _animationState{};
+
+	// state
+
 	bool _ready{ false };
 
 
-	// --
-	// player 
-	// --
+	// system
 
-	PlayerState _state{ PlayerState::NONE };
+	std::array<int, static_cast<size_t>(Common::ItemType::End)> _inventory{}; 
 	PlayerStatus _status{};
 
+
+	// --
+	// network
+	// --
+
+private:
+	PlayerState _state{ PlayerState::NONE };
 	// owner
 	SessionPtr _ownerSession{ nullptr };
 

@@ -191,25 +191,66 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 
 	}
 
+	// 아이템 사용 가능 여부 검사 및 사용 처리
+	auto player{ session->GetPlayer() };
+	if (nullptr == player)
+	{
+		return;
+	}
+	if (false == player->TryConsumeItem(packet.itemType))
+	{
+		return;
+	}
+
+	// 타겟 대상
+	PlayerPtr target{};
+	auto target_iter{ _players.find(packet.targetID) };
+	if (target_iter == _players.end())
+	{
+		target = nullptr;
+	}
+	else
+	{
+		target = target_iter->second;
+	}
+
+	// 효과 적용
+	const auto& player_status{ player->GetStatus() };
 	switch (packet.itemType)
 	{
 		case Common::ItemType::Gun:
 		{
-			// todo: 검증
-			//  타겟 존재 여부
-			//  아이템 사용 가능 여부
 
 
 			// 아이템 사용 패킷 전달
-			Common::SCUseItem use_item_packet{
+
+			// 다른 플레이어에게 전달하는 아이템 사용 패킷
+			// 사용자의 보유 아이템 개수를 공개하지 않음
+			Common::SCUseItem use_item_packet_other{
 				session->GetSessionID(),
 				packet.targetID,
-				packet.itemType
+				packet.itemType,
+				player_status.stamina,
+				player_status.bullet,
+				-1
+			};
+			Broadcast(use_item_packet_other, session->GetSessionID());
+
+			// 사용자 플레이어에게 전달하는 아이템 사용 패킷
+			// 사용자의 보유 아이템 개수를 공개함
+			Common::SCUseItem use_item_packet_self{
+				session->GetSessionID(),
+				packet.targetID,
+				packet.itemType,
+				player_status.stamina,
+				player_status.bullet,
+				target->GetItemCount(packet.itemType)
 			};
 			
-			Broadcast(use_item_packet);
 			
-			// 아이템 효과 적용
+			session->DoSend(use_item_packet_self);
+			
+			// 아이템 효과 적용 패킷 전달
 			Common::SCDamage damage_packet{
 				session->GetSessionID(),
 				packet.targetID,

@@ -36,6 +36,18 @@ namespace PlayerConstants
 
 }
 
+namespace ItemConstants
+{
+	// 스테미나 소모량
+	constexpr std::array<float, static_cast<size_t>(Common::ItemType::End)> Stamina{
+		0.f,	// None
+		0.f,    // Gun
+		1.f,    // Hammer
+		2.f,    // HealPack
+	};
+
+}
+
 // --
 // room
 // --

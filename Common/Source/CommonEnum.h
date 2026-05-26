@@ -43,6 +43,9 @@ enum class ItemType : uint32
 {
 	None = 0,
 	Gun = 1,
+	Hammer = 2,
+	HealPack = 3,
+	End
 };
 
 

@@ -316,6 +316,7 @@ void ASTLocalPlayer::UseItem()
 		OutSlot
 	);
 
+	// todo cham : 필요시 아이템 사용 결과 출력 분리
 	switch (Result)
 	{
 	case EItemUseType::CanUse:
@@ -340,6 +341,8 @@ void ASTLocalPlayer::UseItem()
 	case EItemUseType::UnValid:
 		break;
 	}
+
+	// todo cham : 아이템 사용 결과에 따른 처리 분리
 
 	if (OutSlot.ItemData)
 	{
@@ -548,6 +551,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (1.0f <= StatComp->CurrentStamina)
 			{
 				HammerSmash();
+
+				// todo cham: 해머 성공 시
 			}
 			else
 			{
@@ -565,6 +570,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::Letter:
 		case EItemType::Wheel:
 			UseItem();
+			// todo cham: 반환
 			break;
 	}
 }
