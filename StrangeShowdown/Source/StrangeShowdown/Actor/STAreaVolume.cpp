@@ -49,7 +49,10 @@ void ASTAreaVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
 	// STLocalPlayer와 충돌했는지 확인
 	if (OtherActor && OtherActor->IsA(ASTLocalPlayer::StaticClass()))
 	{
-		HUDWidget->GetAreaVolumeWidget()->UpdateAreaInfo(AreaType);
+		if (HUDWidget)
+		{
+			HUDWidget->GetAreaVolumeWidget()->UpdateAreaInfo(AreaType);
+		}
 	}
 }
 
@@ -62,7 +65,10 @@ void ASTAreaVolume::OnOverlapEnd(
 	// STLocalPlayer와 충돌이 끝났는지 확인
 	if (OtherActor && OtherActor->IsA(ASTLocalPlayer::StaticClass()))
 	{
-		HUDWidget->GetAreaVolumeWidget()->DeleteAreaInfo(AreaType);
+		if (HUDWidget)
+		{
+			HUDWidget->GetAreaVolumeWidget()->DeleteAreaInfo(AreaType);
+		}
 	}
 }
 
