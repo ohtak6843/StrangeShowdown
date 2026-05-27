@@ -17,6 +17,8 @@ public:
 	// Sets default values for this component's properties
 	USTStatComponent();
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
@@ -52,15 +54,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void SetIsActive(bool isActive);
 
+	void ResetMoveSpeed();
 
-	// network methods
-public:
-
-	// 게임 시작 전 플레이어의 스탯 초기화
-	void InitPlayerStats();
-
-
-	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float CurrentHp;
@@ -103,4 +98,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bAlive;
+
+protected:
+	FTimerHandle MoveSpeedBuffTimerHandle;
+
+// network methods
+public:
+	// 게임 시작 전 플레이어의 스탯 초기화
+	void InitPlayerStats();
 };

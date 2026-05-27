@@ -4,10 +4,24 @@
 #include "Component/STStatComponent.h"
 #include "CommonDefine.h"
 
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 // Sets default values for this component's properties
 USTStatComponent::USTStatComponent()
 {
 	bWantsInitializeComponent = true;
+}
+
+void USTStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().ClearTimer(MoveSpeedBuffTimerHandle);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void USTStatComponent::AddHp(int32 HealAmount)
@@ -36,7 +50,24 @@ void USTStatComponent::AddArmor(int32 ArmorAmount)
 
 void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
 {
+	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+	if (Owner)
+	{
+		Owner->GetCharacterMovement()->MaxWalkSpeed += MoveSpeedAmount;
+	}
+
+	float BuffTime = 5.0f;
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FTimerDelegate TimerDel;
+		TimerDel.BindUObject(this, &USTStatComponent::ResetMoveSpeed);
+		World->GetTimerManager().SetTimer(MoveSpeedBuffTimerHandle, TimerDel, BuffTime, false);
+	}
+
 	MoveSpeed += MoveSpeedAmount;
+
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::AddStamina(int32 StaminaAmount)
@@ -66,6 +97,20 @@ void USTStatComponent::AddPrize(int32 PrizeAmount)
 void USTStatComponent::SetIsActive(bool isActive)
 {
 	bAlive = isActive;
+}
+
+void USTStatComponent::ResetMoveSpeed()
+{
+	float CommonMoveSpeed = 500.f;
+
+	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+	if (Owner)
+	{
+		Owner->GetCharacterMovement()->MaxWalkSpeed = CommonMoveSpeed;
+	}
+
+	MoveSpeed = CommonMoveSpeed;
+	OnStatChanged.Broadcast();
 }
 
 void USTStatComponent::InitPlayerStats()
