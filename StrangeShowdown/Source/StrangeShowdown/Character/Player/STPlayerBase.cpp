@@ -73,6 +73,8 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void ASTPlayerBase::PlayItemUseParticleEffect()
 {
+	// 배열로 사운드 저장해놓기
+
 	if (ItemUseParticleEffect)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ItemUseParticleEffect, GetActorLocation(), FRotator::ZeroRotator);
