@@ -7,6 +7,8 @@
 #include "Animation/STAnimInstance.h"
 #include "CommonDefine.h"
 
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ASTPlayerBase::ASTPlayerBase()
 {
@@ -44,6 +46,10 @@ ASTPlayerBase::ASTPlayerBase()
 	RightHandSkeletalMesh->SetupAttachment(GetMesh());
 }
 
+void ASTPlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
 
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -59,15 +65,18 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	// TODO: Check Death
 	if (StatComp->CurrentHp <= 0.f)
 	{
-		
+
 	}
 
 	return ActualDamage;
 }
 
-void ASTPlayerBase::BeginPlay()
+void ASTPlayerBase::PlayItemUseParticleEffect()
 {
-	Super::BeginPlay();
+	if (ItemUseParticleEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ItemUseParticleEffect, GetActorLocation(), FRotator::ZeroRotator);
+	}
 }
 
 void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)

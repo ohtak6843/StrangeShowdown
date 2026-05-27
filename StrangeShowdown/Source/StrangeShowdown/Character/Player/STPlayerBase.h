@@ -34,9 +34,6 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool SetStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 NewState) { return SetState(static_cast<EPlayerState>(NewState)); }
 
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -62,6 +59,30 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
+
+// Damage Section
+public:
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void ChangeToGhost() {}
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class ASTGhostController> GhostControllerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class ASTLocalGhost> GhostClass;
+
+// Effect Section
+public:
+	UFUNCTION(BlueprintCallable, Category = Effect)
+	void PlayItemUseParticleEffect();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TObjectPtr<UParticleSystem> ItemUseParticleEffect;
 
 // Network Section
 public:

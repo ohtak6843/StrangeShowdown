@@ -26,6 +26,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+// Damage Section
+public:
+	virtual void ChangeToGhost() override;
+
+// Effect Section
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayPistolFireEffect();
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<class USTWidgetComponent> StatWidgetComponent;
