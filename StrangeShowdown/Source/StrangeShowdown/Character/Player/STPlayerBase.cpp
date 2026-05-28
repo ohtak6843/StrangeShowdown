@@ -74,7 +74,7 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 
 	FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
-	CharacterStat.SetCurrentHp(CharacterStat.CurrentHp - ActualDamage);
+	StatComp->SetCurrentHp(CharacterStat.CurrentHp - ActualDamage);
 
 	// TODO: Check Death
 	if (CharacterStat.CurrentHp <= 0.f)

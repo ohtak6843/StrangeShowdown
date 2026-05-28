@@ -28,7 +28,7 @@ bool USTWhiskeyEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 	Super::Use(User, ItemData);
 
 	float StaminaBuffAmount = 1.f;
-	CharacterStat.SetCurrentStamina(CharacterStat.CurrentStamina + StaminaBuffAmount);
+	User->StatComp->SetCurrentStamina(CharacterStat.CurrentStamina + StaminaBuffAmount);
 
 	return true;
 }

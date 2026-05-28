@@ -297,7 +297,7 @@ void ASTLocalPlayer::AttackHitCheck()
 	);
 
 	// 스태미나 감소
-	StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - 1.f);
+	StatComp->SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - 1.f);
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
@@ -368,7 +368,7 @@ bool ASTLocalPlayer::UseItem()
 	if (OutSlot.ItemData)
 	{
 		const int32 Cost = OutSlot.ItemData->StaminaCost;
-		StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - Cost);
+		StatComp->SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - Cost);
 
 		// 아이템 제거
 		InventoryComp->RemoveItem(InventorySlotIndex, 1);
@@ -391,7 +391,7 @@ bool ASTLocalPlayer::UseItem()
 void ASTLocalPlayer::HoldItem()
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
-	if (!ItemData)
+	if (nullptr == ItemData)
 	{
 		RightHandStaticMesh->SetStaticMesh(nullptr);
 		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
@@ -424,6 +424,9 @@ void ASTLocalPlayer::HoldItem()
 
 		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
 		break;
+
+	default:
+		break;
 	}
 }
 
@@ -445,7 +448,7 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 			}
 
 			// 골드 차감 및 아이템 추가
-			CharacterStat.SetCurrentGold(CharacterStat.CurrentGold - InStoreSlot.ItemData->GoldCost);
+			StatComp->SetCurrentGold(CharacterStat.CurrentGold - InStoreSlot.ItemData->GoldCost);
 
 			int32 AddedInventoryIndex = -1;
 			FSTItemSlot ItemSlot(InStoreSlot.ItemData, true, 1);
@@ -647,6 +650,8 @@ void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
 	bool result = HasAnyState(EPlayerState::Aiming | EPlayerState::LookingUp);
 	if(result)
 	{
+		RemoveState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::Idle);
 	}
 	QuickSlotComp->SetCurrentSelectIndex(SlotIndex);
@@ -665,6 +670,14 @@ void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
 	else if(ScrollValue < 0)
 	{
 		CurrentIndex = (CurrentIndex - 1 + QuickSlotComp->QuickSlots.Num()) % QuickSlotComp->QuickSlots.Num();
+	}
+
+	bool result = HasAnyState(EPlayerState::Aiming | EPlayerState::LookingUp);
+	if (result)
+	{
+		RemoveState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
+		ApplyStateSettings(ECameraPose::Idle);
 	}
 
 	QuickSlotComp->SetCurrentSelectIndex(CurrentIndex);

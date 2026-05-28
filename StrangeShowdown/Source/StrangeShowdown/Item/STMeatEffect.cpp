@@ -27,7 +27,7 @@ bool USTMeatEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 
 	Super::Use(User, ItemData);
 
-	CharacterStat.SetCurrentHp(CharacterStat.CurrentHp + 1);
+	User->StatComp->SetCurrentHp(CharacterStat.CurrentHp + 1);
 
 	return true;
 }

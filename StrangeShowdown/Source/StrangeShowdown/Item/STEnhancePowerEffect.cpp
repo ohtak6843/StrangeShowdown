@@ -28,7 +28,7 @@ bool USTEnhancePowerEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* Item
 	Super::Use(User, ItemData);
 
 	float ActionBuffAmount = 1.f;
-	CharacterStat.SetUsableAction(CharacterStat.UsableAction + ActionBuffAmount);
+	User->StatComp->SetUsableAction(CharacterStat.UsableAction + ActionBuffAmount);
 
 	return true;
 }

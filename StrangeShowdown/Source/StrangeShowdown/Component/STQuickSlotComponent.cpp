@@ -31,9 +31,8 @@ void USTQuickSlotComponent::SetCurrentSelectIndex(int32 NewIndex)
 	if (QuickSlots.IsValidIndex(NewIndex))
 	{
 		CurrentSelectQuickSlotIndex = NewIndex;
+		OnQuickSlotUpdated.Broadcast();
 	}
-
-	OnQuickSlotUpdated.Broadcast();
 }
 
 bool USTQuickSlotComponent::AddToQuickSlot(USTInventoryComponent* InventorySystem, int32 InventoryItemIndex, int32 TargetQuickSlotIndex)
@@ -125,9 +124,10 @@ USTItemDataAssetBase* USTQuickSlotComponent::GetCurrentSelectedQuickSlotItemData
 {
 	if(QuickSlots.IsValidIndex(CurrentSelectQuickSlotIndex) && QuickSlots[CurrentSelectQuickSlotIndex].ItemData)
 	{
-		return QuickSlots[CurrentSelectQuickSlotIndex].ItemData.Get();
+		return QuickSlots[CurrentSelectQuickSlotIndex].ItemData;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Invalid Quick Slot Index or No Item in the Slot"));
 	return nullptr;
 }
 

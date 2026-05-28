@@ -28,7 +28,7 @@ bool USTHelmetEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 	Super::Use(User, ItemData);
 
 	float ArmorAmount = 3.f;
-	CharacterStat.SetCurrentArmor(CharacterStat.CurrentArmor + ArmorAmount);
+	User->StatComp->SetCurrentArmor(CharacterStat.CurrentArmor + ArmorAmount);
 
 	return true;
 }

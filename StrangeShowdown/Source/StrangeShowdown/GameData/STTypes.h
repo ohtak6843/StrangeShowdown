@@ -90,14 +90,14 @@ enum class EAreaType : uint8
 };
 
 UENUM()
-enum class EItemType : uint16
+enum class EItemType : uint32
 {
-	Pistol				UMETA(DisplayName = "Pistol"),
+	Pistol = Common::ItemType::Pistol				UMETA(DisplayName = "Pistol"),
 	Hammer = Common::ItemType::Hammer				UMETA(DisplayName = "Hammer"),
 	Helmet = Common::ItemType::Helmet				UMETA(DisplayName = "Helmet"),
-	Meat = Common::ItemType::Meat				UMETA(DisplayName = "Meat"),
+	Meat = Common::ItemType::Meat					UMETA(DisplayName = "Meat"),
 	Whiskey = Common::ItemType::Whiskey				UMETA(DisplayName = "Whiskey"),
-	EnhancePower = Common::ItemType::EnhancePower		UMETA(DisplayName = "EnhancePower"),
+	EnhancePower = Common::ItemType::EnhancePower	UMETA(DisplayName = "EnhancePower"),
 	Letter = Common::ItemType::Letter				UMETA(DisplayName = "Letter"),
-	Wheel = Common::ItemType::Wheel				UMETA(DisplayName = "Wheel"),
+	Wheel = Common::ItemType::Wheel					UMETA(DisplayName = "Wheel"),
 };
