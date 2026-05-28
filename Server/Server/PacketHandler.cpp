@@ -74,6 +74,14 @@ void PacketHandler::Init()
 		}
 	);
 
+	RegisterHandler<Common::CSPickItem>(
+		Common::PacketType::CS_PICK_ITEM,
+		[](SessionPtr session, const auto& packet)
+		{
+			HandlePickItem(session, packet);
+		}
+	);
+
 	// dynamic handler µî·Ï
 
 	RegisterDynamicHandler<Common::CSChat>(
@@ -200,6 +208,14 @@ void PacketHandler::HandleUseItem(SessionPtr session, const Common::CSUseItem& p
 	if (auto room{ session->GetRoom() }; nullptr != room)
 	{
 		room->HandleUseItem(session, packet);
+	}
+}
+
+void PacketHandler::HandlePickItem(SessionPtr session, const Common::CSPickItem& packet)
+{
+	if (auto player{ session->GetPlayer() }; nullptr != player)
+	{
+		player->HandlePickItem(packet);
 	}
 }
 

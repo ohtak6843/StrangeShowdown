@@ -35,11 +35,12 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	}
 
 
-	// 플레이어 생성 및 방에 추가;
+	// 플레이어 생성, 초기화 및 방에 추가;
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
 	player->SetOwnerSession(session);
-	player->Init(PlayerState::LOBBY);
+	player->Init(shared_from_this());
+	player->ChangeState(PlayerState::LOBBY);
 	session->SetPlayer(player);
 	_players[id] = player;
 
@@ -149,7 +150,7 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
-		player->Init(PlayerState::INGAME);
+		player->ChangeState(PlayerState::INGAME);
 		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
 	}
 
@@ -185,44 +186,36 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 		return;
 	}
 
-	if (0 == packet.targetID)
+	// 아이템 사용 가능 여부 검사 및 사용 처리
+	auto player{ session->GetPlayer() };
+	if (nullptr == player)
 	{
 		return;
-
 	}
-
-	switch (packet.itemType)
+	if (false == player->TryConsumeItem(packet.itemType))
 	{
-		case Common::ItemType::Gun:
-		{
-			// todo: 검증
-			//  타겟 존재 여부
-			//  아이템 사용 가능 여부
-
-
-			// 아이템 사용 패킷 전달
-			Common::SCUseItem use_item_packet{
-				session->GetSessionID(),
-				packet.targetID,
-				packet.itemType
-			};
-			
-			Broadcast(use_item_packet);
-			
-			// 아이템 효과 적용
-			Common::SCDamage damage_packet{
-				session->GetSessionID(),
-				packet.targetID,
-				10.f
-			};
-			
-			Broadcast(damage_packet);
-		}
-		break;
-	default:
-		break;
+		return;
 	}
+
+	// 타겟 대상
+	PlayerPtr target{};
+	auto target_iter{ _players.find(packet.targetID) };
+	if (target_iter == _players.end())
+	{
+		target = nullptr;
+	}
+	else
+	{
+		target = target_iter->second;
+	}
+
+	// 효과 적용 및 패킷 전송
+	player->ApplyItemEffect(packet, target);
+
+	// debug: 아이템 패킷 종류 출력
+	std::println("Player {} used item {} on target {}", session->GetSessionID(), static_cast<int>(packet.itemType), packet.targetID);
 }
+
 
 void Room::Update()
 {

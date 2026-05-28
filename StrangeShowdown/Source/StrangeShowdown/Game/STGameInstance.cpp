@@ -202,6 +202,21 @@ void USTGameInstance::HandleDamage(const Common::SCDamage& Packet)
 	UE_LOG(LogTemp, Log, TEXT("Damage: TargetID=%d, Damage=%.2f"), Packet.targetID, Packet.damage);
 }
 
+void USTGameInstance::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
+{
+	//DataManager->HandleStatusUpdate(Packet);
+	// UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, Health=%.2f, Stamina=%.2f"), Packet.id, Packet.health, Packet.stamina);
+	UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, HP=%.2f, Stamina=%.2f, Bullet=%.2f, Gold=%.2f, Armor=%.2f"),
+		Packet.id,
+		Packet.hp,
+		Packet.stamina,
+		Packet.bullet,
+		Packet.gold,
+		Packet.armor
+	);
+	
+}
+
 
 void USTGameInstance::HandleUseItem(const Common::SCUseItem& Packet)
 {
@@ -298,6 +313,14 @@ void USTGameInstance::UseItem(uint64 TargetID, Common::ItemType ItemType)
 	auto Packet{ STSerializer::Serialize(UseItemPacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("UseItem called: ItemType=%d"), static_cast<uint32>(ItemType));
+}
+
+void USTGameInstance::PickUpItem(Common::ItemType ItemID)
+{
+	Common::CSPickItem PickUpItemPacket{ ItemID };
+	auto Packet{ STSerializer::Serialize(PickUpItemPacket) };
+	SendPacket(Packet);
+	UE_LOG(LogTemp, Log, TEXT("PickUpItem called: ItemID=%d"), static_cast<uint32>(ItemID));
 }
 
 void USTGameInstance::DevGetRoomList()

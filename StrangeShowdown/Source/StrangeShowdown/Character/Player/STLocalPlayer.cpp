@@ -314,18 +314,17 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	PoseElapsedTime = 0.f;
 }
 
-void ASTLocalPlayer::UseItem()
+bool ASTLocalPlayer::UseItem()
 {
 	if (!InventoryComp || !QuickSlotComp)
-		return;
+		return false;
 
 	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
 	if (QuickSlotIndex == INDEX_NONE)
-		return;
-
+		return false;
 	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
 	if (InventorySlotIndex == INDEX_NONE)
-		return;
+		return false;
 
 	// 결과
 	FSTItemSlot OutSlot;
@@ -338,6 +337,7 @@ void ASTLocalPlayer::UseItem()
 		OutSlot
 	);
 
+	// todo cham : 필요시 아이템 사용 결과 출력 분리
 	switch (Result)
 	{
 	case EItemUseType::CanUse:
@@ -363,6 +363,8 @@ void ASTLocalPlayer::UseItem()
 		break;
 	}
 
+	// todo cham : 아이템 사용 결과에 따른 처리 분리
+
 	if (OutSlot.ItemData)
 	{
 		const int32 Cost = OutSlot.ItemData->StaminaCost;
@@ -378,6 +380,12 @@ void ASTLocalPlayer::UseItem()
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
+	
+	if (EItemUseType::CanUse == Result)
+	{
+		return true;
+	}
+	return false;
 }
 
 void ASTLocalPlayer::HoldItem()
@@ -560,6 +568,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (HasAnyState(EPlayerState::Aiming) && AttackTraceComp->TracingFieldPlayer)
 			{
 				PistolFire();
+
 #if NETWORK_ENABLED
 
 				auto GameInstance{ GetGameInstance<USTGameInstance>() };
@@ -567,7 +576,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 				{
 					GameInstance->UseItem(
 						AttackTraceComp->TracingFieldPlayer->GetPlayerID(),
-						Common::ItemType::Gun
+						/*static_cast<Common::ItemType>(CurrentItemData->ItemType)*/
+						Common::ItemType::Pistol
 					);
 				}
 
@@ -578,6 +588,20 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (1.0f <= StatComp->GetCharacterStat().CurrentStamina)
 			{
 				HammerSmash();
+
+
+#if NETWORK_ENABLED
+
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->UseItem(
+						0,
+						static_cast<Common::ItemType>(CurrentItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 			}
 			else
 			{
@@ -587,6 +611,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
 				}
 			}
+
+
 			break;
 		case EItemType::Helmet:
 		case EItemType::Meat:
@@ -594,7 +620,22 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::EnhancePower:
 		case EItemType::Letter:
 		case EItemType::Wheel:
-			UseItem();
+		{
+			auto ItemResult{ UseItem() };
+
+#if NETWORK_ENABLED
+
+			auto GameInstance{ GetGameInstance<USTGameInstance>() };
+			if (GameInstance && true == ItemResult)
+			{
+				GameInstance->UseItem(
+					0,
+					static_cast<Common::ItemType>(CurrentItemData->ItemType)
+				);
+			}
+
+#endif // NETWORK_ENABLED
+		}
 			break;
 	}
 }
@@ -674,6 +715,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 			{
 				QuickSlot.Count += 1;
 				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+
+#if NETWORK_ENABLED
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->PickUpItem(
+						static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 				break;
 			}
 		}
@@ -689,6 +741,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 	{
 		int32 TargetQuickSlotIndex = -2;
 		bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
+
+#if NETWORK_ENABLED
+		auto GameInstance{ GetGameInstance<USTGameInstance>() };
+		if (GameInstance)
+		{
+			GameInstance->PickUpItem(
+				static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+			);
+		}
+
+#endif // NETWORK_ENABLED
 	}
 
 	// 아이템 장착
