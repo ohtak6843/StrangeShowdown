@@ -46,7 +46,8 @@ void USTStoreComponent::Reroll()
 	if (!OwnerPlayer || !OwnerPlayer->StatComp)
 		return;
 
-	OwnerPlayer->StatComp->AddGold(-RerollCost);
+	FSTCharacterStat& CharacterStat = OwnerPlayer->StatComp->GetCharacterStat();
+	CharacterStat.SetCurrentGold(CharacterStat.CurrentGold - RerollCost);
 	InitStore();
 }
 

@@ -30,6 +30,14 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+// Debug Section
+public:
+	UFUNCTION(BlueprintCallable, Category = Debug)
+	void AddGold(int32 Amount) { StatComp->GetCharacterStat().SetCurrentGold(StatComp->GetCharacterStat().CurrentGold + Amount); StatComp->OnStatChanged.Broadcast(); }
+	
+	UFUNCTION(BlueprintCallable, Category = Debug)
+	void AddStamina(float Amount) { StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina + Amount); StatComp->OnStatChanged.Broadcast(); }
+
 // DELEGATE Section
 public:
 	UPROPERTY(BlueprintAssignable, Category = Delegate)

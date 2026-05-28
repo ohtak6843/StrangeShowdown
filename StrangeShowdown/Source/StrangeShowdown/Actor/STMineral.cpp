@@ -93,10 +93,12 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 	hp -= AttackHp;
 	UE_LOG(LogTemp, Log, TEXT("Attack Hp: %d, Mineral HP: %d"), AttackHp, hp);
 
+	FSTCharacterStat& PlayerStat = Player->StatComp->GetCharacterStat();
+
 	// 1단계
 	if (hp <= 5 && !bIsSubSliced)
 	{
-		Player->StatComp->AddGold(AttackHp * 2);
+		PlayerStat.SetCurrentGold(PlayerStat.CurrentGold + (AttackHp * 2));
 		OnSubSlicedBlueprint(AttackHp * 2);
 		bIsSubSliced = true;
 		return;
@@ -107,7 +109,7 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 	{
 		Super::Slice(HitLocation, HitNormal, Player);
 
-		Player->StatComp->AddGold(AttackHp * 2);
+		PlayerStat.SetCurrentGold(PlayerStat.CurrentGold + (AttackHp * 2));
 		OnMainSlicedBlueprint(AttackHp * 2);
 		SkeletalMeshComponent->SetVisibility(false);
 
@@ -122,7 +124,7 @@ void ASTMineral::Slice(const FVector& HitLocation, const FVector& HitNormal, AST
 	}
 
 	// 부서지지 않았으면 피격 사운드 재생
-	Player->StatComp->AddGold(AttackHp * 2);
+	PlayerStat.SetCurrentGold(PlayerStat.CurrentGold + (AttackHp * 2));
 	OnHitSoundBlueprint(AttackHp * 2);
 }
 

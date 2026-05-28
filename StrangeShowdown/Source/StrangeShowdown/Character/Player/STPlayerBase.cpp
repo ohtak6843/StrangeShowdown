@@ -37,6 +37,14 @@ ASTPlayerBase::ASTPlayerBase()
 
 	// Stat Component
 	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
+	FSTCharacterStat InitialStat;
+	InitialStat.CurrentHp = InitialStat.MaxHp;
+	InitialStat.CurrentGold = 0;
+	InitialStat.KillCount = 0;
+	InitialStat.CurrentArmor = 0;
+	InitialStat.CurrentStamina = InitialStat.MaxStamina - 2;
+	InitialStat.CurrentAction = InitialStat.UsableAction;
+	InitialStat.Bounty = 0;
 
 	// Right Hand Mesh
 	RightHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightItemMesh"));
@@ -51,6 +59,11 @@ void ASTPlayerBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ASTPlayerBase::SetMaxWalkSpeed(float NewMaxWalkSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewMaxWalkSpeed;
+}
+
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -60,10 +73,11 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		return 0.f;
 	}
 
-	StatComp->AddHp(-ActualDamage);
+	FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
+	CharacterStat.SetCurrentHp(CharacterStat.CurrentHp - ActualDamage);
 
 	// TODO: Check Death
-	if (StatComp->CurrentHp <= 0.f)
+	if (CharacterStat.CurrentHp <= 0.f)
 	{
 
 	}
@@ -73,12 +87,13 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void ASTPlayerBase::PlayItemUseParticleEffect()
 {
+	// TODO
 	// 배열로 사운드 저장해놓기
 
-	if (ItemUseParticleEffect)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ItemUseParticleEffect, GetActorLocation(), FRotator::ZeroRotator);
-	}
+	//if (ItemUseParticleEffect)
+	//{
+	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ItemUseParticleEffect, GetActorLocation(), FRotator::ZeroRotator);
+	//}
 }
 
 void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)

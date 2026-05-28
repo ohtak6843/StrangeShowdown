@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameData/STCharacterStat.h"
 #include "STStatComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
@@ -19,87 +20,30 @@ public:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+// Delegate Section
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddHp(int32 HealAmount);
+	FSTCharacterStat& GetCharacterStat() { return CharacterStat; }
+	void SetCharacterStat(const FSTCharacterStat& InStat) { CharacterStat = InStat; }
 
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddGold(int32 GoldAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddKill(int32 KillAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddArmor(int32 ArmorAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddMoveSpeed(int32 MoveSpeedAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddStamina(int32 StaminaAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddAction(int32 ActionAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddUseAbleAction(int32 ActionAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void AddPrize(int32 PrizeAmount);
-
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	void SetIsActive(bool isActive);
-
-	void ResetMoveSpeed();
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	float CurrentHp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	float MaxHp = 15;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 Gold;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 CurrentArmor = 0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 MaxArmor = 30;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 Kill;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	float MoveSpeed;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	float CurrentStamina;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	float MaxStamina = 5;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 CurrentAction;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 UseAbleAction = 1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 MaxAction = 6;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 Bounty;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
-	bool bAlive;
+	void SetCurrentHp(float NewHp) { CharacterStat.SetCurrentHp(NewHp); OnStatChanged.Broadcast(); }
+	void SetCurrentArmor(float NewArmor) { CharacterStat.SetCurrentArmor(NewArmor); OnStatChanged.Broadcast(); }
+	void SetCurrentStamina(float NewStamina) { CharacterStat.SetCurrentStamina(NewStamina); OnStatChanged.Broadcast(); }
+	void SetCurrentAction(float NewAction) { CharacterStat.SetCurrentAction(NewAction); OnStatChanged.Broadcast(); }
+	void SetUsableAction(float NewUsableAction) { CharacterStat.SetUsableAction(NewUsableAction); OnStatChanged.Broadcast(); }
+	void SetCurrentGold(float NewGold) { CharacterStat.SetCurrentGold(NewGold); OnStatChanged.Broadcast(); }
+	void SetKillCount(float NewKillCount) { CharacterStat.SetKillCount(NewKillCount); OnStatChanged.Broadcast(); }
+	void SetBounty(float NewBounty) { CharacterStat.SetBounty(NewBounty); OnStatChanged.Broadcast(); }
 
 protected:
+	void ResetMoveSpeed();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	FSTCharacterStat CharacterStat;
+
 	FTimerHandle MoveSpeedBuffTimerHandle;
 
 // network methods

@@ -19,6 +19,10 @@ public:
 	// Sets default values for this character's properties
 	ASTPlayerBase();
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
 	FORCEINLINE void AddState(EPlayerState NewState) { PlayerStateFlag |= static_cast<uint8>(NewState); }
 	FORCEINLINE void RemoveState(EPlayerState RemoveState) { PlayerStateFlag &= ~static_cast<uint8>(RemoveState); }
 	FORCEINLINE bool HasAnyState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) != 0; }
@@ -34,8 +38,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool SetStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 NewState) { return SetState(static_cast<EPlayerState>(NewState)); }
 
-protected:
-	virtual void BeginPlay() override;
+	void SetMaxWalkSpeed(float NewMaxWalkSpeed);
 
 public:
 	// Stat Component
@@ -82,7 +85,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
-	TObjectPtr<UParticleSystem> ItemUseParticleEffect;
+	TArray<TObjectPtr<UParticleSystem>> ItemUseParticleEffect;
 
 // Network Section
 public:

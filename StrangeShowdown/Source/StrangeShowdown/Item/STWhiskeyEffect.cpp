@@ -19,14 +19,16 @@ USTWhiskeyEffect::USTWhiskeyEffect()
 
 bool USTWhiskeyEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentStamina >= User->StatComp->MaxStamina)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (CharacterStat.CurrentStamina >= CharacterStat.MaxStamina)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	User->StatComp->AddStamina(1);
+	float StaminaBuffAmount = 1.f;
+	CharacterStat.SetCurrentStamina(CharacterStat.CurrentStamina + StaminaBuffAmount);
 
 	return true;
 }

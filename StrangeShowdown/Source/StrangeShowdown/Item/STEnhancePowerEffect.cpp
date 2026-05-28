@@ -19,14 +19,16 @@ USTEnhancePowerEffect::USTEnhancePowerEffect()
 
 bool USTEnhancePowerEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentAction >= User->StatComp->MaxAction)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (CharacterStat.CurrentAction >= CharacterStat.MaxAction)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	User->StatComp->AddUseAbleAction(1);
+	float ActionBuffAmount = 1.f;
+	CharacterStat.SetUsableAction(CharacterStat.UsableAction + ActionBuffAmount);
 
 	return true;
 }

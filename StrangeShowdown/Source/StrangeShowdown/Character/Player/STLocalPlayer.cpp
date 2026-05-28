@@ -52,17 +52,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
 
-	// Stat Component
-	StatComp->CurrentHp = StatComp->MaxHp;
-	StatComp->Gold = 0;
-	StatComp->Kill = 0;
-	StatComp->CurrentArmor = 0;
-	StatComp->MoveSpeed = 500;
-	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
-	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Bounty = 0;
-	StatComp->bAlive = true;
-
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
 
@@ -308,7 +297,7 @@ void ASTLocalPlayer::AttackHitCheck()
 	);
 
 	// 스태미나 감소
-	StatComp->AddStamina(-1.f);
+	StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - 1.f);
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
@@ -377,7 +366,7 @@ void ASTLocalPlayer::UseItem()
 	if (OutSlot.ItemData)
 	{
 		const int32 Cost = OutSlot.ItemData->StaminaCost;
-		StatComp->AddStamina(-Cost);
+		StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - Cost);
 
 		// 아이템 제거
 		InventoryComp->RemoveItem(InventorySlotIndex, 1);
@@ -434,7 +423,9 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 {
 	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
 	{
-		if (StatComp->Gold >= InStoreSlot.ItemData->GoldCost)
+		FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
+
+		if (CharacterStat.CurrentGold >= InStoreSlot.ItemData->GoldCost)
 		{
 			// 메세지 출력
 			ShowFloatingMessage(FText::FromString(TEXT("구매 성공!")));
@@ -446,7 +437,7 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 			}
 
 			// 골드 차감 및 아이템 추가
-			StatComp->AddGold(-InStoreSlot.ItemData->GoldCost);
+			CharacterStat.SetCurrentGold(CharacterStat.CurrentGold - InStoreSlot.ItemData->GoldCost);
 
 			int32 AddedInventoryIndex = -1;
 			FSTItemSlot ItemSlot(InStoreSlot.ItemData, true, 1);
@@ -584,7 +575,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			}
 			break;
 		case EItemType::Hammer:
-			if (1.0f <= StatComp->CurrentStamina)
+			if (1.0f <= StatComp->GetCharacterStat().CurrentStamina)
 			{
 				HammerSmash();
 			}
