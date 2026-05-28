@@ -35,11 +35,12 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	}
 
 
-	// 플레이어 생성 및 방에 추가;
+	// 플레이어 생성, 초기화 및 방에 추가;
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
 	player->SetOwnerSession(session);
-	player->Init(PlayerState::LOBBY);
+	player->Init(shared_from_this());
+	player->ChangeState(PlayerState::LOBBY);
 	session->SetPlayer(player);
 	_players[id] = player;
 
@@ -149,7 +150,7 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
-		player->Init(PlayerState::INGAME);
+		player->ChangeState(PlayerState::INGAME);
 		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
 	}
 
@@ -208,58 +209,13 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 		target = target_iter->second;
 	}
 
-	// 효과 적용
-	const auto& player_status{ player->GetStatus() };
+	// 효과 적용 및 패킷 전송
+	player->ApplyItemEffect(packet, target);
 
 	// debug: 아이템 패킷 종류 출력
 	std::println("Player {} used item {} on target {}", session->GetSessionID(), static_cast<int>(packet.itemType), packet.targetID);
-	std::println("Player {} status: stamina {}, bullet {}", session->GetSessionID(), player_status.stamina, player_status.bullet);
-	switch (packet.itemType)
-	{
-		case Common::ItemType::Pistol:
-		{
-
-
-			// 아이템 사용 패킷 전달
-
-			// 다른 플레이어에게 전달하는 아이템 사용 패킷
-			// 사용자의 보유 아이템 개수를 공개하지 않음
-			Common::SCUseItem use_item_packet_other{
-				session->GetSessionID(),
-				packet.targetID,
-				packet.itemType,
-				player_status.stamina,
-				player_status.bullet,
-				-1
-			};
-			Broadcast(use_item_packet_other, session->GetSessionID());
-
-			// 사용자 플레이어에게 전달하는 아이템 사용 패킷
-			// 사용자의 보유 아이템 개수를 공개함
-			Common::SCUseItem use_item_packet_self{
-				session->GetSessionID(),
-				packet.targetID,
-				packet.itemType,
-				player_status.stamina,
-				player_status.bullet,
-				target->GetItemCount(packet.itemType)
-			};
-			session->DoSend(use_item_packet_self);
-			
-
-			// 아이템 효과 적용 패킷 전달
-			Common::SCDamage damage_packet{
-				session->GetSessionID(),
-				packet.targetID,
-				10.f
-			};
-			Broadcast(damage_packet);
-		}
-		break;
-	default:
-		break;
-	}
 }
+
 
 void Room::Update()
 {

@@ -683,6 +683,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 			{
 				QuickSlot.Count += 1;
 				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+
+#if NETWORK_ENABLED
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->PickUpItem(
+						static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 				break;
 			}
 		}
@@ -698,6 +709,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 	{
 		int32 TargetQuickSlotIndex = -2;
 		bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
+
+#if NETWORK_ENABLED
+		auto GameInstance{ GetGameInstance<USTGameInstance>() };
+		if (GameInstance)
+		{
+			GameInstance->PickUpItem(
+				static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+			);
+		}
+
+#endif // NETWORK_ENABLED
 	}
 
 	// 아이템 장착

@@ -10,10 +10,10 @@ enum class RoomState
 	INGAME,
 };
 
-class Room
+class Room : public std::enable_shared_from_this<Room>
 {
 	// --
-	// job method
+	// job
 	// --
 public:
 	// 밀려있는 job을 실행.
@@ -24,7 +24,7 @@ public:
 
 
 	// --
-	// handler method
+	// handler
 	// --
 public:
 	// static
@@ -36,6 +36,7 @@ public:
 	void HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet);
 
 	// dynamic 
+
 	void HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size);
 
 

@@ -31,8 +31,9 @@ namespace PlayerConstants
 	constexpr float 		MaxBullet{};
 	constexpr float 		Bullet{};
 	constexpr float 		Attack{ 10.f };
-	constexpr float 		Speed{ 5.f };
+	constexpr float 		Speed{ 500.f }; // cmps
 	constexpr float 		Gold{ 0.f };
+	constexpr float 		Armor{ 0.f };
 
 }
 
@@ -52,6 +53,25 @@ namespace ItemConstants
 
 	};
 
+	constexpr float HelmetValue{ 3.f };
+	constexpr float MeatValue{ 10.f };
+	constexpr float WhiskeyValue{ 1.f };
+	constexpr float WheelSpeed{ 1000.f }; // cmps
+	constexpr float WheelTime{ 5.f }; // seconds
+
+}
+
+namespace MapConstants
+{
+	constexpr float BankX{ 0.f };
+	constexpr float BankY{ 0.f };
+	constexpr float BankWidth{ 1000.f };
+	constexpr float BankHeight{ 1000.f };
+}
+
+namespace GameConstants
+{
+	constexpr float TurnTime{ 20.f }; // seconds
 }
 
 // --

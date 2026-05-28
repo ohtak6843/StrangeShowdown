@@ -61,11 +61,14 @@ enum class PacketType : uint16
 	// content
 	// --
 
+	CS_PICK_ITEM,
+
 	SC_USE_ITEM,
 	CS_USE_ITEM,
 
 
 	SC_DAMAGE,
+	SC_STATUS_UPDATE,
 	
 
 };
@@ -400,6 +403,18 @@ struct SCTeleport: Header
 	}
 };
 
+// pick item
+struct CSPickItem : Header
+{
+	Common::ItemType itemType{};
+	CSPickItem() = default;
+	CSPickItem(const Common::ItemType in_itemType) :
+		Header{ sizeof(CSPickItem), PacketType::CS_PICK_ITEM },
+		itemType{ in_itemType }
+	{
+	}
+};
+
 // Param:
 //  uint64 id : 아이템을 사용하는 주체 id
 //  uint64 targetID : 아이템을 적용하는 대상
@@ -462,6 +477,27 @@ struct SCDamage : Header
 		attakerID{ in_attakerID },
 		targetID{ in_targetID },
 		damage{ in_damage }
+	{
+	}
+};
+
+struct SCStatusUpdate : Header
+{
+	uint64 id{};
+	float hp{};
+	float stamina{};
+	float bullet{};
+	float gold{};
+	float armor{};
+	SCStatusUpdate() = default;
+	SCStatusUpdate(const uint64 in_id, const float in_hp, const float in_stamina, const float in_bullet, const float in_gold, const float in_armor) :
+		Header{ sizeof(SCStatusUpdate), PacketType::SC_STATUS_UPDATE },
+		id{ in_id },
+		hp{ in_hp },
+		stamina{ in_stamina },
+		bullet{ in_bullet },
+		gold{ in_gold },
+		armor{ in_armor }
 	{
 	}
 };

@@ -2,6 +2,8 @@
 #include "Session.h"
 #include "Protocol.h"
 
+class Room;
+
 enum class PlayerState : uint32
 {
 	NONE = 0,
@@ -18,17 +20,39 @@ struct PlayerStatus
 	float attack{};
 	float bullet{};
 	float gold{};
+	float armor{};
+
 
 public:
 	void Init(const PlayerState state)
 	{
 		// todo: state에 따른 status 초기화
-
-		hp = Common::PlayerConstants::Hp;
-		stamina = 100.f;
-		attack = Common::PlayerConstants::Attack;
-		bullet = Common::PlayerConstants::Bullet;
-		gold = Common::PlayerConstants::Gold;
+		switch (state)
+		{
+			case PlayerState::LOBBY:
+			{
+				// 로비에서는 체력과 스테미나가 무한대라고 가정
+				hp = 0.f;
+				stamina = 0.f;
+				attack = 0.f;
+				bullet = 0.f;
+				gold = 0.f;
+				armor = 0.f;
+			}
+			break;
+			case PlayerState::INGAME:
+			{
+				hp = Common::PlayerConstants::Hp;
+				stamina = Common::PlayerConstants::Stamina;
+				attack = Common::PlayerConstants::Attack;
+				bullet = Common::PlayerConstants::Bullet;
+				gold = Common::PlayerConstants::Gold;
+				armor = Common::PlayerConstants::Armor;
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
 };
@@ -40,14 +64,18 @@ class Player
 	// method
 	// --
 public:
-	void Init(const PlayerState state);
+	void Init(const std::shared_ptr<Room>& room);
+	void Clear();
+	void ChangeState(const PlayerState state);
 
 
 	// 아이템을 사용 가능한지 여부 검사하고, 가능 시 사용 처리까지 하는 메서드.
 	// 아이템이 사용 불가능하다면 false를 반환한다.
 	bool TryConsumeItem(const Common::ItemType item_type);
 
+	void ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr target);
 
+	void TakeDamage(const float damage);
 public:	
 	
 
@@ -57,7 +85,7 @@ public:
 	// --
 public:
 	void HandleMove(const Common::CSMovePlayer& packet);
-	
+	void HandlePickItem(const Common::CSPickItem& packet);
 
 
 	// --
@@ -108,8 +136,8 @@ private:
 
 private:
 	PlayerState _state{ PlayerState::NONE };
-	// owner
 	SessionPtr _ownerSession{ nullptr };
+	std::weak_ptr<Room> _room{};
 
 
 };
