@@ -137,6 +137,10 @@ void ASTLocalGhost::ShoulderLook(const FInputActionValue& Value)
 
 void ASTLocalGhost::PossessSheriff(const FInputActionValue& Value)
 {
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+
 	APlayerController* OldPC = Cast<APlayerController>(GetController());
 	if (!OldPC)
 	{
@@ -144,28 +148,38 @@ void ASTLocalGhost::PossessSheriff(const FInputActionValue& Value)
 		return;
 	}
 
-	FVector ViewLocation;
-	FRotator ViewRotation;
-	OldPC->GetPlayerViewPoint(ViewLocation, ViewRotation);
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	OldPC->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-	float TraceDistance = 500.f;
-	FVector TraceEnd = ViewLocation + (ViewRotation.Vector() * TraceDistance);
+	const FVector Start = CameraLocation;
+	const FVector End = Start + CameraRotation.Vector() * 2000.f;
 
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(OldPC->GetPawn());
 
-	FHitResult HitResult;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ViewLocation, TraceEnd, ECC_Pawn, QueryParams);
+	FHitResult Hit;
+
+	bool bHit = World->SweepSingleByChannel(
+		Hit,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(100.f),
+		Params
+	);
 
 #if ENABLE_DRAW_DEBUG
-	FColor LineColor = bHit ? FColor::Green : FColor::Red;
-	DrawDebugLine(GetWorld(), ViewLocation, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+	FColor DebugLineColor = bHit ? FColor::Green : FColor::Red;
+	DrawDebugLine(World, Start, End, DebugLineColor, false, 2.0f);
+	DrawDebugSphere(World, Hit.Location, 100.f, 12, DebugLineColor, false, 2.0f);
 #endif
 
 	// Possess Logic
 	if (bHit)
 	{
-		ASTFieldSheriff* HitSheriff = Cast<ASTFieldSheriff>(HitResult.GetActor());
+		ASTFieldSheriff* HitSheriff = Cast<ASTFieldSheriff>(Hit.GetActor());
 		if (HitSheriff)
 		{
 			FTransform SpawnTransform = HitSheriff->GetActorTransform();
@@ -177,7 +191,7 @@ void ASTLocalGhost::PossessSheriff(const FInputActionValue& Value)
 			ASTLocalSheriff* NewSheriff = GetWorld()->SpawnActor<ASTLocalSheriff>(SheriffClass, SpawnTransform, SpawnParams);
 			if (NewSheriff)
 			{
-				ASTSheriffController* NewPC = GetWorld()->SpawnActor<ASTSheriffController>(SheriffControllerClass, ViewLocation, ViewRotation);
+				ASTSheriffController* NewPC = GetWorld()->SpawnActor<ASTSheriffController>(SheriffControllerClass, CameraLocation, CameraRotation);
 				if (NewPC)
 				{
 					OldPC->UnPossess();
