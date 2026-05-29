@@ -15,6 +15,7 @@ public:
 		CurrentAction(0.f), UsableAction(3.f), MaxAction(6.f), CurrentGold(0.f), KillCount(0.f), Bounty(0.f) {
 	}
 
+	// 사용하면 안되는 함수, 이거 대신에 StatComponent에서 정의된 함수 사용하기
 	void SetCurrentHp(float NewHp) { CurrentHp = FMath::Clamp(NewHp, 0.f, MaxHp); }
 	void SetCurrentArmor(float NewArmor) { CurrentArmor = FMath::Clamp(NewArmor, 0.f, MaxArmor); }
 	void SetCurrentStamina(float NewStamina) { CurrentStamina = FMath::Clamp(NewStamina, 0.f, MaxStamina); }
