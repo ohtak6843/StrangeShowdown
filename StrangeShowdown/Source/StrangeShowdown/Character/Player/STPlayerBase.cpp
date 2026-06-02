@@ -8,6 +8,9 @@
 #include "CommonDefine.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 // Sets default values
 ASTPlayerBase::ASTPlayerBase()
@@ -52,6 +55,27 @@ ASTPlayerBase::ASTPlayerBase()
 
 	RightHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightWeaponMesh"));
 	RightHandSkeletalMesh->SetupAttachment(GetMesh());
+
+	// Item Use Effect
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ParticleEffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Item/FX/NS_UseEffect.NS_UseEffect'"));
+	if (ParticleEffectRef.Object)
+	{
+		ItemUseEffect = ParticleEffectRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> HelmetUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_UseHelmet.SW_UseHelmet'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> MeatUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_EatMeat.SW_EatMeat'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> WhiskeyUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_DrinkWhiskey.SW_DrinkWhiskey'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> EnhancePowerUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_EnhancePower.SW_EnhancePower'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> LetterUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Mission.SW_Mission'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> WheelUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Wheel.SW_Wheel'"));
+
+	ItemUseSounds.Add(EItemType::Helmet, HelmetUseSound.Object);
+	ItemUseSounds.Add(EItemType::Meat, MeatUseSound.Object);
+	ItemUseSounds.Add(EItemType::Whiskey, WhiskeyUseSound.Object);
+	ItemUseSounds.Add(EItemType::EnhancePower, EnhancePowerUseSound.Object);
+	ItemUseSounds.Add(EItemType::Letter, LetterUseSound.Object);
+	ItemUseSounds.Add(EItemType::Wheel, WheelUseSound.Object);
 }
 
 void ASTPlayerBase::BeginPlay()
@@ -85,15 +109,19 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return ActualDamage;
 }
 
-void ASTPlayerBase::PlayItemUseParticleEffect()
+void ASTPlayerBase::PlayItemUseEffect(EItemType ItemType)
 {
-	// TODO
-	// 배열로 사운드 저장해놓기
+	if (EItemType::Helmet > ItemType) return;
 
-	//if (ItemUseParticleEffect)
-	//{
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ItemUseParticleEffect, GetActorLocation(), FRotator::ZeroRotator);
-	//}
+	if(IsValid(ItemUseEffect))
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ItemUseEffect, GetActorLocation());
+	}
+
+	if (IsValid(ItemUseSounds[ItemType]))
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ItemUseSounds[ItemType], GetActorLocation());
+	}
 }
 
 void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)

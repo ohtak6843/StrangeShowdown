@@ -4,7 +4,6 @@
 #include "Item/STItemUseEffect.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Item/STItemDataAssetBase.h"
-#include "STItemUseEffect.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Kismet/GameplayStatics.h"

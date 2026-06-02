@@ -187,11 +187,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
 	TObjectPtr<class UNiagaraSystem> HitEffect;
 
-// Sound Section
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)
-	TObjectPtr<class USoundBase> PistolFireSound;
-
 // Camera Pose Section
 protected:
 	void ApplyStateSettings(ECameraPose NewState);

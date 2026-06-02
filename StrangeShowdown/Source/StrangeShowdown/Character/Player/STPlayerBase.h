@@ -81,11 +81,14 @@ protected:
 // Effect Section
 public:
 	UFUNCTION(BlueprintCallable, Category = Effect)
-	void PlayItemUseParticleEffect();
+	void PlayItemUseEffect(EItemType ItemType);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
-	TArray<TObjectPtr<UParticleSystem>> ItemUseParticleEffect;
+	TObjectPtr<class UNiagaraSystem> ItemUseEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TMap<EItemType, TObjectPtr<class USoundBase>> ItemUseSounds;
 
 // Network Section
 public:
