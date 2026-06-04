@@ -158,7 +158,13 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 
 void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
 {
-	// 연출 재생
+	auto Player{ GetPlayer(Packet.id) };
+	if (Player.IsValid())
+	{
+		Player->PlayItemUseEffect(static_cast<EItemType>(Packet.itemType));
+		UE_LOG(LogTemp, Log, TEXT("Player %llu used item: %d"), Packet.id, Packet.itemType);
+	}
+
 }
 
 void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
