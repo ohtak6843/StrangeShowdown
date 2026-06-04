@@ -29,7 +29,7 @@ private:
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);

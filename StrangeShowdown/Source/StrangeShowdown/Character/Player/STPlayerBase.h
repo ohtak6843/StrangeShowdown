@@ -65,6 +65,9 @@ protected:
 
 // Damage Section
 public:
+
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
+
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 

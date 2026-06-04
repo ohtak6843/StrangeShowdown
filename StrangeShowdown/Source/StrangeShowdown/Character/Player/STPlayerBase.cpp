@@ -88,6 +88,11 @@ void ASTPlayerBase::SetMaxWalkSpeed(float NewMaxWalkSpeed)
 	GetCharacterMovement()->MaxWalkSpeed = NewMaxWalkSpeed;
 }
 
+void ASTPlayerBase::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
+{
+	StatComp->HandleStatusUpdate(Packet);
+}
+
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);

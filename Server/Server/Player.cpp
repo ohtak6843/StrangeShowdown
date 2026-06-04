@@ -106,9 +106,6 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		_ownerSession->GetSessionID(),
 		packet.targetID,
 		packet.itemType,
-		_status.stamina,
-		_status.bullet,
-		-1
 	};
 	room->Broadcast(use_item_packet_other, _ownerSession->GetSessionID());
 
@@ -118,9 +115,6 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		_ownerSession->GetSessionID(),
 		packet.targetID,
 		packet.itemType,
-		_status.stamina,
-		_status.bullet,
-		GetItemCount(packet.itemType)
 	};
 	_ownerSession->DoSend(use_item_packet_self);
 
@@ -134,12 +128,16 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 				target->TakeDamage(_status.attack);
 			}
 
-			Common::SCDamage damage_packet{
-				_ownerSession->GetSessionID(),
-				packet.targetID,
-				_status.attack
+			const auto& target_status{ target->GetStatus() };
+			Common::SCStatusUpdate status_update_packet{
+				target->GetOwnerSession()->GetSessionID(),
+				target_status.hp,
+				target_status.stamina,
+				target_status.bullet,
+				target_status.gold,
+				target_status.armor
 			};
-			room->Broadcast(damage_packet);
+			room->Broadcast(status_update_packet);
 
 		}
 		break;
@@ -154,46 +152,18 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		{
 			_status.armor += Common::ItemConstants::HelmetValue;
 			
-			// todo: 코드 중복 해결
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
 		case Common::ItemType::Meat:
 		{
 			_status.hp += Common::ItemConstants::MeatValue;
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
 		case Common::ItemType::Whiskey:
 		{
 			_status.stamina += Common::ItemConstants::WhiskeyValue;
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
@@ -221,6 +191,17 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 	default:
 		break;
 	}
+
+	// 스탯 업데이트 패킷 전달
+	Common::SCStatusUpdate status_update_packet{
+		_ownerSession->GetSessionID(),
+		_status.hp,
+		_status.stamina,
+		_status.bullet,
+		_status.gold,
+		_status.armor
+	};
+	room->Broadcast(status_update_packet);
 
 }
 

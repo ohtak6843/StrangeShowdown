@@ -132,29 +132,29 @@ void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
 	}
 }
 
-void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
-{
-	// 본인 플레이어가 데미지를 입었을 경우
-	if (Packet.targetID == MyPlayerInfo.PlayerID)
-	{
-		if (MyPlayerInfo.Player.IsValid())
-		{
-			MyPlayerInfo.Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
-		}
-		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
-		return;
-	}
-
-	// 다른 플레이어가 데미지를 입었을 경우
-	auto Player{ GetPlayer(Packet.targetID) };
-	if (true == Player.IsValid())
-	{
-		Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
-		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
-	}
-
-	
-}
+//void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
+//{
+//	// 본인 플레이어가 데미지를 입었을 경우
+//	if (Packet.targetID == MyPlayerInfo.PlayerID)
+//	{
+//		if (MyPlayerInfo.Player.IsValid())
+//		{
+//			MyPlayerInfo.Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
+//		}
+//		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
+//		return;
+//	}
+//
+//	// 다른 플레이어가 데미지를 입었을 경우
+//	auto Player{ GetPlayer(Packet.targetID) };
+//	if (true == Player.IsValid())
+//	{
+//		Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
+//		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
+//	}
+//
+//	
+//}
 
 void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
 {
@@ -172,18 +172,17 @@ void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 	// 본인 플레이어의 상태 업데이트
 	if (Packet.id == MyPlayerInfo.PlayerID)
 	{
-		if (MyPlayerInfo.Player.IsValid())
+		if (true == MyPlayerInfo.Player.IsValid())
 		{
+			MyPlayerInfo.Player->HandleStatusUpdate(Packet);
 		}
 		return;
 	}
 	// 다른 플레이어의 상태 업데이트
-	if (auto* PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) })
+	auto Player{ GetPlayer(Packet.id) };
+	if (true == Player.IsValid())
 	{
-		if (PlayerInfoPtr->Player.IsValid())
-		{
-		//	PlayerInfoPtr->Player->UpdateStatus(Packet.hp, Packet.stamina, Packet.bullet, Packet.gold, Packet.armor);
-		}
+		Player->HandleStatusUpdate(Packet);
 	}
 }
 

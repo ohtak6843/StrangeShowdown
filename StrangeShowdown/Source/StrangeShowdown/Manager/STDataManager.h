@@ -33,21 +33,6 @@ struct FPlayerInfo
 	bool bIsHost{ false };
 
 	bool bIsReady{ false };
-
-	// -- 
-	// player stats
-	// --
-
-	void UpdateStatus(const Common::SCStatusUpdate& Packet)
-	{
-		// 여기부터 작업하시오
-		//HP = Packet.hp;
-		//Stamina = Packet.stamina;
-		//Bullet = Packet.bullet;
-		//Gold = Packet.gold;
-		//Armor = Packet.armor;
-	}
-
 };
 
 /**
@@ -71,7 +56,6 @@ public:
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 

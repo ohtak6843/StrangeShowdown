@@ -86,7 +86,6 @@ public:
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 	// µ¿Àû

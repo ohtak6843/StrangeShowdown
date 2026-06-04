@@ -91,11 +91,11 @@ STPacketHandler::STPacketHandler()
 		}
 	);
 
-	RegisterHandler<Common::SCDamage>(
-		Common::PacketType::SC_DAMAGE,
+	RegisterHandler<Common::SCStatusUpdate>(
+		Common::PacketType::SC_STATUS_UPDATE,
 		[this](const auto& Packet)
 		{
-			HandleDamage(Packet);
+			HandleStatusUpdate(Packet);
 		}
 	);
 }
@@ -165,7 +165,7 @@ void STPacketHandler::HandleUseItem(const Common::SCUseItem& Packet)
 	GameInstance->HandleUseItem(Packet);
 }
 
-void STPacketHandler::HandleDamage(const Common::SCDamage& Packet)
+void STPacketHandler::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
-	GameInstance->HandleDamage(Packet);
+	GameInstance->HandleStatusUpdate(Packet);
 }

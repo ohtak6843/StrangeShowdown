@@ -195,17 +195,18 @@ void USTGameInstance::HandleStartGame(const Common::SCStartGame& Packet)
 	}
 }
 
-void USTGameInstance::HandleDamage(const Common::SCDamage& Packet)
-{
-	// 여기부터 작업하시오
-	DataManager->HandleDamage(Packet);
-	UE_LOG(LogTemp, Log, TEXT("Damage: TargetID=%d, Damage=%.2f"), Packet.targetID, Packet.damage);
-}
+//void USTGameInstance::HandleDamage(const Common::SCDamage& Packet)
+//{
+//	// 여기부터 작업하시오
+//	DataManager->HandleDamage(Packet);
+//	UE_LOG(LogTemp, Log, TEXT("Damage: TargetID=%d, Damage=%.2f"), Packet.targetID, Packet.damage);
+//}
 
 void USTGameInstance::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
 	//DataManager->HandleStatusUpdate(Packet);
 	// UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, Health=%.2f, Stamina=%.2f"), Packet.id, Packet.health, Packet.stamina);
+	DataManager->HandleStatusUpdate(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, HP=%.2f, Stamina=%.2f, Bullet=%.2f, Gold=%.2f, Armor=%.2f"),
 		Packet.id,
 		Packet.hp,

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameData/STCharacterStat.h"
+#include "protocol.h"
 #include "STStatComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
@@ -37,6 +38,8 @@ public:
 	void SetCurrentGold(float NewGold) { CharacterStat.SetCurrentGold(NewGold); OnStatChanged.Broadcast(); }
 	void SetKillCount(float NewKillCount) { CharacterStat.SetKillCount(NewKillCount); OnStatChanged.Broadcast(); }
 	void SetBounty(float NewBounty) { CharacterStat.SetBounty(NewBounty); OnStatChanged.Broadcast(); }
+
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 protected:
 	void ResetMoveSpeed();
