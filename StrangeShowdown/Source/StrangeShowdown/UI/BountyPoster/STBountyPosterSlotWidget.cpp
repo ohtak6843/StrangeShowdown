@@ -10,6 +10,13 @@
 
 USTBountyPosterSlotWidget::USTBountyPosterSlotWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_BadGuy.T_BadGuy"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_BusinessMan.T_BusinessMan"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_CowBoy.T_CowBoy"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_CowGirl.T_CowGirl"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_GunMan.T_GunMan"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_Woman.T_Woman"))));
+	Player2DTextures.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/StrangeShowdown/UI/Texture/BountyPosterPlayerTexture/T_WorkingGirl.T_WorkingGirl"))));
 }
 
 void USTBountyPosterSlotWidget::NativeConstruct()
@@ -32,10 +39,42 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 		PlayerBountyText->SetText(FText::AsNumber(InPlayer->StatComp->Bounty));
 		PlayerNameText->SetText(FText::FromString(InPlayer->PlayerNickName));
 
-		// TODO: 플레이어 2D 이미지로 설정해주기
-		if(TempTexture)
+		UTexture2D* Texture = nullptr;
+
+		switch(InPlayer->PlayerMeshType)
 		{
-			PlayerImage->SetBrushFromTexture(TempTexture);
+			case EPlayerMeshType::Badguy:
+				Texture = Player2DTextures[0].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::BuisinessMan:
+				Texture = Player2DTextures[1].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::Cowboy:
+				Texture = Player2DTextures[2].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::Cowgirl:
+				Texture = Player2DTextures[3].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::Gunman:
+				Texture = Player2DTextures[4].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::Woman:
+				Texture = Player2DTextures[5].LoadSynchronous();
+				break;
+
+			case EPlayerMeshType::WorkingGirl:
+				Texture = Player2DTextures[6].LoadSynchronous();
+				break;
+		}
+
+		if (Texture)
+		{
+			PlayerImage->SetBrushFromTexture(Texture);
 		}
 
 		PlayerGold->SetText(FText::AsNumber(InPlayer->StatComp->Gold));
