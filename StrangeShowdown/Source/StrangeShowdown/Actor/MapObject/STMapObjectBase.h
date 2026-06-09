@@ -7,6 +7,7 @@
 #include "Actor/STInteractableActor.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameData/STTypes.h"
 #include "STMapObjectBase.generated.h"
 
 /**
@@ -25,12 +26,16 @@ public:
 	// Sets default values for this actor's properties
 	ASTMapObjectBase();
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
 	virtual void Interact_Implementation(APawn* Interactor) override;
-
-	virtual void ActivationMapObject(APawn* Interactor) {};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI", Meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* InteractWidgetComponent;
@@ -50,8 +55,8 @@ public:
 	FOnCharacterMapObjectExit OnPlayerExit;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EMapObjectType MapObjectType;
 
 private:
 	UFUNCTION()
