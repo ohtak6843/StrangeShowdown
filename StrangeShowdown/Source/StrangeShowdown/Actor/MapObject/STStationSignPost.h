@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Actor/MapObject/STMapObjectBase.h"
-#include "STChurchFirstMapObject.generated.h"
+#include "STStationSignPost.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTChurchFirstMapObject : public ASTMapObjectBase
+class STRANGESHOWDOWN_API ASTStationSignPost : public ASTMapObjectBase
 {
 	GENERATED_BODY()
 	
 public:
-	virtual void ActivationMapObject(APawn* Interactor) override;
+	ASTStationSignPost();
 };

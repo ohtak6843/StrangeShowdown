@@ -28,11 +28,6 @@ ASTMapObjectBase::ASTMapObjectBase()
 	InteractWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 }
 
-void ASTMapObjectBase::Interact_Implementation(APawn* Interactor)
-{
-	ActivationMapObject(Interactor);
-}
-
 // Called when the game starts or when spawned
 void ASTMapObjectBase::BeginPlay()
 {
@@ -67,6 +62,11 @@ void ASTMapObjectBase::Tick(float DeltaTime)
 	FVector Direction = CameraLocation - InteractWidgetComponent->GetComponentLocation();
 	FRotator LookAtRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
 	InteractWidgetComponent->SetWorldRotation(LookAtRotation);
+}
+
+void ASTMapObjectBase::Interact_Implementation(APawn* Interactor)
+{
+	// 서버 패킷 송신
 }
 
 void ASTMapObjectBase::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

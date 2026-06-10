@@ -13,7 +13,4 @@ UCLASS()
 class STRANGESHOWDOWN_API ASTAlterFirstMapObject : public ASTMapObjectBase
 {
 	GENERATED_BODY()
-	
-public:
-	virtual void ActivationMapObject(APawn* Interactor) override;
 };

@@ -101,3 +101,15 @@ enum class EItemType : uint32
 	Letter = Common::ItemType::Letter				UMETA(DisplayName = "Letter"),
 	Wheel = Common::ItemType::Wheel					UMETA(DisplayName = "Wheel"),
 };
+
+UENUM()
+enum class EMapObjectType : uint32
+{
+	BankVault										UMETA(DisplayName = "BankVault"),
+
+	ChurchOldPodium									UMETA(DisplayName = "ChurchOldPodium"),
+
+	BarTable										UMETA(DisplayName = "BarTable"),
+
+	StationSignPost									UMETA(DisplayName = "StationSignPost"),
+};

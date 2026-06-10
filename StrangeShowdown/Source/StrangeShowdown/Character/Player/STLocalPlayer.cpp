@@ -784,8 +784,8 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 		{
 			PickupItem->ItemData = ItemData;
 			PickupItem->FinishSpawning(SpawnTransform);
-			UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(PickupItem->GetRootComponent());
-			if (PrimComp)
+			UStaticMeshComponent* PrimComp = Cast<UStaticMeshComponent>(PickupItem->FindComponentByClass<UStaticMeshComponent>());
+			if (IsValid(PrimComp))
 			{
 				PrimComp->SetSimulatePhysics(true);
 				PrimComp->SetEnableGravity(true);
