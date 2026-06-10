@@ -2,8 +2,9 @@
 #include "Player.h"
 #include "Room.h"
 
-void Player::Init(const std::shared_ptr<Room>& room)
+void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
 {
+	// 초기화
 	Clear();
 
 	if (nullptr != room)
@@ -15,6 +16,19 @@ void Player::Init(const std::shared_ptr<Room>& room)
 		// todo: 예외 처리
 		std::println("Error: Player::Init called with nullptr room");
 	}
+
+	if (nullptr != session)
+	{
+		_ownerSession = session;
+	}
+	else
+	{
+		// todo: 예외 처리
+		std::println("Error: Player::Init called with nullptr session");
+	}
+	
+	// 캐릭터 배치
+	ChangeType(Common::PlayerType::LobbyPlayer);
 }
 
 void Player::Clear()
@@ -27,15 +41,15 @@ void Player::Clear()
 	_status = {};
 }
 
-void Player::ChangeState(const PlayerState state)
+void Player::ChangeType(const Common::PlayerType type)
 {
 	Clear();
 
-	_state = state;
-	_status.Init(state);
+	_type = type;
+	_status.Init(type);
 
 	// 총과 망치는 기본 지급
-	if (PlayerState::INGAME == state)
+	if (Common::PlayerType::Player == type)
 	{
 		_inventory[static_cast<size_t>(Common::ItemType::Pistol)] = 1;
 		_inventory[static_cast<size_t>(Common::ItemType::Hammer)] = 1;
@@ -71,7 +85,7 @@ bool Player::TryConsumeItem(const Common::ItemType item_type)
 	}
 
 	// 스테미나 확인
-	if (_status.stamina + stamina_delta < -1e-6f)
+	if (_status.stamina + stamina_delta < -std::numeric_limits<float>::epsilon())
 	{
 		return false;
 	}
@@ -208,6 +222,32 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 void Player::TakeDamage(const float damage)
 {
 	_status.hp -= damage;
+
+	// 체력이 0이 되었을떄 유령 플레이어 생성
+	if (_status.hp <= std::numeric_limits<float>::epsilon())
+	{
+		ChangeType(Common::PlayerType::Ghost);
+		
+		// 기존 플레이어 제거 패킷 전송
+		Common::SCDespawnPlayer despawn_packet{ _ownerSession->GetSessionID() };
+		auto room{ _room.lock() };
+		if (nullptr != room)
+		{
+			room->Broadcast(despawn_packet);
+		}
+
+		// 새로이 유령 플레이어 생성 패킷 전송
+		Common::SCSpawnPlayer spawn_packet{
+			_ownerSession->GetSessionID(),
+			_position,
+			_direction,
+			_type
+		};
+		if (nullptr != room)
+		{
+			room->Broadcast(spawn_packet);
+		}
+	}
 }
 
 void Player::HandleMove(const Common::CSMovePlayer& packet)

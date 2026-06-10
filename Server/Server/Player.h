@@ -1,17 +1,9 @@
 #pragma once
 #include "Session.h"
 #include "Protocol.h"
+#include "Object.h"
 
 class Room;
-
-enum class PlayerState : uint32
-{
-	NONE = 0,
-	LOBBY = 1,
-	INGAME = 2,
-	GHOST = 3,
-	GHOST_SHERIFF = 4,
-};
 
 struct PlayerStatus
 {
@@ -24,32 +16,31 @@ struct PlayerStatus
 
 
 public:
-	void Init(const PlayerState state)
+	void Init(const Common::PlayerType type)
 	{
-		// todo: state에 따른 status 초기화
-		switch (state)
+		// todo: type에 따른 status 초기화
+		switch (type)
 		{
-			case PlayerState::LOBBY:
-			{
-				// 로비에서는 체력과 스테미나가 무한대라고 가정
-				hp = 0.f;
-				stamina = 0.f;
-				attack = 0.f;
-				bullet = 0.f;
-				gold = 0.f;
-				armor = 0.f;
-			}
-			break;
-			case PlayerState::INGAME:
-			{
-				hp = Common::PlayerConstants::Hp;
-				stamina = Common::PlayerConstants::Stamina;
-				attack = Common::PlayerConstants::Attack;
-				bullet = Common::PlayerConstants::Bullet;
-				gold = Common::PlayerConstants::Gold;
-				armor = Common::PlayerConstants::Armor;
-			}
-			break;
+		case Common::PlayerType::LobbyPlayer: case Common::PlayerType::Ghost:
+		{
+			hp = 0.f;
+			stamina = 0.f;
+			attack = 0.f;
+			bullet = 0.f;
+			gold = 0.f;
+			armor = 0.f;
+		}
+		break;
+		case Common::PlayerType::Player:
+		{
+			hp = Common::PlayerConstants::Hp;
+			stamina = Common::PlayerConstants::Stamina;
+			attack = Common::PlayerConstants::Attack;
+			bullet = Common::PlayerConstants::Bullet;
+			gold = Common::PlayerConstants::Gold;
+			armor = Common::PlayerConstants::Armor;
+		}
+		break;
 		default:
 			break;
 		}
@@ -57,16 +48,15 @@ public:
 
 };
 
-class Player
+class Player : public Object
 {
-
 	// --
 	// method
 	// --
 public:
-	void Init(const std::shared_ptr<Room>& room);
+	void Init(const std::shared_ptr<Room>& room, const SessionPtr session);
 	void Clear();
-	void ChangeState(const PlayerState state);
+	void ChangeType(const Common::PlayerType type);
 
 
 	// 아이템을 사용 가능한지 여부 검사하고, 가능 시 사용 처리까지 하는 메서드.
@@ -75,6 +65,8 @@ public:
 
 	void ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr target);
 
+	// 플레이어의 체력을 깎는 것은 TakeDamage 메서드를 통해서만 가능하다.
+	// 이를 통해 유령 플레이어 생성을 처리한다.
 	void TakeDamage(const float damage);
 public:	
 	
@@ -97,9 +89,10 @@ public:
 	const Vec3f& GetDirection() const { return _direction; }
 
 	SessionPtr GetOwnerSession() const { return _ownerSession; }
-	void SetOwnerSession(const SessionPtr session) { _ownerSession = session; }
 
 	uint8 GetAnimationState() const { return _animationState; }
+
+	Common::PlayerType GetType() const { return _type; }
 
 	bool GetReady() const { return _ready; }
 	void SetReady(const bool ready) { _ready = ready; }
@@ -135,7 +128,7 @@ private:
 	// --
 
 private:
-	PlayerState _state{ PlayerState::NONE };
+	Common::PlayerType _type{ Common::PlayerType::None };
 	SessionPtr _ownerSession{ nullptr };
 	std::weak_ptr<Room> _room{};
 

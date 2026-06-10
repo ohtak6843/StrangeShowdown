@@ -97,11 +97,16 @@ void USTGameInstance::AddRoom(USTRoomInfoObject* NewRoom)
 }
 
 
-void USTGameInstance::HandleSpawn(const Common::SCSpawnObject& Packet)
+void USTGameInstance::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 {
 	// player bp class
-	DataManager->HandleSpawn(Packet);
+	DataManager->HandleSpawnPlayer(Packet);
 
+}
+
+void USTGameInstance::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
+{
+	DataManager->HandleDespawnPlayer(Packet);
 }
 
 void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
@@ -111,7 +116,6 @@ void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 
 void USTGameInstance::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 {
-	UE_LOG(LogTemp, Log, TEXT("Room Create: %s"), Packet.success ? TEXT("true") : TEXT("false"));
 	if (true == Packet.success)
 	{
 		DataManager->HandleCreateRoom(Packet);

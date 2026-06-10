@@ -9,11 +9,19 @@ STPacketHandler::STPacketHandler()
 	GameInstance = Cast<USTGameInstance>(GWorld->GetGameInstance());
 	
 	// 고정 크기 패킷 핸들러 등록
-	RegisterHandler<Common::SCSpawnObject>(
-		Common::PacketType::SC_SPAWN_OBJECT,
+	RegisterHandler<Common::SCSpawnPlayer>(
+		Common::PacketType::SC_SPAWN_PLAYER,
 		[this](const auto& Packet)
 		{
-			HandleSpawnObject(Packet);
+			HandleSpawnPlayer(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCDespawnPlayer>(
+		Common::PacketType::SC_DESPAWN_PLAYER,
+		[this](const auto& Packet)
+		{
+			HandleDespawnPlayer(Packet);
 		}
 	);
 
@@ -114,10 +122,14 @@ void STPacketHandler::HandlePacket(const TArray<uint8>& Data)
 	}
 }
 
-void STPacketHandler::HandleSpawnObject(const Common::SCSpawnObject& Packet)
+void STPacketHandler::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 {
-	GameInstance->HandleSpawn(Packet);
-	UE_LOG(LogTemp, Log, TEXT("Spawn Success"));
+	GameInstance->HandleSpawnPlayer(Packet);
+}
+
+void STPacketHandler::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
+{
+	GameInstance->HandleDespawnPlayer(Packet);
 }
 
 void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)

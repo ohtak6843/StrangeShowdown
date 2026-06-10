@@ -21,8 +21,11 @@
 
 
 
-void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
+void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 {
+	// 타입에 따라 생성할 플레이어 클래스 결정
+
+	
 	// blueprint class 예외 처리
 	if (false == bIsInGame && nullptr == LobbyFieldPlayerClass)
 	{
@@ -46,28 +49,67 @@ void USTDataManager::HandleSpawn(const Common::SCSpawnObject& Packet)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	// playerinfo 생성
-	FPlayerInfo PlayerInfo{
-		.NickName = FString::Printf(TEXT("Player_%llu"), Packet.objectID),
-		.PlayerID = Packet.objectID,
-		.bIsHost = (Packet.objectID == HostID)
-	};
 
-	// spawn player
-	ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo) };
-
-	PlayerInfo.Player = Player;
-
-	// playerinfoMap에 추가
-	PlayerInfoMap.Add(Packet.objectID, PlayerInfo);
+	auto PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) };
 	
-	UE_LOG(LogTemp, Log, TEXT("HandleSpawn: PlayerID=%llu"), Packet.objectID);
+	// 플레이어가 존재하지 않음.
+	if (nullptr == PlayerInfoPtr)
+	{
+		// playerinfo 생성
+		FPlayerInfo PlayerInfo{
+			.NickName = FString::Printf(TEXT("Player_%llu"), Packet.id),
+			.PlayerID = Packet.id,
+			.bIsHost = (Packet.id == HostID),
+			.bIsReady = false,
+			.Type = Packet.type
+		};
+
+		ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo, Packet.type) };
+		PlayerInfo.Player = Player;
+		PlayerInfoMap.Add(Packet.id, PlayerInfo);
+
+		UE_LOG(LogTemp, Log, TEXT("New Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+	}
+
+	// 플레이어가 이미 존재함.
+	else
+	{
+		// 기존 플레이어 객체를 제거한다.
+		if (true == PlayerInfoPtr->Player.IsValid())
+		{
+			PlayerInfoPtr->Player->Destroy();
+		}
+		PlayerInfoPtr->Player.Reset();
+
+		// 새로운 객체를 생성한다.
+		ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, *PlayerInfoPtr, Packet.type) };
+		PlayerInfoPtr->Player = Player;
+		
+	
+		UE_LOG(LogTemp, Log, TEXT("Origin Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+	}
+}
+
+void USTDataManager::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
+{
+	auto Player{ GetPlayer(Packet.id) };
+	if (true == Player.IsValid())
+	{
+		Player->Destroy();
+		PlayerInfoMap.Find(Packet.id)->Player.Reset();
+
+		// 유령 클라이언트의 딜레이를 고려한다? -> PC에 따라서 다 다를거니까
+		// 1. 플레이어가 죽는 동시에 유령을 스폰한다.
+		// 2, 플레이어가 죽어도 일정시간동안 기다렸다가 스폰한다.
+		//    => 시간 좀 걸려  생각보다 까다로워. => Job을 통해서 넣어야돼. Job 시간이 안돼. JOb의 시간 지연 시스템 
+		//    => 
+	}
 }
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
 	auto Player{ GetPlayer(Packet.id) };
-	if (Player.IsValid())
+	if (true == Player.IsValid())
 	{
 		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
@@ -131,30 +173,6 @@ void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
 		bIsInGame = true;
 	}
 }
-
-//void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
-//{
-//	// 본인 플레이어가 데미지를 입었을 경우
-//	if (Packet.targetID == MyPlayerInfo.PlayerID)
-//	{
-//		if (MyPlayerInfo.Player.IsValid())
-//		{
-//			MyPlayerInfo.Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
-//		}
-//		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
-//		return;
-//	}
-//
-//	// 다른 플레이어가 데미지를 입었을 경우
-//	auto Player{ GetPlayer(Packet.targetID) };
-//	if (true == Player.IsValid())
-//	{
-//		Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
-//		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
-//	}
-//
-//	
-//}
 
 void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
 {
@@ -330,4 +348,61 @@ ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, con
 	}
 	return player;
 }
+
+ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo, const Common::PlayerType PlayerType)
+{
+	ASTPlayerBase* player{ nullptr };
+	if (false == IsValid(GetWorld()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World is not valid. Cannot spawn player."));
+		return nullptr;
+	}
+
+	switch (PlayerType)
+	{
+	case Common::PlayerType::LobbyPlayer:
+	{
+		auto* LobbyPlayer{ GetWorld()->SpawnActor<ASTLobbyFieldPlayer>(
+			LobbyFieldPlayerClass,
+			Transform,
+			SpawnParams
+		) };
+		LobbyPlayer->Init(PlayerInfo);
+		player = LobbyPlayer;
+		UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Spawned"));
+	}
+	break;
+	case Common::PlayerType::Player:
+	{
+		auto* IngamePlayer = GetWorld()->SpawnActor<ASTFieldPlayer>(
+			FieldPlayerClass,
+			Transform,
+			SpawnParams
+		);
+		IngamePlayer->Init(PlayerInfo);
+		player = IngamePlayer;
+		UE_LOG(LogTemp, Log, TEXT("Field Player Spawned"));
+	}
+	break;
+	case Common::PlayerType::Ghost:
+	{
+		auto* IngamePlayer = GetWorld()->SpawnActor<ASTFieldPlayer>(
+			FieldPlayerClass,
+			Transform,
+			SpawnParams
+		);
+		IngamePlayer->Init(PlayerInfo);
+		player = IngamePlayer;
+		UE_LOG(LogTemp, Warning, TEXT("Ghost player type is not implemented yet. Spawning as regular player."));
+	}
+	break;
+
+	default:
+		break;
+	}
+
+	return player;
+}
+
+
 

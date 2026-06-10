@@ -55,8 +55,9 @@ void USTStatComponent::InitPlayerStats()
 void USTStatComponent::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
 	CharacterStat.CurrentHp = Packet.hp;
-	CharacterStat.CurrentStamina = 2.f;
+	CharacterStat.CurrentStamina = Packet.stamina;
 	CharacterStat.CurrentGold = Packet.gold;
 	CharacterStat.CurrentArmor = Packet.armor;
+	CharacterStat.CurrentAction = Packet.bullet;
 	OnStatChanged.Broadcast();
 }

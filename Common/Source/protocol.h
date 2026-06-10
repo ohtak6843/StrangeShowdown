@@ -48,7 +48,8 @@ enum class PacketType : uint16
 	// object
 	// --
 
-	SC_SPAWN_OBJECT,
+	SC_SPAWN_PLAYER,
+	SC_DESPAWN_PLAYER,
 
 	SC_MOVE_OBJECT,
 
@@ -309,7 +310,7 @@ struct SCChat : Header
 };
 
 // CSChat
-// no param
+//  no param
 // Brief:
 //  [ 가변 크기 패킷 ]
 //  서버로 채팅 메시지를 보내는 패킷. 채팅 메시지를 뒤에 이어붙인다.
@@ -323,21 +324,38 @@ struct CSChat : Header
 };
 
 // Param:
-//	Vec3f dir
+//  uint64 objectID
+//  Vec3f pos
+//  Vec3f dir
+//  PlayerState state
+//	
 // Brief:
 //  클라이언트 로그인 요청
-struct SCSpawnObject : Header
+struct SCSpawnPlayer : Header
 {
-	uint64 objectID{};
+	uint64 id{};
 	Vec3f pos{};
 	Vec3f dir{};
+	PlayerType type{ PlayerType::None };
 
-	SCSpawnObject() = default;
-	SCSpawnObject(const uint64 in_objectID, const Vec3f& in_pos, const Vec3f& in_dir) :
-		Header{ sizeof(SCSpawnObject), PacketType::SC_SPAWN_OBJECT },
-		objectID{ in_objectID },
+	SCSpawnPlayer() = default;
+	SCSpawnPlayer(const uint64 in_id, const Vec3f& in_pos, const Vec3f& in_dir, const PlayerType in_type = PlayerType::None) :
+		Header{ sizeof(SCSpawnPlayer), PacketType::SC_SPAWN_PLAYER },
+		id{ in_id },
 		pos{ in_pos },
-		dir{ in_dir }
+		dir{ in_dir },
+		type{ in_type } 
+	{
+	}
+};
+
+struct SCDespawnPlayer : Header
+{
+	uint64 id{};
+	SCDespawnPlayer() = default;
+	SCDespawnPlayer(const uint64 in_id) :
+		Header{ sizeof(SCDespawnPlayer), PacketType::SC_DESPAWN_PLAYER },
+		id{ in_id }
 	{
 	}
 };

@@ -33,6 +33,8 @@ struct FPlayerInfo
 	bool bIsHost{ false };
 
 	bool bIsReady{ false };
+
+	Common::PlayerType Type{ Common::PlayerType::None };
 };
 
 /**
@@ -50,7 +52,8 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 	// static packet handlers
 	// --
 public:
-	void HandleSpawn(const Common::SCSpawnObject& Packet);
+	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
+	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
@@ -85,8 +88,6 @@ private:
 	// getter and setter
 	// --
 public:
-	//bool GetLoddingLevel() const { return bIsInGame; }
-	//void SetLoadingLevel(bool Value) { bIsInGame = Value; }
 
 	uint64 GetHostID() const { return HostID; }
 
@@ -104,6 +105,14 @@ private:
 		const FActorSpawnParameters& SpawnParams,
 		const FPlayerInfo& PlayerInfo
 	);
+	
+	ASTPlayerBase* SpawnFieldPlayer(
+		const FTransform& Transform,
+		const FActorSpawnParameters& SpawnParams,
+		const FPlayerInfo& PlayerInfo,
+		const Common::PlayerType PlayerType
+	);
+
 
 	// todo cham: 나중에 private화.
 
