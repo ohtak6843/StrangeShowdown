@@ -19,6 +19,9 @@ struct FMissionSlot
 	UTextBlock* Mission = nullptr;
 
 	UPROPERTY()
+	UTextBlock* MissionProgress = nullptr;
+
+	UPROPERTY()
 	UImage* Image = nullptr;
 };
 
@@ -36,6 +39,9 @@ public:
 
 	UFUNCTION()
 	void MissionClear(USTMissionRowData* Data);
+
+	UFUNCTION()
+	void UpdateMissionProgress(USTMissionRowData* Data);
 
 	void RemoveMission(USTMissionRowData* Data);
 	void RebuildSlots();
@@ -60,6 +66,10 @@ protected:
 	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission1;
 	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission2;
 	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission3;
+
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission1Progress;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission2Progress;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* Mission3Progress;
 
 	UPROPERTY(meta = (BindWidget)) UImage* Mission1Image;
 	UPROPERTY(meta = (BindWidget)) UImage* Mission2Image;

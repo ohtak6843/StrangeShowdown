@@ -26,10 +26,7 @@ bool USTLetterEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 
 	Super::Use(User, ItemData);
 
-	MissionComp->SetMission(
-		FText::FromString(TEXT("테스트 미션")),
-		FText::FromString(TEXT("이것은 테스트 미션입니다. 다시 한번 말씀드립니다. 테스트 미션입니다."))
-	);
+	MissionComp->AddMission();
 
 	return true;
 }
