@@ -54,16 +54,19 @@ void USTStoreSlotWidget::UpdateSlot(const FStoreSlot& InStoreSlot)
 	{
 		ItemImage->SetBrushFromTexture(StoreSlot.ItemData->Icon);
 		ItemNameText->SetText(StoreSlot.ItemData->ItemName);
+		ItemDescriptionText->SetText(StoreSlot.ItemData->Description);
 		GoldCostText->SetText(FText::AsNumber(StoreSlot.ItemData->GoldCost));
 
 		ItemImage->SetVisibility(ESlateVisibility::Visible);
 		ItemNameText->SetVisibility(ESlateVisibility::Visible);
+		ItemDescriptionText->SetVisibility(ESlateVisibility::Visible);
 		GoldCostText->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		ItemImage->SetVisibility(ESlateVisibility::Hidden);
 		ItemNameText->SetVisibility(ESlateVisibility::Hidden);
+		ItemDescriptionText->SetVisibility(ESlateVisibility::Hidden);
 		GoldCostText->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

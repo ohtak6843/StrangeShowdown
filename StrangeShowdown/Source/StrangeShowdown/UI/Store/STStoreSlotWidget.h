@@ -44,6 +44,9 @@ protected:
 	TObjectPtr<class UTextBlock> ItemNameText;
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> ItemDescriptionText;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> GoldCostText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)

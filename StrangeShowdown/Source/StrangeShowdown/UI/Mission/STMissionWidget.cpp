@@ -10,9 +10,9 @@ void USTMissionWidget::NativeConstruct()
 	// ½½·Ô ±¸¼º
 	MissionSlots =
 	{
-		{ Mission1Title, Mission1, Mission1Image },
-		{ Mission2Title, Mission2, Mission2Image },
-		{ Mission3Title, Mission3, Mission3Image }
+		{ Mission1Title, Mission1, Mission1Progress, Mission1Image },
+		{ Mission2Title, Mission2, Mission2Progress, Mission2Image },
+		{ Mission3Title, Mission3, Mission3Progress, Mission3Image }
 	};
 
 	// ÃÊ±â ¼û±è
@@ -20,6 +20,7 @@ void USTMissionWidget::NativeConstruct()
 	{
 		if (MissionSlot.Title)   MissionSlot.Title->SetVisibility(ESlateVisibility::Hidden);
 		if (MissionSlot.Mission) MissionSlot.Mission->SetVisibility(ESlateVisibility::Hidden);
+		if (MissionSlot.MissionProgress) MissionSlot.MissionProgress->SetVisibility(ESlateVisibility::Hidden);
 		if (MissionSlot.Image)   MissionSlot.Image->SetVisibility(ESlateVisibility::Hidden);
 	}
 
@@ -32,6 +33,7 @@ void USTMissionWidget::NativeConstruct()
 			{
 				MissionComp->OnMissionStart.AddDynamic(this, &USTMissionWidget::AddMission);
 				MissionComp->OnMissionClear.AddDynamic(this, &USTMissionWidget::MissionClear);
+				MissionComp->OnMissionUpdate.AddDynamic(this, &USTMissionWidget::UpdateMissionProgress);
 			}
 		}
 	}
@@ -67,6 +69,11 @@ void USTMissionWidget::MissionClear(USTMissionRowData* Data)
 		MissionSlots[Index].Mission->SetText(FText::FromString(TEXT("Mission Clear!")));
 	}
 
+	if (MissionSlots[Index].MissionProgress)
+	{
+		MissionSlots[Index].MissionProgress->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	MissionAnimation(Index + 1);
 
 	// 3ÃÊ ÈÄ Á¦°Å
@@ -77,6 +84,19 @@ void USTMissionWidget::MissionClear(USTMissionRowData* Data)
 		3.0f,
 		false
 	);
+}
+
+void USTMissionWidget::UpdateMissionProgress(USTMissionRowData* Data)
+{
+	if (!Data) return;
+	int32 Index = ActiveMissions.IndexOfByKey(Data);
+	if (!ActiveMissions.IsValidIndex(Index))
+		return;
+
+	if (MissionSlots[Index].MissionProgress)
+	{
+		MissionSlots[Index].MissionProgress->SetText(Data->MissionProgress);
+	}
 }
 
 void USTMissionWidget::RemoveMission(USTMissionRowData* Data)
@@ -95,6 +115,7 @@ void USTMissionWidget::RebuildSlots()
 	{
 		if (MissionSlot.Title)   MissionSlot.Title->SetVisibility(ESlateVisibility::Hidden);
 		if (MissionSlot.Mission) MissionSlot.Mission->SetVisibility(ESlateVisibility::Hidden);
+		if (MissionSlot.MissionProgress) MissionSlot.MissionProgress->SetVisibility(ESlateVisibility::Hidden);
 		if (MissionSlot.Image)   MissionSlot.Image->SetVisibility(ESlateVisibility::Hidden);
 	}
 
@@ -123,6 +144,19 @@ void USTMissionWidget::RebuildSlots()
 				MissionSlot.Mission->SetText(Data->Mission);
 			}
 			MissionSlot.Mission->SetVisibility(ESlateVisibility::Visible);
+		}
+
+		if (MissionSlot.MissionProgress)
+		{
+			if (Data->bIsCleared)
+			{
+				MissionSlot.MissionProgress->SetVisibility(ESlateVisibility::Hidden);
+			}
+			else
+			{
+				MissionSlot.MissionProgress->SetText(Data->MissionProgress);
+				MissionSlot.MissionProgress->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 
 		if (MissionSlot.Image)
