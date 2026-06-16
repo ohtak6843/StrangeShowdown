@@ -179,6 +179,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> SmashMontage;
 
+// Dead Section
+public:
+	virtual void SetDead() override;
+
 // Effect Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
@@ -202,11 +206,6 @@ protected:
 
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
-
-// Player Meshes Section
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 
 // Sheriff Chase Section
 public:

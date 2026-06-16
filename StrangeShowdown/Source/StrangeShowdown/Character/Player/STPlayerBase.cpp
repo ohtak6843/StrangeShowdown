@@ -81,6 +81,17 @@ ASTPlayerBase::ASTPlayerBase()
 void ASTPlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Set Local Player Mesh
+	if (PlayerMeshes.IsValidIndex(static_cast<uint8>(PlayerMeshType)) && PlayerMeshes[static_cast<uint8>(PlayerMeshType)].IsValid())
+	{
+		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<uint8>(PlayerMeshType)].LoadSynchronous();
+		GetMesh()->SetSkeletalMesh(PlayerMesh);
+	}
+
+	// Set Dynamic Material
+	DynamicMaterial = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0), this);
+	GetMesh()->SetMaterial(0, DynamicMaterial);
 }
 
 void ASTPlayerBase::SetMaxWalkSpeed(float NewMaxWalkSpeed)
@@ -107,6 +118,39 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 
 	return ActualDamage;
+}
+
+void ASTPlayerBase::SetDead()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	PlayDeadAnimation();
+	SetActorEnableCollision(false);
+}
+
+void ASTPlayerBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	if (IsValid(DeadMontage))
+	{
+		AnimInstance->Montage_Play(DeadMontage);
+	}
+
+	FTimerHandle DeadTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
+		[&]()
+		{
+			PlayDissolveEffect();
+			FTimerHandle DestroyTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, FTimerDelegate::CreateLambda(
+				[&]()
+				{
+					GetMesh()->SetVisibility(false);
+					RightHandStaticMesh->SetVisibility(false);
+					RightHandSkeletalMesh->SetVisibility(false);
+				}
+			), DissolveEffectDelayTime, false);
+		}), DeadEventDelayTime, false);
 }
 
 void ASTPlayerBase::PlayItemUseEffect(EItemType ItemType)

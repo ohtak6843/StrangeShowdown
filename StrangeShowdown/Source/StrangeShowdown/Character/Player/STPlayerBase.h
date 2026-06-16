@@ -63,13 +63,38 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
 
+// Player Meshes Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
+
 // Damage Section
 public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+// Dead Section
+public:
 	UFUNCTION(BlueprintCallable)
 	virtual void ChangeToGhost() {}
+
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayDissolveEffect();
+	virtual void PlayDissolveEffect_Implementation() {}
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetDead();
+	void PlayDeadAnimation();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UMaterialInstanceDynamic> DynamicMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UAnimMontage> DeadMontage;
+
+	float DeadEventDelayTime = 3.0f;
+	float DissolveEffectDelayTime = 2.5f;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
