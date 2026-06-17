@@ -9,6 +9,9 @@
 #include "Character/Player/STLobbyFieldPlayer.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Character/Player/STLobbyLocalPlayer.h"
+#include "Character/Ghost/STFieldGhost.h"
+#include "Character/Ghost/STLocalGhost.h"
+
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Controller/STLobbyController.h"
@@ -58,13 +61,13 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 		// playerinfo 생성
 		FPlayerInfo PlayerInfo{
 			.NickName = FString::Printf(TEXT("Player_%llu"), Packet.id),
-			.PlayerID = Packet.id,
+			.ID = Packet.id,
 			.bIsHost = (Packet.id == HostID),
 			.bIsReady = false,
 			.Type = Packet.type
 		};
 
-		ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo, Packet.type) };
+		auto* Player{ SpawnFieldPlayer(Transform, SpawnParams, PlayerInfo, Packet.type) };
 		PlayerInfo.Player = Player;
 		PlayerInfoMap.Add(Packet.id, PlayerInfo);
 
@@ -75,16 +78,20 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 	else
 	{
 		// 기존 플레이어 객체를 제거한다.
-		if (true == PlayerInfoPtr->Player.IsValid())
+		if (auto PlayerPtr{ PlayerInfoPtr->Player.Get() }; PlayerPtr != nullptr)
 		{
-			PlayerInfoPtr->Player->Destroy();
+			PlayerPtr->Destroy();
 		}
+
 		PlayerInfoPtr->Player.Reset();
 
 		// 새로운 객체를 생성한다.
-		ASTPlayerBase* Player{ SpawnFieldPlayer(Transform, SpawnParams, *PlayerInfoPtr, Packet.type) };
+		auto* Player{ SpawnFieldPlayer(Transform, SpawnParams, *PlayerInfoPtr, Packet.type) };
 		PlayerInfoPtr->Player = Player;
 		
+		// 기존 정보를 업데이트한다.
+		PlayerInfoPtr->Type = Packet.type;
+		PlayerInfoPtr->ID = Packet.id;
 	
 		UE_LOG(LogTemp, Log, TEXT("Origin Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
 	}
@@ -92,57 +99,77 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 
 void USTDataManager::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 {
-	auto Player{ GetPlayer(Packet.id) };
-	if (true == Player.IsValid())
+	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
+	if (nullptr == PlayerInfoPtr)
 	{
-		Player->Destroy();
-		PlayerInfoMap.Find(Packet.id)->Player.Reset();
+		return;
+	}
+	auto PlayerPtr{ PlayerInfoPtr->Player.Get()};
+	if (nullptr == PlayerPtr)
+	{
+		return;
+	}
+
+	PlayerPtr->Destroy();	
+
 
 		// 유령 클라이언트의 딜레이를 고려한다? -> PC에 따라서 다 다를거니까
 		// 1. 플레이어가 죽는 동시에 유령을 스폰한다.
 		// 2, 플레이어가 죽어도 일정시간동안 기다렸다가 스폰한다.
 		//    => 시간 좀 걸려  생각보다 까다로워. => Job을 통해서 넣어야돼. Job 시간이 안돼. JOb의 시간 지연 시스템 
 		//    => 
-	}
+	
+
 }
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
-	auto Player{ GetPlayer(Packet.id) };
-	if (true == Player.IsValid())
+	// 예외 처리
+	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
+	if (nullptr == PlayerInfoPtr)
 	{
-		FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
-		FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
-		Player->Move(Location, Rotation);
-		Player->PlayerStateFlag = Packet.state;
+		return;
 	}
+
+	auto PlayerPtr{ PlayerInfoPtr->Player.Get() };
+	if (nullptr == PlayerPtr)
+	{
+		return;
+	}
+
+	// 패킷 처리
+	FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
+	FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
+	if (Common::PlayerType::Player == PlayerInfoPtr->Type ||
+		Common::PlayerType::LobbyPlayer == PlayerInfoPtr->Type)
+	{
+		auto* PlayerBasePtr{ Cast<ASTPlayerBase>(PlayerPtr) };
+		if (nullptr == PlayerBasePtr)
+		{
+			return;
+		}
+		PlayerBasePtr->Move(Location, Rotation);
+		PlayerBasePtr->PlayerStateFlag = Packet.state;
+	}
+
 }
 
 void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)
 {
 	if (true == Packet.success)
 	{
-		// 방을 만드는데 성공 했으면 방장이므로 호스트 플래그를 켜줌.
 		bIsHost = true;
-
-		// controller에 호스트 정보 전달
-
 	}
 }
 
 void USTDataManager::HandleJoinRoom(const Common::SCJoinRoom& Packet)
 {
+	// 정보 저장
 	HostID = Packet.hostID;
-	MyPlayerInfo.PlayerID = Packet.MyID;
-	MyPlayerInfo.bIsHost = (MyPlayerInfo.PlayerID == HostID);
+	MyPlayerInfo.ID = Packet.MyID;
+	MyPlayerInfo.bIsHost = (MyPlayerInfo.ID == HostID);
+	PlayerInfoMap.Add(Packet.MyID, MyPlayerInfo);
 	bIsInGame = false;
-
-	APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
-	ASTLobbyController* LobbyController{ Cast<ASTLobbyController>(PlayerController) };
-	if (nullptr == LobbyController)
-	{
-		return;
-	}
 }
 
 void USTDataManager::HandleReady(const Common::SCReady& Packet)
@@ -176,32 +203,55 @@ void USTDataManager::HandleStartGame(const Common::SCStartGame& Packet)
 
 void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
 {
-	auto Player{ GetPlayer(Packet.id) };
-	if (Player.IsValid())
+	// 예외처리
+	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
+	if (nullptr == PlayerInfoPtr)
 	{
-		Player->PlayItemUseEffect(static_cast<EItemType>(Packet.itemType));
-		UE_LOG(LogTemp, Log, TEXT("Player %llu used item: %d"), Packet.id, Packet.itemType);
+		return;
 	}
+
+	auto PlayerPtr{ PlayerInfoPtr->Player.Get() };
+	if (nullptr == PlayerPtr)
+	{
+		return;
+	}
+
+	
+	if (Common::PlayerType::Player == PlayerInfoPtr->Type)
+	{
+		auto* PlayerBasePtr{ Cast<ASTPlayerBase>(PlayerPtr) };
+		if (nullptr == PlayerBasePtr)
+		{
+			return;
+		}
+
+		PlayerBasePtr->PlayItemUseEffect(static_cast<EItemType>(Packet.itemType));
+	}
+	
 
 }
 
 void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
-	// 본인 플레이어의 상태 업데이트
-	if (Packet.id == MyPlayerInfo.PlayerID)
+	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
+	if (nullptr == PlayerInfoPtr)
 	{
-		if (true == MyPlayerInfo.Player.IsValid())
-		{
-			MyPlayerInfo.Player->HandleStatusUpdate(Packet);
-		}
 		return;
 	}
-	// 다른 플레이어의 상태 업데이트
-	auto Player{ GetPlayer(Packet.id) };
-	if (true == Player.IsValid())
+
+	auto PlayerPtr{ PlayerInfoPtr->Player.Get() };
+	if (nullptr == PlayerPtr)
 	{
-		Player->HandleStatusUpdate(Packet);
+		return;
 	}
+	
+	auto* PlayerBasePtr{ Cast<ASTPlayerBase>(PlayerPtr) };
+	if (nullptr == PlayerBasePtr)
+	{
+		return;
+	}
+	PlayerBasePtr->HandleStatusUpdate(Packet);
+	
 }
 
 void USTDataManager::OnLevelChanged()
@@ -227,9 +277,15 @@ void USTDataManager::RefreshPlayers()
 	}
 
 	// 기존 플레이어 객체들을 제거하고 새 객체를 생성하는 로직.
+	// 본인 플레이어는 생성하지 않는다.
 	// 데이터는 유지한다.
 	for (auto& [_, PlayerInfo] : PlayerInfoMap)
 	{
+		if (PlayerInfo.ID == MyPlayerInfo.ID)
+		{
+			continue;
+		}
+
 		if (PlayerInfo.Player.IsValid())
 		{
 			PlayerInfo.Player->Destroy();
@@ -263,7 +319,7 @@ void USTDataManager::InitController()
 			UE_LOG(LogTemp, Log, TEXT("PlayerController is not of type ASTLobbyController"));
 			return;
 		}
-		LobbyController->InitData(HostID, MyPlayerInfo.PlayerID);
+		LobbyController->InitData(HostID, MyPlayerInfo.ID);
 		UE_LOG(LogTemp, Log, TEXT("hostplayer set success"));
 	}
 }
@@ -300,24 +356,20 @@ void USTDataManager::GetMyPlayer()
 		}
 		MyPlayerInfo.Player = Player;
 	}
-
 }
 
-PlayerWeakPtr USTDataManager::GetPlayer(const uint64 PlayerID) const
+FPlayerInfo* USTDataManager::GetPlayerInfo(const uint64 ID)
 {
-	if (auto* InfoPtr{ PlayerInfoMap.Find(PlayerID) })
+	if (auto* InfoPtr{ PlayerInfoMap.Find(ID) })
 	{
-		// FPlayerInfo 구조체 안에 있는 Player 포인터 참조
-		auto Player{ InfoPtr->Player };
-
-		return Player;
+		return InfoPtr;
 	}
 	return nullptr;
 }
 
-ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo)
+ASTCharacter* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo)
 {
-	ASTPlayerBase* player{ nullptr };
+	ASTCharacter* player{ nullptr };
 	if (false == IsValid(GetWorld()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("World is not valid. Cannot spawn player."));
@@ -349,9 +401,9 @@ ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, con
 	return player;
 }
 
-ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo, const Common::PlayerType PlayerType)
+ASTCharacter* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, const FActorSpawnParameters& SpawnParams, const FPlayerInfo& PlayerInfo, const Common::PlayerType PlayerType)
 {
-	ASTPlayerBase* player{ nullptr };
+	ASTCharacter* player{ nullptr };
 	if (false == IsValid(GetWorld()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("World is not valid. Cannot spawn player."));
@@ -386,14 +438,13 @@ ASTPlayerBase* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, con
 	break;
 	case Common::PlayerType::Ghost:
 	{
-		auto* IngamePlayer = GetWorld()->SpawnActor<ASTFieldPlayer>(
-			FieldPlayerClass,
+		auto* Ghost = GetWorld()->SpawnActor<ASTFieldGhost>(
+			FieldGhostClass,
 			Transform,
 			SpawnParams
 		);
-		IngamePlayer->Init(PlayerInfo);
-		player = IngamePlayer;
-		UE_LOG(LogTemp, Warning, TEXT("Ghost player type is not implemented yet. Spawning as regular player."));
+		// Ghost->Init(PlayerInfo);
+		player = Ghost;
 	}
 	break;
 

@@ -78,7 +78,7 @@ void ASTFieldPlayer::ChangeToGhost()
 
 void ASTFieldPlayer::Init(const FPlayerInfo& PlayerInfo)
 {
-	PlayerID = PlayerInfo.PlayerID;
+	ID = PlayerInfo.ID;
 
 	StatComp->InitPlayerStats();
 }

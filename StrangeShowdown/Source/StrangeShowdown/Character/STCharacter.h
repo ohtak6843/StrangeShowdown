@@ -24,8 +24,6 @@ public:
 	// Character Name
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info")
 	FString PlayerNickName = TEXT("NoName");
-	// todo: cham
-	// uint64 PlayerID = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
 	TObjectPtr<class ASTMiniMapActor> MiniMapActor;
@@ -40,8 +38,14 @@ public:
 public:
 	void Move(const FVector& Location, const FRotator& Rotator);
 
+	uint64 GetID() const { return ID; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	uint64 ID{ 0 };
+
+
 
 };

@@ -209,7 +209,7 @@ void USTGameInstance::HandleStartGame(const Common::SCStartGame& Packet)
 void USTGameInstance::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
 	//DataManager->HandleStatusUpdate(Packet);
-	// UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, Health=%.2f, Stamina=%.2f"), Packet.id, Packet.health, Packet.stamina);
+	// UE_LOG(LogTemp, Log, TEXT("Status Update: ID=%d, Health=%.2f, Stamina=%.2f"), Packet.id, Packet.health, Packet.stamina);
 	DataManager->HandleStatusUpdate(Packet);
 	UE_LOG(LogTemp, Log, TEXT("Status Update: PlayerID=%d, HP=%.2f, Stamina=%.2f, Bullet=%.2f, Gold=%.2f, Armor=%.2f"),
 		Packet.id,

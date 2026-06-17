@@ -578,7 +578,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 				if (GameInstance)
 				{
 					GameInstance->UseItem(
-						AttackTraceComp->TracingFieldPlayer->GetPlayerID(),
+						AttackTraceComp->TracingFieldPlayer->GetID(),
 						/*static_cast<Common::ItemType>(CurrentItemData->ItemType)*/
 						Common::ItemType::Pistol
 					);

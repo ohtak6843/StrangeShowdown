@@ -9,9 +9,10 @@
 
 #include "STDataManager.generated.h"
 
-class ASTPlayerBase;
 
-using PlayerWeakPtr = TWeakObjectPtr<ASTPlayerBase>;
+class ASTCharacter;
+
+using CharacterWeakPtr = TWeakObjectPtr<ASTCharacter>;
 
 /**
 * @brief:
@@ -24,11 +25,11 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	PlayerWeakPtr Player;
+	CharacterWeakPtr Player;
 
 	FString NickName{ UTF8_TO_TCHAR(std::string(Common::PlayerConstants::Name).c_str()) };
 
-	uint64 PlayerID{ 0 };
+	uint64 ID{ 0 };
 
 	bool bIsHost{ false };
 
@@ -98,15 +99,17 @@ public:
 	// 내부 메소드
 	// --
 private:
-	// PlayerID로 플레이어 객체를 반환하는 함수
-	PlayerWeakPtr GetPlayer(const uint64 PlayerID) const;
-	ASTPlayerBase* SpawnFieldPlayer(
+	// ID로 PlayerInfo를 반환하는 함수
+	FPlayerInfo* GetPlayerInfo(const uint64 ID);
+	// 플레이어 객체를 반환하는 함수
+
+	ASTCharacter* SpawnFieldPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,
 		const FPlayerInfo& PlayerInfo
 	);
 	
-	ASTPlayerBase* SpawnFieldPlayer(
+	ASTCharacter* SpawnFieldPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,
 		const FPlayerInfo& PlayerInfo,
@@ -149,10 +152,17 @@ private:
 
 public:
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTPlayerBase> FieldPlayerClass;
+	TSubclassOf<ASTCharacter> FieldPlayerClass;
 
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTPlayerBase> LobbyFieldPlayerClass;
+	TSubclassOf<ASTCharacter> LobbyFieldPlayerClass;
+
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTCharacter> FieldGhostClass;
+
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTCharacter> LocalGhostClass;
+
 
 
 };

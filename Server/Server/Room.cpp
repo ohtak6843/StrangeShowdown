@@ -56,6 +56,8 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 		player->GetType()
 	};
 
+	std::println("Player Type: {}", static_cast<int>(player->GetType()));
+
 	for (const auto& [other_id, other_player] : _players)
 	{
 		if (other_id == id)
@@ -69,8 +71,11 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 		Common::SCSpawnPlayer other_spawn_packet{
 			other_id,
 			other_player->GetPosition(),
-			other_player->GetDirection()
+			other_player->GetDirection(),
+			other_player->GetType()
 		};
+
+		std::println("Other Player Type: {}", static_cast<int>(other_player->GetType()));
 		// 현재 클라이언트에 기존 플레이어 정보 전달
 		session->DoSend(other_spawn_packet);
 	}
