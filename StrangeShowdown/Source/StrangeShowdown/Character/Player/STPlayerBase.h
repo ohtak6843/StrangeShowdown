@@ -76,15 +76,15 @@ public:
 // Dead Section
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual void ChangeToGhost() {}
+	virtual void SetDead();
+	void PlayDeadAnimation();
 
 	UFUNCTION(BlueprintNativeEvent)
 	void PlayDissolveEffect();
 	virtual void PlayDissolveEffect_Implementation() {}
 
 	UFUNCTION(BlueprintCallable)
-	virtual void SetDead();
-	void PlayDeadAnimation();
+	virtual void ChangeToGhost() {}
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dead)
@@ -96,12 +96,11 @@ protected:
 	float DeadEventDelayTime = 3.0f;
 	float DissolveEffectDelayTime = 2.5f;
 
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<class ASTGhostController> GhostControllerClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<class ASTLocalGhost> GhostClass;
+	TSubclassOf<class ASTGhostBase> GhostClass;
 
 // Effect Section
 public:

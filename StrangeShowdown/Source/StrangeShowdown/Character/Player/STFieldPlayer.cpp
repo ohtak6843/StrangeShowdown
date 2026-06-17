@@ -9,7 +9,7 @@
 
 #include "GameFramework/GameModeBase.h"
 #include "Controller/STGhostController.h"
-#include "Character/Ghost/STLocalGhost.h"
+#include "Character/Ghost/STFieldGhost.h"
 
 ASTFieldPlayer::ASTFieldPlayer()
 {
@@ -69,7 +69,7 @@ void ASTFieldPlayer::ChangeToGhost()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
+	ASTFieldGhost* NewGhost = GetWorld()->SpawnActor<ASTFieldGhost>(GhostClass, SpawnTransform, SpawnParams);
 	if (NewGhost)
 	{
 		this->Destroy();

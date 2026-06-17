@@ -197,35 +197,6 @@ void ASTLocalPlayer::BeginPlay()
 	HoldItem();
 }
 
-void ASTLocalPlayer::ChangeToGhost()
-{
-	APlayerController* OldPC = Cast<APlayerController>(GetController());
-	if (!OldPC)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Controller is not valid"));
-		return;
-	}
-
-	FTransform SpawnTransform = this->GetActorTransform();
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
-	if (NewGhost)
-	{
-		ASTGhostController* NewPC = GetWorld()->SpawnActor<ASTGhostController>(GhostControllerClass, SpawnTransform);
-		if (NewPC)
-		{
-			OldPC->UnPossess();
-			UGameplayStatics::GetGameMode(GetWorld())->SwapPlayerControllers(OldPC, NewPC);
-			OldPC->Destroy();
-			NewPC->Possess(NewGhost);
-			this->Destroy();
-		}
-	}
-}
-
 void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
 	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
@@ -797,6 +768,35 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 void ASTLocalPlayer::SetDead()
 {
 	Super::SetDead();
+}
+
+void ASTLocalPlayer::ChangeToGhost()
+{
+	APlayerController* OldPC = Cast<APlayerController>(GetController());
+	if (!OldPC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Controller is not valid"));
+		return;
+	}
+
+	FTransform SpawnTransform = this->GetActorTransform();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
+	if (NewGhost)
+	{
+		ASTGhostController* NewPC = GetWorld()->SpawnActor<ASTGhostController>(GhostControllerClass, SpawnTransform);
+		if (NewPC)
+		{
+			OldPC->UnPossess();
+			UGameplayStatics::GetGameMode(GetWorld())->SwapPlayerControllers(OldPC, NewPC);
+			OldPC->Destroy();
+			NewPC->Possess(NewGhost);
+			this->Destroy();
+		}
+	}
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

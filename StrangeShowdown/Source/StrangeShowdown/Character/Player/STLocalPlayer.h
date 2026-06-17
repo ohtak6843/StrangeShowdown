@@ -45,10 +45,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = Delegate)
 	FOnLookingUpStateDeactivated OnLookingUpStateDeactivated;
 
-// Damage Section
-public:
-	virtual void ChangeToGhost() override;
-
 // HUD Section
 public:
 	virtual USTHUDWidget* GetHUDWidget(class USTHUDWidget* OutHUDWidget) { return HUDWidget.Get(); }
@@ -182,6 +178,8 @@ protected:
 // Dead Section
 public:
 	virtual void SetDead() override;
+
+	virtual void ChangeToGhost() override;
 
 // Effect Section
 protected:
