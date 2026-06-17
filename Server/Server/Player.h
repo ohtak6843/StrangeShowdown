@@ -56,7 +56,9 @@ class Player : public Object
 public:
 	void Init(const std::shared_ptr<Room>& room, const SessionPtr session);
 	void Clear();
-	void ChangeType(const Common::PlayerType type);
+
+	// player type 변경. clear가 true면 type 변경과 함께 Clear()도 실행
+	void ChangePlayerType(const Common::PlayerType type, const bool clear = true);
 
 
 	// 아이템을 사용 가능한지 여부 검사하고, 가능 시 사용 처리까지 하는 메서드.

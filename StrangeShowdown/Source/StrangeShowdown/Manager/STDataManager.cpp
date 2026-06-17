@@ -41,7 +41,7 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 		UE_LOG(LogTemp, Log, TEXT("FieldPlayerClass is NOT assigned!"));
 		return;
 	}
-
+	
 	// transform
 	FTransform Transform{ FTransform::Identity };
 
@@ -77,13 +77,12 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 	// 플레이어가 이미 존재함.
 	else
 	{
-		// 기존 플레이어 객체를 제거한다.
+		// 기존 플레이어 객체가 있으면 제거한다.
 		if (auto PlayerPtr{ PlayerInfoPtr->Player.Get() }; PlayerPtr != nullptr)
 		{
 			PlayerPtr->Destroy();
+			PlayerInfoPtr->Player.Reset();
 		}
-
-		PlayerInfoPtr->Player.Reset();
 
 		// 새로운 객체를 생성한다.
 		auto* Player{ SpawnFieldPlayer(Transform, SpawnParams, *PlayerInfoPtr, Packet.type) };
@@ -91,7 +90,6 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 		
 		// 기존 정보를 업데이트한다.
 		PlayerInfoPtr->Type = Packet.type;
-		PlayerInfoPtr->ID = Packet.id;
 	
 		UE_LOG(LogTemp, Log, TEXT("Origin Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
 	}
@@ -110,7 +108,8 @@ void USTDataManager::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 		return;
 	}
 
-	PlayerPtr->Destroy();	
+	PlayerPtr->Destroy();
+	PlayerInfoPtr->Player.Reset();
 
 
 		// 유령 클라이언트의 딜레이를 고려한다? -> PC에 따라서 다 다를거니까
@@ -128,18 +127,21 @@ void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
 	if (nullptr == PlayerInfoPtr)
 	{
+		UE_LOG(LogTemp, Log, TEXT("PlayerInfoPtr is nullptr for ID: %llu"), Packet.id);
 		return;
 	}
 
 	auto PlayerPtr{ PlayerInfoPtr->Player.Get() };
 	if (nullptr == PlayerPtr)
 	{
+		UE_LOG(LogTemp, Log, TEXT("PlayerPtr is nullptr for ID: %llu"), Packet.id);
 		return;
 	}
 
 	// 패킷 처리
 	FVector Location{ Packet.pos.x, Packet.pos.y, Packet.pos.z };
 	FRotator Rotation{ Packet.dir.x, Packet.dir.y, Packet.dir.z };
+
 	if (Common::PlayerType::Player == PlayerInfoPtr->Type ||
 		Common::PlayerType::LobbyPlayer == PlayerInfoPtr->Type)
 	{
@@ -148,10 +150,9 @@ void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 		{
 			return;
 		}
-		PlayerBasePtr->Move(Location, Rotation);
 		PlayerBasePtr->PlayerStateFlag = Packet.state;
 	}
-
+	PlayerPtr->Move(Location, Rotation);
 }
 
 void USTDataManager::HandleCreateRoom(const Common::SCCreateRoom& Packet)

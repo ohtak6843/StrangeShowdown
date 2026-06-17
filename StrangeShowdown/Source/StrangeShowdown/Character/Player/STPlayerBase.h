@@ -93,12 +93,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
 	TMap<EItemType, TObjectPtr<class USoundBase>> ItemUseSounds;
 
-// Network Section
-public:
-	void Move(const FVector& Location, const FRotator& Rotator);
-
-protected:
-	FVector TargetLocation{};
-	FRotator TargetRotation{};
 
 };

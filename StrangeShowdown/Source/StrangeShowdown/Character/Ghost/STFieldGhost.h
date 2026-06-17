@@ -17,6 +17,10 @@ class STRANGESHOWDOWN_API ASTFieldGhost : public ASTGhostBase
 public:
 	ASTFieldGhost();
 
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 
 private:

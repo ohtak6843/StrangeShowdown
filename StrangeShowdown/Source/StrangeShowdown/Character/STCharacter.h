@@ -37,7 +37,15 @@ public:
 	// --
 public:
 	void Move(const FVector& Location, const FRotator& Rotator);
+	void TickMove(float DeltaTime);
 
+protected:
+	FVector TargetLocation{};
+	FRotator TargetRotation{};
+	const float MoveSpeed{ 12.f };
+	const float RotationSpeed{ 12.f };
+
+public:
 	uint64 GetID() const { return ID; }
 
 protected:
@@ -45,7 +53,5 @@ protected:
 	virtual void BeginPlay() override;
 
 	uint64 ID{ 0 };
-
-
 
 };

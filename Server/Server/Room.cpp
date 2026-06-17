@@ -156,7 +156,7 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
-		player->ChangeType(Common::PlayerType::Player);
+		player->ChangePlayerType(Common::PlayerType::Player);
 		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
 	}
 

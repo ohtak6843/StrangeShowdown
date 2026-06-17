@@ -6,3 +6,10 @@
 ASTFieldGhost::ASTFieldGhost()
 {
 }
+
+void ASTFieldGhost::Tick(float DeltaTime)
+{
+#if NETWORK_ENABLED
+	TickMove(DeltaTime);
+#endif
+}

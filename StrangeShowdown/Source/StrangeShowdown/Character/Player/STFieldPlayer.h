@@ -49,7 +49,4 @@ private:
 
 	UPROPERTY()
 	APlayerCameraManager* CachedCameraManager = nullptr;
-
-	const float MoveSpeed{ 12.f };
-	const float RotationSpeed{ 12.f };
 };

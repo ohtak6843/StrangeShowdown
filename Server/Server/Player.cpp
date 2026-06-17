@@ -28,7 +28,7 @@ void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
 	}
 	
 	// 캐릭터 배치
-	ChangeType(Common::PlayerType::LobbyPlayer);
+	ChangePlayerType(Common::PlayerType::LobbyPlayer);
 }
 
 void Player::Clear()
@@ -41,9 +41,12 @@ void Player::Clear()
 	_status = {};
 }
 
-void Player::ChangeType(const Common::PlayerType type)
+void Player::ChangePlayerType(const Common::PlayerType type, const bool clear)
 {
-	Clear();
+	if (clear)
+	{
+		Clear();
+	}
 
 	_type = type;
 	_status.Init(type);
@@ -226,7 +229,7 @@ void Player::TakeDamage(const float damage)
 	// 체력이 0이 되었을떄 유령 플레이어 생성
 	if (_status.hp <= std::numeric_limits<float>::epsilon())
 	{
-		ChangeType(Common::PlayerType::Ghost);
+		ChangePlayerType(Common::PlayerType::Ghost, false);
 		
 		// 기존 플레이어 제거 패킷 전송
 		Common::SCDespawnPlayer despawn_packet{ _ownerSession->GetSessionID() };
@@ -243,6 +246,9 @@ void Player::TakeDamage(const float damage)
 			_direction,
 			_type
 		};
+
+		std::println("Player {} has become a ghost", _ownerSession->GetSessionID());
+		std::println("Player Type: {}", static_cast<int>(_type));
 		if (nullptr != room)
 		{
 			room->Broadcast(spawn_packet);
