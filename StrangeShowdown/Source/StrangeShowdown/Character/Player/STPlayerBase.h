@@ -45,10 +45,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	TObjectPtr<USTStatComponent> StatComp;
 
-	// Player Mesh Type
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	EPlayerMeshType PlayerMeshType;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerState"))
 	uint8 PlayerStateFlag;
 
@@ -64,9 +60,15 @@ protected:
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
 
 // Player Meshes Section
+public:
+	EPlayerMeshType GetPlayerMeshType() const { return PlayerMeshType; }
+
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	EPlayerMeshType PlayerMeshType;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
+	TMap<EPlayerMeshType, TObjectPtr<USkeletalMesh>> PlayerMeshes;
 
 // Damage Section
 public:

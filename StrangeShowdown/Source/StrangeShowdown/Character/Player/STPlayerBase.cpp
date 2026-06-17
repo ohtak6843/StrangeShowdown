@@ -56,6 +56,29 @@ ASTPlayerBase::ASTPlayerBase()
 	RightHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightWeaponMesh"));
 	RightHandSkeletalMesh->SetupAttachment(GetMesh());
 
+	// Player Meshes
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BadguyMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Badguy_01.SK_Chr_Badguy_01'"));
+	ensure(BadguyMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BusinessManMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Business_Man_01.SK_Chr_Business_Man_01'"));
+	ensure(BusinessManMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CowboyMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Cowboy_01.SK_Chr_Cowboy_01'"));
+	ensure(CowboyMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CowgirlMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Cowgirl_01.SK_Chr_Cowgirl_01'"));
+	ensure(CowgirlMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> GunmanMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Gunman_01.SK_Chr_Gunman_01'"));
+	ensure(GunmanMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WomanMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_Woman_01.SK_Chr_Woman_01'"));
+	ensure(WomanMesh.Object);
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WorkingGirlMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/PolygonWestern/Meshes/CharactersUE4Mannequin/SK_Chr_WorkingGirl_01.SK_Chr_WorkingGirl_01'"));
+	ensure(WorkingGirlMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::Badguy, BadguyMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::BusinessMan, BusinessManMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::Cowboy, CowboyMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::Cowgirl, CowgirlMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::Gunman, GunmanMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::Woman, WomanMesh.Object);
+	PlayerMeshes.Add(EPlayerMeshType::WorkingGirl, WorkingGirlMesh.Object);
+
 	// Item Use Effect
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ParticleEffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Item/FX/NS_UseEffect.NS_UseEffect'"));
 	if (ParticleEffectRef.Object)
@@ -83,9 +106,9 @@ void ASTPlayerBase::BeginPlay()
 	Super::BeginPlay();
 
 	// Set Local Player Mesh
-	if (PlayerMeshes.IsValidIndex(static_cast<uint8>(PlayerMeshType)) && PlayerMeshes[static_cast<uint8>(PlayerMeshType)].IsValid())
+	if (IsValid(PlayerMeshes[PlayerMeshType]))
 	{
-		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<uint8>(PlayerMeshType)].LoadSynchronous();
+		USkeletalMesh* PlayerMesh = PlayerMeshes[PlayerMeshType];
 		GetMesh()->SetSkeletalMesh(PlayerMesh);
 	}
 

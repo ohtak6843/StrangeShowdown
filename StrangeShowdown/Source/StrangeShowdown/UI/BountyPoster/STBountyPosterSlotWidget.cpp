@@ -36,6 +36,7 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 {
 	if (InPlayer)
 	{
+		EPlayerMeshType PlayerMeshType = InPlayer->GetPlayerMeshType();
 		FSTCharacterStat& CharacterStat = InPlayer->StatComp->GetCharacterStat();
 
 		PlayerBountyText->SetText(FText::AsNumber(CharacterStat.Bounty));
@@ -43,13 +44,13 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 
 		UTexture2D* Texture = nullptr;
 
-		switch(InPlayer->PlayerMeshType)
+		switch(PlayerMeshType)
 		{
 			case EPlayerMeshType::Badguy:
 				Texture = Player2DTextures[0].LoadSynchronous();
 				break;
 
-			case EPlayerMeshType::BuisinessMan:
+			case EPlayerMeshType::BusinessMan:
 				Texture = Player2DTextures[1].LoadSynchronous();
 				break;
 

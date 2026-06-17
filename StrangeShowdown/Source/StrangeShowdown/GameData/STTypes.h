@@ -31,7 +31,7 @@ UENUM(BlueprintType)
 enum class EPlayerMeshType : uint8
 {
 	Badguy			UMETA(DisplayName = "Badguy"),
-	BuisinessMan	UMETA(DisplayName = "BuisinessMan"),
+	BusinessMan		UMETA(DisplayName = "BusinessMan"),
 	Cowboy			UMETA(DisplayName = "Cowboy"),
 	Cowgirl			UMETA(DisplayName = "Cowgirl"),
 	Gunman			UMETA(DisplayName = "Gunman"),
