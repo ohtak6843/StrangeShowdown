@@ -42,7 +42,15 @@ enum class PlayerState : uint8
 enum class ItemType : uint32
 {
 	None = 0,
-	Gun = 1,
+	Pistol,
+	Hammer,
+	Helmet,
+	Meat,
+	Whiskey,
+	EnhancePower,
+	Letter,
+	Wheel,
+	End
 };
 
 

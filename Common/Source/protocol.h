@@ -61,10 +61,14 @@ enum class PacketType : uint16
 	// content
 	// --
 
+	CS_PICK_ITEM,
+
 	SC_USE_ITEM,
 	CS_USE_ITEM,
 
+
 	SC_DAMAGE,
+	SC_STATUS_UPDATE,
 	
 
 };
@@ -399,10 +403,24 @@ struct SCTeleport: Header
 	}
 };
 
+// pick item
+struct CSPickItem : Header
+{
+	Common::ItemType itemType{};
+	CSPickItem() = default;
+	CSPickItem(const Common::ItemType in_itemType) :
+		Header{ sizeof(CSPickItem), PacketType::CS_PICK_ITEM },
+		itemType{ in_itemType }
+	{
+	}
+};
+
 // Param:
 //  uint64 id : 아이템을 사용하는 주체 id
 //  uint64 targetID : 아이템을 적용하는 대상
 //  ItemType itemType : 사용하는 아이템의 타입, 실패 시 ItemType::None 반환
+//  float Stamina: 아이템 사용 이후의 사용자 스테미나
+//  
 //  
 struct SCUseItem : Header
 {
@@ -411,12 +429,19 @@ struct SCUseItem : Header
 
 	ItemType itemType{ ItemType::None };
 
+	float stamina{};
+	float bullet{};
+	int receiverItemCount{};
+
 	SCUseItem() = default;
-	SCUseItem(const uint64 in_id, const uint64 in_targetID, const ItemType in_itemType) :
+	SCUseItem(const uint64 in_id, const uint64 in_targetID, const ItemType in_itemType, const float in_stamina, const float in_bullet, const int in_receiverItemCount) :
 		Header{ sizeof(SCUseItem), PacketType::SC_USE_ITEM },
 		id{ in_id },
 		targetID{ in_targetID },
-		itemType{ in_itemType }
+		itemType{ in_itemType },
+		stamina{ in_stamina },
+		bullet{ in_bullet },
+		receiverItemCount{ in_receiverItemCount }
 	{
 	}
 };
@@ -452,6 +477,27 @@ struct SCDamage : Header
 		attakerID{ in_attakerID },
 		targetID{ in_targetID },
 		damage{ in_damage }
+	{
+	}
+};
+
+struct SCStatusUpdate : Header
+{
+	uint64 id{};
+	float hp{};
+	float stamina{};
+	float bullet{};
+	float gold{};
+	float armor{};
+	SCStatusUpdate() = default;
+	SCStatusUpdate(const uint64 in_id, const float in_hp, const float in_stamina, const float in_bullet, const float in_gold, const float in_armor) :
+		Header{ sizeof(SCStatusUpdate), PacketType::SC_STATUS_UPDATE },
+		id{ in_id },
+		hp{ in_hp },
+		stamina{ in_stamina },
+		bullet{ in_bullet },
+		gold{ in_gold },
+		armor{ in_armor }
 	{
 	}
 };

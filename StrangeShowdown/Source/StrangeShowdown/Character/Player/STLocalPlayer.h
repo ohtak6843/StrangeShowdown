@@ -30,12 +30,24 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+// Debug Section
+public:
+	UFUNCTION(BlueprintCallable, Category = Debug)
+	void AddGold(int32 Amount) { StatComp->GetCharacterStat().SetCurrentGold(StatComp->GetCharacterStat().CurrentGold + Amount); StatComp->OnStatChanged.Broadcast(); }
+	
+	UFUNCTION(BlueprintCallable, Category = Debug)
+	void AddStamina(float Amount) { StatComp->GetCharacterStat().SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina + Amount); StatComp->OnStatChanged.Broadcast(); }
+
 // DELEGATE Section
 public:
 	UPROPERTY(BlueprintAssignable, Category = Delegate)
 	FOnLookingUpStateActivated OnLookingUpStateActivated;
 	UPROPERTY(BlueprintAssignable, Category = Delegate)
 	FOnLookingUpStateDeactivated OnLookingUpStateDeactivated;
+
+// Damage Section
+public:
+	virtual void ChangeToGhost() override;
 
 // HUD Section
 public:
@@ -63,7 +75,7 @@ public:
 // Blueprint Function Section
 public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UseItem();
+	bool UseItem();
 
 	UFUNCTION(BlueprintCallable)
 	void HoldItem();
@@ -167,6 +179,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> SmashMontage;
 
+// Dead Section
+public:
+	virtual void SetDead() override;
+
 // Effect Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
@@ -174,11 +190,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
 	TObjectPtr<class UNiagaraSystem> HitEffect;
-
-// Sound Section
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sound)
-	TObjectPtr<class USoundBase> PistolFireSound;
 
 // Camera Pose Section
 protected:
@@ -195,11 +206,6 @@ protected:
 
 	FCameraPoseSetting StartPose;
 	FCameraPoseSetting TargetPose;
-
-// Player Meshes Section
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
 
 // Sheriff Chase Section
 public:

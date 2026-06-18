@@ -31,9 +31,47 @@ namespace PlayerConstants
 	constexpr float 		MaxBullet{};
 	constexpr float 		Bullet{};
 	constexpr float 		Attack{ 10.f };
-	constexpr float 		Speed{ 5.f };
+	constexpr float 		Speed{ 500.f }; // cmps
 	constexpr float 		Gold{ 0.f };
+	constexpr float 		Armor{ 0.f };
 
+}
+
+namespace ItemConstants
+{
+	// 스테미나 소모량
+	constexpr std::array<float, static_cast<size_t>(Common::ItemType::End)> Stamina{
+		0.f,	// None
+		0.f,    // Pistol
+		1.f,    // Hammer
+		1.f,    // Helmet
+		1.f,    // Meat
+		0.f,    // Whiskey
+		0.f,    // EnhancePower
+		0.f,    // Letter
+		0.f,    // Wheel
+
+	};
+
+	constexpr float HelmetValue{ 3.f };
+	constexpr float MeatValue{ 10.f };
+	constexpr float WhiskeyValue{ 1.f };
+	constexpr float WheelSpeed{ 1000.f }; // cmps
+	constexpr float WheelTime{ 5.f }; // seconds
+
+}
+
+namespace MapConstants
+{
+	constexpr float BankX{ 0.f };
+	constexpr float BankY{ 0.f };
+	constexpr float BankWidth{ 1000.f };
+	constexpr float BankHeight{ 1000.f };
+}
+
+namespace GameConstants
+{
+	constexpr float TurnTime{ 20.f }; // seconds
 }
 
 // --

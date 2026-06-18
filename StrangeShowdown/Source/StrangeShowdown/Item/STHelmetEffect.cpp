@@ -19,14 +19,16 @@ USTHelmetEffect::USTHelmetEffect()
 
 bool USTHelmetEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentArmor >= User->StatComp->MaxArmor)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (CharacterStat.CurrentArmor >= CharacterStat.MaxArmor)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	User->StatComp->AddArmor(3);
+	float ArmorAmount = 3.f;
+	User->StatComp->SetCurrentArmor(CharacterStat.CurrentArmor + ArmorAmount);
 
 	return true;
 }

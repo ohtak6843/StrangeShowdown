@@ -10,10 +10,10 @@ enum class RoomState
 	INGAME,
 };
 
-class Room
+class Room : public std::enable_shared_from_this<Room>
 {
 	// --
-	// job method
+	// job
 	// --
 public:
 	// 밀려있는 job을 실행.
@@ -24,7 +24,7 @@ public:
 
 
 	// --
-	// handler method
+	// handler
 	// --
 public:
 	// static
@@ -41,9 +41,17 @@ public:
 
 
 
+	// --
+	// item method
+	// --
+public:
+	bool UseGun(const PlayerPtr target);
+
+
+
 
 	// --
-	// method
+	// network method
 	// -- 
 public:
 	void RemovePlayer(const uint64 playerId) { _players.erase(playerId); }

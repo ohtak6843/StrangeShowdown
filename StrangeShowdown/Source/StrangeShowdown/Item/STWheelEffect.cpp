@@ -4,6 +4,7 @@
 #include "Item/STWheelEffect.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Component/STStatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 USTWheelEffect::USTWheelEffect()
 	: Super()
@@ -19,15 +20,16 @@ USTWheelEffect::USTWheelEffect()
 
 bool USTWheelEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentStamina >= User->StatComp->MaxStamina)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (CharacterStat.CurrentStamina >= CharacterStat.MaxStamina)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	// TODO: 이동속도 증가
-	User->StatComp->AddMoveSpeed(100);
+	float SpeedBuffAmount = 100.f;
+	User->SetMaxWalkSpeed(User->GetCharacterMovement()->MaxWalkSpeed + SpeedBuffAmount);
 
 	return true;
 }

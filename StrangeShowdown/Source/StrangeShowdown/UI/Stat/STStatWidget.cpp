@@ -126,10 +126,11 @@ void USTStatWidget::UpdateStat()
 	if (SourceStatComp.IsValid())
 	{
 		USTStatComponent* StatComp = SourceStatComp.Get();
+		FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
 
 #pragma region HP Update
-		float CurrentHp = StatComp->CurrentHp;
-		float MaxHp = StatComp->MaxHp;
+		float CurrentHp = CharacterStat.CurrentHp;
+		float MaxHp = CharacterStat.MaxHp;
 
 		if (HpBar)
 		{
@@ -145,8 +146,8 @@ void USTStatWidget::UpdateStat()
 #pragma endregion
 
 #pragma region Shield Update
-		float CurrentArmor = StatComp->CurrentArmor;
-		float MaxArmor = StatComp->MaxArmor;
+		float CurrentArmor = CharacterStat.CurrentArmor;
+		float MaxArmor = CharacterStat.MaxArmor;
 
 		if (ShieldBar)
 		{
@@ -161,8 +162,8 @@ void USTStatWidget::UpdateStat()
 #pragma endregion
 
 #pragma region Gold Update
-		int32 CurrentGold = StatComp->Gold;
-		
+		int32 CurrentGold = CharacterStat.CurrentGold;
+
 		if (GoldText)
 		{
 			FString GoldString = FString::Printf(TEXT("%d"), CurrentGold);
@@ -171,14 +172,14 @@ void USTStatWidget::UpdateStat()
 #pragma endregion
 
 #pragma region Stamina Update
-		int32 CurrentStamina = StatComp->CurrentStamina;
-		int32 MaxStamina = StatComp->MaxStamina;
+		int32 CurrentStamina = CharacterStat.CurrentStamina;
+		int32 MaxStamina = CharacterStat.MaxStamina;
 		check(CurrentStamina >= 0);
 
 		FLinearColor Cyan(0.0f, 0.5f, 1.0f, 1.f);
 		for (int32 i = 0; i < CurrentStamina; i++)
 		{
-			if (StaminaImages[i])
+			if (StaminaImages.IsValidIndex(i))
 			{
 				StaminaImages[i]->SetBrushTintColor(Cyan);
 			}
@@ -186,7 +187,7 @@ void USTStatWidget::UpdateStat()
 
 		for (int32 i = CurrentStamina; i < MaxStamina; i++)
 		{
-			if (StaminaImages[i])
+			if (StaminaImages.IsValidIndex(i))
 			{
 				StaminaImages[i]->SetBrushTintColor(FLinearColor::White);
 			}
@@ -194,9 +195,9 @@ void USTStatWidget::UpdateStat()
 #pragma endregion
 
 #pragma region Action Update
-		int32 CurrentAction = StatComp->CurrentAction;
-		int32 UsableAction = StatComp->UseAbleAction;
-		int32 MaxAction = StatComp->MaxAction;
+		int32 CurrentAction = CharacterStat.CurrentAction;
+		int32 UsableAction = CharacterStat.UsableAction;
+		int32 MaxAction = CharacterStat.MaxAction;
 		check(CurrentAction >= 0);
 
 		FLinearColor DarkGray(0.2f, 0.2f, 0.2f, 1.f);

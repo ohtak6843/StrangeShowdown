@@ -4,80 +4,49 @@
 #include "Component/STStatComponent.h"
 #include "CommonDefine.h"
 
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 // Sets default values for this component's properties
 USTStatComponent::USTStatComponent()
 {
 	bWantsInitializeComponent = true;
 }
 
-void USTStatComponent::AddHp(int32 HealAmount)
+void USTStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	CurrentHp = FMath::Clamp(CurrentHp + HealAmount, 0.f, MaxHp);
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().ClearTimer(MoveSpeedBuffTimerHandle);
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+void USTStatComponent::ResetMoveSpeed()
+{
+	float CommonMoveSpeed = 500.f;
+
+	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+	if (Owner)
+	{
+		Owner->GetCharacterMovement()->MaxWalkSpeed = CommonMoveSpeed;
+	}
 
 	OnStatChanged.Broadcast();
-}
-
-void USTStatComponent::AddGold(int32 GoldAmount)
-{
-	Gold += GoldAmount;
-
-	OnStatChanged.Broadcast();
-}
-
-void USTStatComponent::AddKill(int32 KillAmount)
-{
-	Kill += KillAmount;
-}
-
-void USTStatComponent::AddArmor(int32 ArmorAmount)
-{
-	CurrentArmor += ArmorAmount;
-}
-
-void USTStatComponent::AddMoveSpeed(int32 MoveSpeedAmount)
-{
-	MoveSpeed += MoveSpeedAmount;
-}
-
-void USTStatComponent::AddStamina(int32 StaminaAmount)
-{
-	CurrentStamina = FMath::Clamp(CurrentStamina + StaminaAmount, 0.f, MaxStamina);
-
-	OnStatChanged.Broadcast();
-}
-
-void USTStatComponent::AddAction(int32 ActionAmount)
-{
-	CurrentAction = FMath::Clamp(CurrentAction + ActionAmount, 0.f, UseAbleAction);
-
-	OnStatChanged.Broadcast();
-}
-
-void USTStatComponent::AddUseAbleAction(int32 ActionAmount)
-{
-	UseAbleAction += ActionAmount;
-}
-
-void USTStatComponent::AddPrize(int32 PrizeAmount)
-{
-	Bounty += PrizeAmount;
-}
-
-void USTStatComponent::SetIsActive(bool isActive)
-{
-	bAlive = isActive;
 }
 
 void USTStatComponent::InitPlayerStats()
 {
-	CurrentHp = Common::PlayerConstants::Hp;
-	MaxHp = Common::PlayerConstants::MaxHp;
-	Gold = Common::PlayerConstants::Gold;
+	CharacterStat.CurrentHp = Common::PlayerConstants::Hp;
+	CharacterStat.MaxHp = Common::PlayerConstants::MaxHp;
+	CharacterStat.CurrentGold = 0;
 	// armor
-	Kill = 0;
+	CharacterStat.KillCount = 0;
 	// movespeed
-	CurrentStamina = Common::PlayerConstants::Stamina;
-	MaxStamina = Common::PlayerConstants::MaxStamina;
+	CharacterStat.CurrentStamina = Common::PlayerConstants::Stamina;
+	CharacterStat.MaxStamina = Common::PlayerConstants::MaxStamina;
 
 	OnStatChanged.Broadcast();
 }

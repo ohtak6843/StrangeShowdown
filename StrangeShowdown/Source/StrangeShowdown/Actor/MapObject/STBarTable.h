@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Actor/MapObject/STMapObjectBase.h"
-#include "STPubFirstMapObject.generated.h"
+#include "STBarTable.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STRANGESHOWDOWN_API ASTPubFirstMapObject : public ASTMapObjectBase
+class STRANGESHOWDOWN_API ASTBarTable : public ASTMapObjectBase
 {
 	GENERATED_BODY()
 	
 public:
-	virtual void ActivationMapObject(APawn* Interactor) override;
+	ASTBarTable();
 };

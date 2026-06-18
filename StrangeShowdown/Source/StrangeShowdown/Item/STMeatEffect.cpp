@@ -19,14 +19,15 @@ USTMeatEffect::USTMeatEffect()
 
 bool USTMeatEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (User->StatComp->CurrentHp >= User->StatComp->MaxHp)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (CharacterStat.CurrentHp >= CharacterStat.MaxHp)
 	{
 		return false;
 	}
 
 	Super::Use(User, ItemData);
 
-	User->StatComp->AddHp(1);
+	User->StatComp->SetCurrentHp(CharacterStat.CurrentHp + 1);
 
 	return true;
 }

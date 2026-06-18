@@ -88,3 +88,28 @@ enum class EAreaType : uint8
 	Station,
 	Alter,
 };
+
+UENUM()
+enum class EItemType : uint32
+{
+	Pistol = Common::ItemType::Pistol				UMETA(DisplayName = "Pistol"),
+	Hammer = Common::ItemType::Hammer				UMETA(DisplayName = "Hammer"),
+	Helmet = Common::ItemType::Helmet				UMETA(DisplayName = "Helmet"),
+	Meat = Common::ItemType::Meat					UMETA(DisplayName = "Meat"),
+	Whiskey = Common::ItemType::Whiskey				UMETA(DisplayName = "Whiskey"),
+	EnhancePower = Common::ItemType::EnhancePower	UMETA(DisplayName = "EnhancePower"),
+	Letter = Common::ItemType::Letter				UMETA(DisplayName = "Letter"),
+	Wheel = Common::ItemType::Wheel					UMETA(DisplayName = "Wheel"),
+};
+
+UENUM()
+enum class EMapObjectType : uint32
+{
+	BankVault										UMETA(DisplayName = "BankVault"),
+
+	ChurchOldPodium									UMETA(DisplayName = "ChurchOldPodium"),
+
+	BarTable										UMETA(DisplayName = "BarTable"),
+
+	StationSignPost									UMETA(DisplayName = "StationSignPost"),
+};

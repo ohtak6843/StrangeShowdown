@@ -61,6 +61,7 @@ private:
 	static void HandleReady(SessionPtr session, const Common::CSReady& packet);
 	static void HandleStartGame(SessionPtr session, const Common::CSStartGame& packet);
 	static void HandleUseItem(SessionPtr session, const Common::CSUseItem& packet);
+	static void HandlePickItem(SessionPtr session, const Common::CSPickItem& packet);
 
 	// --
 	// dynamic handler

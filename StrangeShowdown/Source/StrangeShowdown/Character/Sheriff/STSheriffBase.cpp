@@ -56,13 +56,4 @@ ASTSheriffBase::ASTSheriffBase()
 
 	// Stat Component
 	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
-	StatComp->CurrentHp = StatComp->MaxHp;
-	StatComp->Gold = 0;
-	StatComp->Kill = 0;
-	StatComp->CurrentArmor = 0;
-	StatComp->MoveSpeed = 500;
-	StatComp->CurrentStamina = 0;
-	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Bounty = 0;
-	StatComp->bAlive = true;
 }

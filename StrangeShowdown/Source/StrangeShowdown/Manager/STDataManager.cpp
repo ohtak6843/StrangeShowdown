@@ -17,6 +17,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Interface/STControllerHUDInterface.h"
 
+#include "Engine/DamageEvents.h"
 
 
 
@@ -138,7 +139,7 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 	{
 		if (MyPlayerInfo.Player.IsValid())
 		{
-			MyPlayerInfo.Player->HandleDamage(Packet.damage);
+			MyPlayerInfo.Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
 		}
 		UE_LOG(LogTemp, Log, TEXT("My Player took damage: %f"), Packet.damage);
 		return;
@@ -148,7 +149,7 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 	auto Player{ GetPlayer(Packet.targetID) };
 	if (true == Player.IsValid())
 	{
-		Player->HandleDamage(Packet.damage);
+		Player->TakeDamage(Packet.damage, FDamageEvent(UDamageType::StaticClass()), nullptr, nullptr);
 		UE_LOG(LogTemp, Log, TEXT("Player %llu took damage: %f"), Packet.targetID, Packet.damage);
 	}
 
@@ -158,6 +159,26 @@ void USTDataManager::HandleDamage(const Common::SCDamage& Packet)
 void USTDataManager::HandleUseItem(const Common::SCUseItem& Packet)
 {
 	// 연출 재생
+}
+
+void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
+{
+	// 본인 플레이어의 상태 업데이트
+	if (Packet.id == MyPlayerInfo.PlayerID)
+	{
+		if (MyPlayerInfo.Player.IsValid())
+		{
+		}
+		return;
+	}
+	// 다른 플레이어의 상태 업데이트
+	if (auto* PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) })
+	{
+		if (PlayerInfoPtr->Player.IsValid())
+		{
+		//	PlayerInfoPtr->Player->UpdateStatus(Packet.hp, Packet.stamina, Packet.bullet, Packet.gold, Packet.armor);
+		}
+	}
 }
 
 void USTDataManager::OnLevelChanged()

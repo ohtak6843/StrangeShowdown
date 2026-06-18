@@ -5,20 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "STItemUseEffect.h"
+#include "CommonEnum.h"
+#include "GameData/STTypes.h"
 #include "STItemDataAssetBase.generated.h"
 
-UENUM()
-enum class EItemType : uint16
-{
-	Pistol				UMETA(DisplayName = "Pistol"),
-	Hammer				UMETA(DisplayName = "Hammer"),
-	Helmet				UMETA(DisplayName = "Helmet"),
-	Meat				UMETA(DisplayName = "Meat"),
-	Whiskey				UMETA(DisplayName = "Whiskey"),
-	EnhancePower		UMETA(DisplayName = "EnhancePower"),
-	Letter				UMETA(DisplayName = "Letter"),
-	Wheel				UMETA(DisplayName = "Wheel"),
-};
 
 UCLASS(BlueprintType, Blueprintable)
 class STRANGESHOWDOWN_API USTItemDataAssetBase : public UPrimaryDataAsset

@@ -32,6 +32,10 @@
 #include "NiagaraSystem.h"
 #include "Protocol.h"
 
+#include "GameFramework/GameModeBase.h"
+#include "Controller/STGhostController.h"
+#include "Character/Ghost/STLocalGhost.h"
+
 
 ASTLocalPlayer::ASTLocalPlayer()
 {
@@ -47,17 +51,6 @@ ASTLocalPlayer::ASTLocalPlayer()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
-
-	// Stat Component
-	StatComp->CurrentHp = StatComp->MaxHp;
-	StatComp->Gold = 0;
-	StatComp->Kill = 0;
-	StatComp->CurrentArmor = 0;
-	StatComp->MoveSpeed = 500;
-	StatComp->CurrentStamina = StatComp->MaxStamina - 2;
-	StatComp->CurrentAction = StatComp->UseAbleAction;
-	StatComp->Bounty = 0;
-	StatComp->bAlive = true;
 
 	// Inventory Component
 	InventoryComp = CreateDefaultSubobject<USTInventoryComponent>(TEXT("InventoryComp"));
@@ -197,18 +190,40 @@ void ASTLocalPlayer::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 
-	// Set Local Player Mesh
-	if(PlayerMeshes[static_cast<int>(PlayerMeshType)].IsValid())
-	{
-		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<int>(PlayerMeshType)].LoadSynchronous();
-		GetMesh()->SetSkeletalMesh(PlayerMesh);
-	}
-
 	// Sheriff Chase Line
 	LineBatcher = NewObject<ULineBatchComponent>(this, TEXT("LineBatcher"));
 	LineBatcher->RegisterComponent();
 
 	HoldItem();
+}
+
+void ASTLocalPlayer::ChangeToGhost()
+{
+	APlayerController* OldPC = Cast<APlayerController>(GetController());
+	if (!OldPC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Controller is not valid"));
+		return;
+	}
+
+	FTransform SpawnTransform = this->GetActorTransform();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
+	if (NewGhost)
+	{
+		ASTGhostController* NewPC = GetWorld()->SpawnActor<ASTGhostController>(GhostControllerClass, SpawnTransform);
+		if (NewPC)
+		{
+			OldPC->UnPossess();
+			UGameplayStatics::GetGameMode(GetWorld())->SwapPlayerControllers(OldPC, NewPC);
+			OldPC->Destroy();
+			NewPC->Possess(NewGhost);
+			this->Destroy();
+		}
+	}
 }
 
 void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)
@@ -275,7 +290,7 @@ void ASTLocalPlayer::AttackHitCheck()
 	);
 
 	// 스태미나 감소
-	StatComp->AddStamina(-1.f);
+	StatComp->SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - 1.f);
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f);
@@ -292,18 +307,17 @@ void ASTLocalPlayer::SetCameraPose(ECameraPose NewPose)
 	PoseElapsedTime = 0.f;
 }
 
-void ASTLocalPlayer::UseItem()
+bool ASTLocalPlayer::UseItem()
 {
 	if (!InventoryComp || !QuickSlotComp)
-		return;
+		return false;
 
 	int32 QuickSlotIndex = QuickSlotComp->CurrentSelectQuickSlotIndex;
 	if (QuickSlotIndex == INDEX_NONE)
-		return;
-
+		return false;
 	int32 InventorySlotIndex = QuickSlotComp->InventorySlotIndex[QuickSlotIndex];
 	if (InventorySlotIndex == INDEX_NONE)
-		return;
+		return false;
 
 	// 결과
 	FSTItemSlot OutSlot;
@@ -316,6 +330,7 @@ void ASTLocalPlayer::UseItem()
 		OutSlot
 	);
 
+	// todo cham : 필요시 아이템 사용 결과 출력 분리
 	switch (Result)
 	{
 	case EItemUseType::CanUse:
@@ -341,10 +356,12 @@ void ASTLocalPlayer::UseItem()
 		break;
 	}
 
+	// todo cham : 아이템 사용 결과에 따른 처리 분리
+
 	if (OutSlot.ItemData)
 	{
 		const int32 Cost = OutSlot.ItemData->StaminaCost;
-		StatComp->AddStamina(-Cost);
+		StatComp->SetCurrentStamina(StatComp->GetCharacterStat().CurrentStamina - Cost);
 
 		// 아이템 제거
 		InventoryComp->RemoveItem(InventorySlotIndex, 1);
@@ -356,12 +373,18 @@ void ASTLocalPlayer::UseItem()
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
+	
+	if (EItemUseType::CanUse == Result)
+	{
+		return true;
+	}
+	return false;
 }
 
 void ASTLocalPlayer::HoldItem()
 {
 	USTItemDataAssetBase* ItemData = QuickSlotComp->GetCurrentSelectedQuickSlotItemData();
-	if (!ItemData)
+	if (nullptr == ItemData)
 	{
 		RightHandStaticMesh->SetStaticMesh(nullptr);
 		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
@@ -394,6 +417,9 @@ void ASTLocalPlayer::HoldItem()
 
 		RightHandSkeletalMesh->SetSkeletalMesh(nullptr);
 		break;
+
+	default:
+		break;
 	}
 }
 
@@ -401,7 +427,9 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 {
 	if (InStoreSlot.ItemData && false == InStoreSlot.bIsSold)
 	{
-		if (StatComp->Gold >= InStoreSlot.ItemData->GoldCost)
+		FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
+
+		if (CharacterStat.CurrentGold >= InStoreSlot.ItemData->GoldCost)
 		{
 			// 메세지 출력
 			ShowFloatingMessage(FText::FromString(TEXT("구매 성공!")));
@@ -413,7 +441,7 @@ void ASTLocalPlayer::HandleStoreSlotClicked(const FStoreSlot& InStoreSlot)
 			}
 
 			// 골드 차감 및 아이템 추가
-			StatComp->AddGold(-InStoreSlot.ItemData->GoldCost);
+			StatComp->SetCurrentGold(CharacterStat.CurrentGold - InStoreSlot.ItemData->GoldCost);
 
 			int32 AddedInventoryIndex = -1;
 			FSTItemSlot ItemSlot(InStoreSlot.ItemData, true, 1);
@@ -536,6 +564,7 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			if (HasAnyState(EPlayerState::Aiming) && AttackTraceComp->TracingFieldPlayer)
 			{
 				PistolFire();
+
 #if NETWORK_ENABLED
 
 				auto GameInstance{ GetGameInstance<USTGameInstance>() };
@@ -543,7 +572,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 				{
 					GameInstance->UseItem(
 						AttackTraceComp->TracingFieldPlayer->GetPlayerID(),
-						Common::ItemType::Gun
+						/*static_cast<Common::ItemType>(CurrentItemData->ItemType)*/
+						Common::ItemType::Pistol
 					);
 				}
 
@@ -551,9 +581,23 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 			}
 			break;
 		case EItemType::Hammer:
-			if (1.0f <= StatComp->CurrentStamina)
+			if (1.0f <= StatComp->GetCharacterStat().CurrentStamina)
 			{
 				HammerSmash();
+
+
+#if NETWORK_ENABLED
+
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->UseItem(
+						0,
+						static_cast<Common::ItemType>(CurrentItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 			}
 			else
 			{
@@ -563,6 +607,8 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 					UGameplayStatics::PlaySound2D(GetWorld(), ErrorSound.LoadSynchronous());
 				}
 			}
+
+
 			break;
 		case EItemType::Helmet:
 		case EItemType::Meat:
@@ -570,7 +616,22 @@ void ASTLocalPlayer::UseQuickSlotItem(const FInputActionValue& Value)
 		case EItemType::EnhancePower:
 		case EItemType::Letter:
 		case EItemType::Wheel:
-			UseItem();
+		{
+			auto ItemResult{ UseItem() };
+
+#if NETWORK_ENABLED
+
+			auto GameInstance{ GetGameInstance<USTGameInstance>() };
+			if (GameInstance && true == ItemResult)
+			{
+				GameInstance->UseItem(
+					0,
+					static_cast<Common::ItemType>(CurrentItemData->ItemType)
+				);
+			}
+
+#endif // NETWORK_ENABLED
+		}
 			break;
 	}
 }
@@ -582,6 +643,8 @@ void ASTLocalPlayer::ChangeQuickSlot(const FInputActionValue& Value)
 	bool result = HasAnyState(EPlayerState::Aiming | EPlayerState::LookingUp);
 	if(result)
 	{
+		RemoveState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
 		ApplyStateSettings(ECameraPose::Idle);
 	}
 	QuickSlotComp->SetCurrentSelectIndex(SlotIndex);
@@ -600,6 +663,14 @@ void ASTLocalPlayer::ScrollQuickSlot(const FInputActionValue& Value)
 	else if(ScrollValue < 0)
 	{
 		CurrentIndex = (CurrentIndex - 1 + QuickSlotComp->QuickSlots.Num()) % QuickSlotComp->QuickSlots.Num();
+	}
+
+	bool result = HasAnyState(EPlayerState::Aiming | EPlayerState::LookingUp);
+	if (result)
+	{
+		RemoveState(EPlayerState::Aiming);
+		RemoveState(EPlayerState::LookingUp);
+		ApplyStateSettings(ECameraPose::Idle);
 	}
 
 	QuickSlotComp->SetCurrentSelectIndex(CurrentIndex);
@@ -650,6 +721,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 			{
 				QuickSlot.Count += 1;
 				QuickSlotComp->OnQuickSlotUpdated.Broadcast();
+
+#if NETWORK_ENABLED
+				auto GameInstance{ GetGameInstance<USTGameInstance>() };
+				if (GameInstance)
+				{
+					GameInstance->PickUpItem(
+						static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+					);
+				}
+
+#endif // NETWORK_ENABLED
 				break;
 			}
 		}
@@ -665,6 +747,17 @@ void ASTLocalPlayer::PickUp(const FInputActionValue& Value)
 	{
 		int32 TargetQuickSlotIndex = -2;
 		bool result = QuickSlotComp->AddItem(InventoryComp, AddedInventoryIndex, TargetQuickSlotIndex);
+
+#if NETWORK_ENABLED
+		auto GameInstance{ GetGameInstance<USTGameInstance>() };
+		if (GameInstance)
+		{
+			GameInstance->PickUpItem(
+				static_cast<Common::ItemType>(PickupItem->ItemData->ItemType)
+			);
+		}
+
+#endif // NETWORK_ENABLED
 	}
 
 	// 아이템 장착
@@ -684,8 +777,8 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 		{
 			PickupItem->ItemData = ItemData;
 			PickupItem->FinishSpawning(SpawnTransform);
-			UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(PickupItem->GetRootComponent());
-			if (PrimComp)
+			UStaticMeshComponent* PrimComp = Cast<UStaticMeshComponent>(PickupItem->FindComponentByClass<UStaticMeshComponent>());
+			if (IsValid(PrimComp))
 			{
 				PrimComp->SetSimulatePhysics(true);
 				PrimComp->SetEnableGravity(true);
@@ -699,6 +792,11 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
+}
+
+void ASTLocalPlayer::SetDead()
+{
+	Super::SetDead();
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

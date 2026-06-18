@@ -7,6 +7,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/STWidgetComponent.h"
 
+#include "GameFramework/GameModeBase.h"
+#include "Controller/STGhostController.h"
+#include "Character/Ghost/STLocalGhost.h"
+
 ASTFieldPlayer::ASTFieldPlayer()
 {
 	// Stat Widget Component
@@ -55,6 +59,20 @@ void ASTFieldPlayer::BeginPlay()
 	if (PC)
 	{
 		CachedCameraManager = PC->PlayerCameraManager;
+	}
+}
+
+void ASTFieldPlayer::ChangeToGhost()
+{
+	FTransform SpawnTransform = this->GetActorTransform();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
+	if (NewGhost)
+	{
+		this->Destroy();
 	}
 }
 

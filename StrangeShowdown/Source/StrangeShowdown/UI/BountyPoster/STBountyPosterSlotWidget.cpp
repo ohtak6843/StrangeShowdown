@@ -36,7 +36,9 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 {
 	if (InPlayer)
 	{
-		PlayerBountyText->SetText(FText::AsNumber(InPlayer->StatComp->Bounty));
+		FSTCharacterStat& CharacterStat = InPlayer->StatComp->GetCharacterStat();
+
+		PlayerBountyText->SetText(FText::AsNumber(CharacterStat.Bounty));
 		PlayerNameText->SetText(FText::FromString(InPlayer->PlayerNickName));
 
 		UTexture2D* Texture = nullptr;
@@ -77,15 +79,15 @@ void USTBountyPosterSlotWidget::UpdateBountyPosterSlot(ASTPlayerBase* InPlayer)
 			PlayerImage->SetBrushFromTexture(Texture);
 		}
 
-		PlayerGold->SetText(FText::AsNumber(InPlayer->StatComp->Gold));
+		PlayerGold->SetText(FText::AsNumber(CharacterStat.CurrentGold));
 
-		PlayerHpBar->SetPercent(InPlayer->StatComp->CurrentHp / InPlayer->StatComp->MaxHp);
-		FString HpString = FString::Printf(TEXT("%.0f / %.0f"), InPlayer->StatComp->CurrentHp, InPlayer->StatComp->MaxHp);
+		PlayerHpBar->SetPercent(CharacterStat.CurrentHp / CharacterStat.MaxHp);
+		FString HpString = FString::Printf(TEXT("%.0f / %.0f"), CharacterStat.CurrentHp, CharacterStat.MaxHp);
 		PlayerHpText->SetText(FText::FromString(HpString));
 
 		for (int i = 0; i < StaminaImages.Num(); i++)
 		{
-			if (i < FMath::FloorToInt(InPlayer->StatComp->CurrentStamina))
+			if (i < FMath::FloorToInt(CharacterStat.CurrentStamina))
 			{
 				StaminaImages[i]->SetVisibility(ESlateVisibility::Visible);
 			}

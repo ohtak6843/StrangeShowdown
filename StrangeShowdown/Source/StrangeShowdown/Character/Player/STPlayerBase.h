@@ -19,6 +19,10 @@ public:
 	// Sets default values for this character's properties
 	ASTPlayerBase();
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
 	FORCEINLINE void AddState(EPlayerState NewState) { PlayerStateFlag |= static_cast<uint8>(NewState); }
 	FORCEINLINE void RemoveState(EPlayerState RemoveState) { PlayerStateFlag &= ~static_cast<uint8>(RemoveState); }
 	FORCEINLINE bool HasAnyState(EPlayerState CheckState) const { return (PlayerStateFlag & static_cast<uint8>(CheckState)) != 0; }
@@ -34,11 +38,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool SetStateMask(UPARAM(meta = (Bitmask, BitmaskEnum = "EPlayerState")) int32 NewState) { return SetState(static_cast<EPlayerState>(NewState)); }
 
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-protected:
-	virtual void BeginPlay() override;
+	void SetMaxWalkSpeed(float NewMaxWalkSpeed);
 
 public:
 	// Stat Component
@@ -63,14 +63,61 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
 
+// Player Meshes Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSoftObjectPtr<class USkeletalMesh>> PlayerMeshes;
+
+// Damage Section
+public:
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+// Dead Section
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void ChangeToGhost() {}
+
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayDissolveEffect();
+	virtual void PlayDissolveEffect_Implementation() {}
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetDead();
+	void PlayDeadAnimation();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UMaterialInstanceDynamic> DynamicMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UAnimMontage> DeadMontage;
+
+	float DeadEventDelayTime = 3.0f;
+	float DissolveEffectDelayTime = 2.5f;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class ASTGhostController> GhostControllerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class ASTLocalGhost> GhostClass;
+
+// Effect Section
+public:
+	UFUNCTION(BlueprintCallable, Category = Effect)
+	void PlayItemUseEffect(EItemType ItemType);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TObjectPtr<class UNiagaraSystem> ItemUseEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
+	TMap<EItemType, TObjectPtr<class USoundBase>> ItemUseSounds;
+
 // Network Section
 public:
 	void Move(const FVector& Location, const FRotator& Rotator);
-
-
-
-	// Handle Damage when Get Damage Packet from Server
-	virtual void HandleDamage(float DamageAmount) override;
 
 protected:
 	FVector TargetLocation{};

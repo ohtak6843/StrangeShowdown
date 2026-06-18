@@ -4,7 +4,6 @@
 #include "Item/STItemUseEffect.h"
 #include "Character/Player/STLocalPlayer.h"
 #include "Item/STItemDataAssetBase.h"
-#include "STItemUseEffect.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -34,7 +33,8 @@ bool USTItemUseEffect::Use(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 
 bool USTItemUseEffect::CanUse(ASTLocalPlayer* User, USTItemDataAssetBase* ItemData)
 {
-	if (ItemData->StaminaCost > User->StatComp->CurrentStamina)
+	FSTCharacterStat& CharacterStat = User->StatComp->GetCharacterStat();
+	if (ItemData->StaminaCost > CharacterStat.CurrentStamina)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot use item due to insufficient stamina."));
 		return false;

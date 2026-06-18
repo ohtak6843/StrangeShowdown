@@ -7,6 +7,11 @@
 #include "Animation/STAnimInstance.h"
 #include "CommonDefine.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+
 // Sets default values
 ASTPlayerBase::ASTPlayerBase()
 {
@@ -35,6 +40,14 @@ ASTPlayerBase::ASTPlayerBase()
 
 	// Stat Component
 	StatComp = CreateDefaultSubobject<USTStatComponent>(TEXT("StatComp"));
+	FSTCharacterStat InitialStat;
+	InitialStat.CurrentHp = InitialStat.MaxHp;
+	InitialStat.CurrentGold = 0;
+	InitialStat.KillCount = 0;
+	InitialStat.CurrentArmor = 0;
+	InitialStat.CurrentStamina = InitialStat.MaxStamina - 2;
+	InitialStat.CurrentAction = InitialStat.UsableAction;
+	InitialStat.Bounty = 0;
 
 	// Right Hand Mesh
 	RightHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightItemMesh"));
@@ -42,8 +55,49 @@ ASTPlayerBase::ASTPlayerBase()
 
 	RightHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightWeaponMesh"));
 	RightHandSkeletalMesh->SetupAttachment(GetMesh());
+
+	// Item Use Effect
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ParticleEffectRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StrangeShowdown/Item/FX/NS_UseEffect.NS_UseEffect'"));
+	if (ParticleEffectRef.Object)
+	{
+		ItemUseEffect = ParticleEffectRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> HelmetUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_UseHelmet.SW_UseHelmet'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> MeatUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_EatMeat.SW_EatMeat'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> WhiskeyUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_DrinkWhiskey.SW_DrinkWhiskey'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> EnhancePowerUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_EnhancePower.SW_EnhancePower'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> LetterUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Mission.SW_Mission'"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> WheelUseSound(TEXT("/Script/Engine.SoundWave'/Game/StrangeShowdown/Sound/Effect/SW_Wheel.SW_Wheel'"));
+
+	ItemUseSounds.Add(EItemType::Helmet, HelmetUseSound.Object);
+	ItemUseSounds.Add(EItemType::Meat, MeatUseSound.Object);
+	ItemUseSounds.Add(EItemType::Whiskey, WhiskeyUseSound.Object);
+	ItemUseSounds.Add(EItemType::EnhancePower, EnhancePowerUseSound.Object);
+	ItemUseSounds.Add(EItemType::Letter, LetterUseSound.Object);
+	ItemUseSounds.Add(EItemType::Wheel, WheelUseSound.Object);
 }
 
+void ASTPlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Set Local Player Mesh
+	if (PlayerMeshes.IsValidIndex(static_cast<uint8>(PlayerMeshType)) && PlayerMeshes[static_cast<uint8>(PlayerMeshType)].IsValid())
+	{
+		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<uint8>(PlayerMeshType)].LoadSynchronous();
+		GetMesh()->SetSkeletalMesh(PlayerMesh);
+	}
+
+	// Set Dynamic Material
+	DynamicMaterial = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0), this);
+	GetMesh()->SetMaterial(0, DynamicMaterial);
+}
+
+void ASTPlayerBase::SetMaxWalkSpeed(float NewMaxWalkSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewMaxWalkSpeed;
+}
 
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -54,20 +108,64 @@ float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		return 0.f;
 	}
 
-	StatComp->AddHp(-ActualDamage);
+	FSTCharacterStat& CharacterStat = StatComp->GetCharacterStat();
+	StatComp->SetCurrentHp(CharacterStat.CurrentHp - ActualDamage);
 
 	// TODO: Check Death
-	if (StatComp->CurrentHp <= 0.f)
+	if (CharacterStat.CurrentHp <= 0.f)
 	{
-		
+
 	}
 
 	return ActualDamage;
 }
 
-void ASTPlayerBase::BeginPlay()
+void ASTPlayerBase::SetDead()
 {
-	Super::BeginPlay();
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	PlayDeadAnimation();
+	SetActorEnableCollision(false);
+}
+
+void ASTPlayerBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	if (IsValid(DeadMontage))
+	{
+		AnimInstance->Montage_Play(DeadMontage);
+	}
+
+	FTimerHandle DeadTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
+		[&]()
+		{
+			PlayDissolveEffect();
+			FTimerHandle DestroyTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, FTimerDelegate::CreateLambda(
+				[&]()
+				{
+					GetMesh()->SetVisibility(false);
+					RightHandStaticMesh->SetVisibility(false);
+					RightHandSkeletalMesh->SetVisibility(false);
+				}
+			), DissolveEffectDelayTime, false);
+		}), DeadEventDelayTime, false);
+}
+
+void ASTPlayerBase::PlayItemUseEffect(EItemType ItemType)
+{
+	if (EItemType::Helmet > ItemType) return;
+
+	if(IsValid(ItemUseEffect))
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ItemUseEffect, GetActorLocation());
+	}
+
+	if (IsValid(ItemUseSounds[ItemType]))
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ItemUseSounds[ItemType], GetActorLocation());
+	}
 }
 
 void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)
@@ -103,10 +201,5 @@ void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)
 
 	TargetLocation = Location;
 	TargetRotation = Rotator;
-}
-
-void ASTPlayerBase::HandleDamage(float DamageAmount)
-{
-	StatComp->AddHp(-DamageAmount);
 }
 

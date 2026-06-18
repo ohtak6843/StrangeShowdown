@@ -87,6 +87,7 @@ public:
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
 	void HandleDamage(const Common::SCDamage& Packet);
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 	// µ¿Àû
 public:
@@ -116,6 +117,8 @@ public:
 	void StartGame();
 	
 	void UseItem(uint64 TargetID, Common::ItemType ItemID);
+
+	void PickUpItem(Common::ItemType ItemID);
 
 
 
