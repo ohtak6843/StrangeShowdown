@@ -23,7 +23,7 @@ namespace PlayerConstants
 {
 	//constexpr float MoveSpeed{ 5.f };
 	const std::string_view	Name{ "NoName" };
-	constexpr PlayerType	Type{ PlayerType::Badguy };
+	constexpr PlayerApperance	Type{ PlayerApperance::Badguy };
 	constexpr float			MaxHp{ 100.f };
 	constexpr float  		Hp{ 100.f };
 	constexpr float 		MaxStamina{ 5.f };

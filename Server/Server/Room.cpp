@@ -35,12 +35,12 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	}
 
 
-	// 플레이어 생성, 초기화 및 방에 추가;
+	// 플레이어 생성
 	auto id{ session->GetSessionID() };
 	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
-	player->SetOwnerSession(session);
-	player->Init(shared_from_this());
-	player->ChangeState(PlayerState::LOBBY);
+	
+	// 플레이어 초기화 todo: 실패시 처리
+	player->Init(shared_from_this(), session);
 	session->SetPlayer(player);
 	_players[id] = player;
 
@@ -49,11 +49,14 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 	session->DoSend(join_packet);
 
 	// 다른 플레이어에게 스폰 패킷 전달
-	Common::SCSpawnObject spawn_packet{
+	Common::SCSpawnPlayer spawn_packet{
 		id,
 		player->GetPosition(),
 		player->GetDirection(),
+		player->GetType()
 	};
+
+	std::println("Player Type: {}", static_cast<int>(player->GetType()));
 
 	for (const auto& [other_id, other_player] : _players)
 	{
@@ -65,11 +68,14 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 		// 다른 플레이어에게 스폰 패킷 전달
 		other_player->GetOwnerSession()->DoSend(spawn_packet);
 
-		Common::SCSpawnObject other_spawn_packet{
+		Common::SCSpawnPlayer other_spawn_packet{
 			other_id,
 			other_player->GetPosition(),
-			other_player->GetDirection()
+			other_player->GetDirection(),
+			other_player->GetType()
 		};
+
+		std::println("Other Player Type: {}", static_cast<int>(other_player->GetType()));
 		// 현재 클라이언트에 기존 플레이어 정보 전달
 		session->DoSend(other_spawn_packet);
 	}
@@ -150,7 +156,7 @@ void Room::HandleStart(const SessionPtr session)
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
-		player->ChangeState(PlayerState::INGAME);
+		player->ChangePlayerType(Common::PlayerType::Player);
 		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
 	}
 

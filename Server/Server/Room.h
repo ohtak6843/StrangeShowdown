@@ -2,6 +2,7 @@
 
 #include "Protocol.h"
 #include "Job.h"
+#include "Object.h"
 
 enum class RoomState
 {
@@ -48,6 +49,10 @@ public:
 	bool UseGun(const PlayerPtr target);
 
 
+	// --
+	// content method
+	// --
+public:
 
 
 	// --
@@ -103,11 +108,15 @@ private:
 	// 현재 방에 있는 플레이어 수
 	std::unordered_map<uint64, std::shared_ptr<Player>> _players{};
 
+	std::unordered_map<uint32, std::shared_ptr<Object>> _objects{};
+
 	uint32 _roomID{};
 	std::string _name{};
 	bool _hasPassword{ false };
 	std::string _password{};
 	uint64 _hostID{};
+
+	uint32 _currentId{ 0 };
 	
 	// 임시. 이후 enum으로 변경
 	RoomState _state{ RoomState::WAITING };

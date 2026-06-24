@@ -72,6 +72,9 @@ protected:
 
 // Damage Section
 public:
+
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
+
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -116,12 +119,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Effect)
 	TMap<EItemType, TObjectPtr<class USoundBase>> ItemUseSounds;
 
-// Network Section
-public:
-	void Move(const FVector& Location, const FRotator& Rotator);
-
-protected:
-	FVector TargetLocation{};
-	FRotator TargetRotation{};
 
 };

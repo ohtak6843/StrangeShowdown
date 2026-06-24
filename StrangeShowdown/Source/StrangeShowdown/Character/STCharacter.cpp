@@ -2,6 +2,10 @@
 
 
 #include "Character/STCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/STAnimInstance.h"
+#include "CommonDefine.h"
+
 
 // Sets default values
 ASTCharacter::ASTCharacter()
@@ -30,5 +34,52 @@ void ASTCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ASTCharacter::Move(const FVector& Location, const FRotator& Rotator)
+{
+	// speed 미리 계산
+	float Speed{
+		static_cast<float>(FVector::Dist(Location, TargetLocation)) / Common::SendMoveTime
+	};
+
+	if (nullptr == GetMesh())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mesh is not valid in Move function"));
+		return;
+	}
+
+	SetActorLocation(TargetLocation);
+	SetActorRotation(TargetRotation);
+
+	// 애니메이션
+	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
+	{
+		// STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
+
+		// velocity 설정
+		auto* Movement{ GetCharacterMovement() };
+		if (Movement)
+		{
+			FVector Direction{ Location - TargetLocation };
+			Movement->Velocity = Direction * Speed;
+		}
+	}
+
+	TargetLocation = Location;
+	TargetRotation = Rotator;
+
+
+}
+
+void ASTCharacter::TickMove(float DeltaTime)
+{
+	FVector CurrentLocation{ GetActorLocation() };
+	FVector NewLocation{ FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, MoveSpeed) };
+	SetActorLocation(NewLocation);
+
+	FRotator CurrentRotation{ GetActorRotation() };
+	FRotator NewRotation{ FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed) };
+	SetActorRotation(NewRotation);
 }
 

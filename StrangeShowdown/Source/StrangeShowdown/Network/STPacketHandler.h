@@ -21,7 +21,8 @@ public:
 private:
 
 	// 고정 크기 핸들러
-	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
+	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
+	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
 	void HandleMoveObject(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
@@ -29,7 +30,7 @@ private:
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
+	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);

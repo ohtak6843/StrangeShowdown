@@ -76,7 +76,7 @@ void ASTLobbyLocalPlayer::BeginPlay()
 	auto* DataManager{ GameInstance ? GameInstance->GetDataManager() : nullptr };
 	if (DataManager)
 	{
-		MyId = DataManager->GetMyPlayerInfo().PlayerID;
+		MyId = DataManager->GetMyPlayerInfo().ID;
 		PlayerNickName = DataManager->GetMyPlayerInfo().NickName;
 	}
 

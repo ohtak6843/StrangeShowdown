@@ -41,12 +41,23 @@ void USTStatComponent::InitPlayerStats()
 {
 	CharacterStat.CurrentHp = Common::PlayerConstants::Hp;
 	CharacterStat.MaxHp = Common::PlayerConstants::MaxHp;
-	CharacterStat.CurrentGold = 0;
+	CharacterStat.CurrentGold = Common::PlayerConstants::Gold;
 	// armor
 	CharacterStat.KillCount = 0;
 	// movespeed
 	CharacterStat.CurrentStamina = Common::PlayerConstants::Stamina;
 	CharacterStat.MaxStamina = Common::PlayerConstants::MaxStamina;
 
+	OnStatChanged.Broadcast();
+}
+
+
+void USTStatComponent::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
+{
+	CharacterStat.CurrentHp = Packet.hp;
+	CharacterStat.CurrentStamina = Packet.stamina;
+	CharacterStat.CurrentGold = Packet.gold;
+	CharacterStat.CurrentArmor = Packet.armor;
+	CharacterStat.CurrentAction = Packet.bullet;
 	OnStatChanged.Broadcast();
 }

@@ -40,13 +40,7 @@ void ASTFieldPlayer::Tick(float DeltaTime)
 
 #if NETWORK_ENABLED
 
-	FVector CurrentLocation{ GetActorLocation() };
-	FVector NewLocation{ FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, MoveSpeed) };
-	SetActorLocation(NewLocation);
-
-	FRotator CurrentRotation{ GetActorRotation() };
-	FRotator NewRotation{ FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed) };
-	SetActorRotation(NewRotation);
+	TickMove(DeltaTime);
 
 #endif
 }
@@ -78,7 +72,7 @@ void ASTFieldPlayer::ChangeToGhost()
 
 void ASTFieldPlayer::Init(const FPlayerInfo& PlayerInfo)
 {
-	PlayerID = PlayerInfo.PlayerID;
+	ID = PlayerInfo.ID;
 
 	StatComp->InitPlayerStats();
 }

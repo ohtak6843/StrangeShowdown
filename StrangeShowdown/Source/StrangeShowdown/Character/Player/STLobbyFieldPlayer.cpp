@@ -69,7 +69,7 @@ void ASTLobbyFieldPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ASTLobbyFieldPlayer::Init(const FPlayerInfo& PlayerInfo)
 {
-	PlayerID = PlayerInfo.PlayerID;
+	PlayerID = PlayerInfo.ID;
 	OnFieldPlayerSpawned.Broadcast(PlayerID, PlayerInfo.NickName, false);
 	UE_LOG(LogTemp, Log, TEXT("Lobby Field Player Initialized: PlayerID=%llu"), PlayerID);
 }

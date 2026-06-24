@@ -79,14 +79,14 @@ public:
 
 	// 정적
 public:
-	void HandleSpawn(const Common::SCSpawnObject& Packet);
+	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
+	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
 	// 동적

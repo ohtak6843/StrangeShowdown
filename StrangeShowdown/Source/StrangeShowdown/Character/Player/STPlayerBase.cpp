@@ -122,6 +122,11 @@ void ASTPlayerBase::SetMaxWalkSpeed(float NewMaxWalkSpeed)
 	GetCharacterMovement()->MaxWalkSpeed = NewMaxWalkSpeed;
 }
 
+void ASTPlayerBase::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
+{
+	StatComp->HandleStatusUpdate(Packet);
+}
+
 float ASTPlayerBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -190,39 +195,3 @@ void ASTPlayerBase::PlayItemUseEffect(EItemType ItemType)
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ItemUseSounds[ItemType], GetActorLocation());
 	}
 }
-
-void ASTPlayerBase::Move(const FVector& Location, const FRotator& Rotator)
-{
-
-	// speed 미리 계산
-	float Speed{
-		static_cast<float>(FVector::Dist(Location, TargetLocation)) / Common::SendMoveTime
-	};
-
-	if (nullptr == GetMesh())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Mesh is not valid in Move function"));
-		return;
-	}
-
-	SetActorLocation(TargetLocation);
-	SetActorRotation(TargetRotation);
-
-	// 애니메이션
-	if (auto* STAnimInst{ Cast<USTAnimInstance>(GetMesh()->GetAnimInstance()) })
-	{
-		// STAnimInst->SetAnimationValue(Speed, Rotator.Pitch, Rotator.Yaw);
-
-		// velocity 설정
-		auto* Movement{ GetCharacterMovement() };
-		if (Movement)
-		{
-			FVector Direction{ Location - TargetLocation };
-			Movement->Velocity = Direction * Speed;
-		}
-	}
-
-	TargetLocation = Location;
-	TargetRotation = Rotator;
-}
-

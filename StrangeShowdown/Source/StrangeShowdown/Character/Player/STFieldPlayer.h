@@ -44,17 +44,9 @@ public:
 
 	void Init(const FPlayerInfo& PlayerInfo);
 
-// getters
-public:
-	uint64 GetPlayerID() const { return PlayerID; }
 
 private:
 
-	uint64 PlayerID{};
-
 	UPROPERTY()
 	APlayerCameraManager* CachedCameraManager = nullptr;
-
-	const float MoveSpeed{ 12.f };
-	const float RotationSpeed{ 12.f };
 };

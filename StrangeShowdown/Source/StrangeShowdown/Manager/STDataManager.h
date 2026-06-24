@@ -9,9 +9,10 @@
 
 #include "STDataManager.generated.h"
 
-class ASTPlayerBase;
 
-using PlayerWeakPtr = TWeakObjectPtr<ASTPlayerBase>;
+class ASTCharacter;
+
+using CharacterWeakPtr = TWeakObjectPtr<ASTCharacter>;
 
 /**
 * @brief:
@@ -24,30 +25,17 @@ struct FPlayerInfo
 	GENERATED_BODY()
 
 	// 이 정보를 가지고 있는 현재 레벨의 플레이어 객체
-	PlayerWeakPtr Player;
+	CharacterWeakPtr Player;
 
 	FString NickName{ UTF8_TO_TCHAR(std::string(Common::PlayerConstants::Name).c_str()) };
 
-	uint64 PlayerID{ 0 };
+	uint64 ID{ 0 };
 
 	bool bIsHost{ false };
 
 	bool bIsReady{ false };
 
-	// -- 
-	// player stats
-	// --
-
-	void UpdateStatus(const Common::SCStatusUpdate& Packet)
-	{
-		// 여기부터 작업하시오
-		//HP = Packet.hp;
-		//Stamina = Packet.stamina;
-		//Bullet = Packet.bullet;
-		//Gold = Packet.gold;
-		//Armor = Packet.armor;
-	}
-
+	Common::PlayerType Type{ Common::PlayerType::None };
 };
 
 /**
@@ -65,13 +53,13 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 	// static packet handlers
 	// --
 public:
-	void HandleSpawn(const Common::SCSpawnObject& Packet);
+	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
+	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
 	void HandleReady(const Common::SCReady& Packet);
 	void HandleStartGame(const Common::SCStartGame& Packet);
-	void HandleDamage(const Common::SCDamage& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
 
@@ -101,8 +89,6 @@ private:
 	// getter and setter
 	// --
 public:
-	//bool GetLoddingLevel() const { return bIsInGame; }
-	//void SetLoadingLevel(bool Value) { bIsInGame = Value; }
 
 	uint64 GetHostID() const { return HostID; }
 
@@ -113,13 +99,23 @@ public:
 	// 내부 메소드
 	// --
 private:
-	// PlayerID로 플레이어 객체를 반환하는 함수
-	PlayerWeakPtr GetPlayer(const uint64 PlayerID) const;
-	ASTPlayerBase* SpawnFieldPlayer(
+	// ID로 PlayerInfo를 반환하는 함수
+	FPlayerInfo* GetPlayerInfo(const uint64 ID);
+	// 플레이어 객체를 반환하는 함수
+
+	ASTCharacter* SpawnFieldPlayer(
 		const FTransform& Transform,
 		const FActorSpawnParameters& SpawnParams,
 		const FPlayerInfo& PlayerInfo
 	);
+	
+	ASTCharacter* SpawnFieldPlayer(
+		const FTransform& Transform,
+		const FActorSpawnParameters& SpawnParams,
+		const FPlayerInfo& PlayerInfo,
+		const Common::PlayerType PlayerType
+	);
+
 
 	// todo cham: 나중에 private화.
 
@@ -156,10 +152,17 @@ private:
 
 public:
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTPlayerBase> FieldPlayerClass;
+	TSubclassOf<ASTCharacter> FieldPlayerClass;
 
 	UPROPERTY(EditAnywhere, Category = "SpawnData")
-	TSubclassOf<ASTPlayerBase> LobbyFieldPlayerClass;
+	TSubclassOf<ASTCharacter> LobbyFieldPlayerClass;
+
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTCharacter> FieldGhostClass;
+
+	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	TSubclassOf<ASTCharacter> LocalGhostClass;
+
 
 
 };

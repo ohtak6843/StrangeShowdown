@@ -2,8 +2,9 @@
 #include "Player.h"
 #include "Room.h"
 
-void Player::Init(const std::shared_ptr<Room>& room)
+void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
 {
+	// 초기화
 	Clear();
 
 	if (nullptr != room)
@@ -15,6 +16,19 @@ void Player::Init(const std::shared_ptr<Room>& room)
 		// todo: 예외 처리
 		std::println("Error: Player::Init called with nullptr room");
 	}
+
+	if (nullptr != session)
+	{
+		_ownerSession = session;
+	}
+	else
+	{
+		// todo: 예외 처리
+		std::println("Error: Player::Init called with nullptr session");
+	}
+	
+	// 캐릭터 배치
+	ChangePlayerType(Common::PlayerType::LobbyPlayer);
 }
 
 void Player::Clear()
@@ -27,15 +41,18 @@ void Player::Clear()
 	_status = {};
 }
 
-void Player::ChangeState(const PlayerState state)
+void Player::ChangePlayerType(const Common::PlayerType type, const bool clear)
 {
-	Clear();
+	if (clear)
+	{
+		Clear();
+	}
 
-	_state = state;
-	_status.Init(state);
+	_type = type;
+	_status.Init(type);
 
 	// 총과 망치는 기본 지급
-	if (PlayerState::INGAME == state)
+	if (Common::PlayerType::Player == type)
 	{
 		_inventory[static_cast<size_t>(Common::ItemType::Pistol)] = 1;
 		_inventory[static_cast<size_t>(Common::ItemType::Hammer)] = 1;
@@ -71,7 +88,7 @@ bool Player::TryConsumeItem(const Common::ItemType item_type)
 	}
 
 	// 스테미나 확인
-	if (_status.stamina + stamina_delta < -1e-6f)
+	if (_status.stamina + stamina_delta < -std::numeric_limits<float>::epsilon())
 	{
 		return false;
 	}
@@ -106,9 +123,6 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		_ownerSession->GetSessionID(),
 		packet.targetID,
 		packet.itemType,
-		_status.stamina,
-		_status.bullet,
-		-1
 	};
 	room->Broadcast(use_item_packet_other, _ownerSession->GetSessionID());
 
@@ -118,9 +132,6 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		_ownerSession->GetSessionID(),
 		packet.targetID,
 		packet.itemType,
-		_status.stamina,
-		_status.bullet,
-		GetItemCount(packet.itemType)
 	};
 	_ownerSession->DoSend(use_item_packet_self);
 
@@ -134,12 +145,16 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 				target->TakeDamage(_status.attack);
 			}
 
-			Common::SCDamage damage_packet{
-				_ownerSession->GetSessionID(),
-				packet.targetID,
-				_status.attack
+			const auto& target_status{ target->GetStatus() };
+			Common::SCStatusUpdate status_update_packet{
+				target->GetOwnerSession()->GetSessionID(),
+				target_status.hp,
+				target_status.stamina,
+				target_status.bullet,
+				target_status.gold,
+				target_status.armor
 			};
-			room->Broadcast(damage_packet);
+			room->Broadcast(status_update_packet);
 
 		}
 		break;
@@ -154,46 +169,18 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		{
 			_status.armor += Common::ItemConstants::HelmetValue;
 			
-			// todo: 코드 중복 해결
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
 		case Common::ItemType::Meat:
 		{
 			_status.hp += Common::ItemConstants::MeatValue;
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
 		case Common::ItemType::Whiskey:
 		{
 			_status.stamina += Common::ItemConstants::WhiskeyValue;
-			Common::SCStatusUpdate status_update_packet{
-				_ownerSession->GetSessionID(),
-				_status.hp,
-				_status.stamina,
-				_status.bullet,
-				_status.gold,
-				_status.armor
-			};
-			room->Broadcast(status_update_packet);
 		}
 		break;
 
@@ -222,11 +209,51 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 		break;
 	}
 
+	// 스탯 업데이트 패킷 전달
+	Common::SCStatusUpdate status_update_packet{
+		_ownerSession->GetSessionID(),
+		_status.hp,
+		_status.stamina,
+		_status.bullet,
+		_status.gold,
+		_status.armor
+	};
+	room->Broadcast(status_update_packet);
+
 }
 
 void Player::TakeDamage(const float damage)
 {
 	_status.hp -= damage;
+
+	// 체력이 0이 되었을떄 유령 플레이어 생성
+	if (_status.hp <= std::numeric_limits<float>::epsilon())
+	{
+		ChangePlayerType(Common::PlayerType::Ghost, false);
+		
+		// 기존 플레이어 제거 패킷 전송
+		Common::SCDespawnPlayer despawn_packet{ _ownerSession->GetSessionID() };
+		auto room{ _room.lock() };
+		if (nullptr != room)
+		{
+			room->Broadcast(despawn_packet);
+		}
+
+		// 새로이 유령 플레이어 생성 패킷 전송
+		Common::SCSpawnPlayer spawn_packet{
+			_ownerSession->GetSessionID(),
+			_position,
+			_direction,
+			_type
+		};
+
+		std::println("Player {} has become a ghost", _ownerSession->GetSessionID());
+		std::println("Player Type: {}", static_cast<int>(_type));
+		if (nullptr != room)
+		{
+			room->Broadcast(spawn_packet);
+		}
+	}
 }
 
 void Player::HandleMove(const Common::CSMovePlayer& packet)
