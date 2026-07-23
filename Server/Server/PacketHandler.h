@@ -12,7 +12,9 @@ public:
 
 private:
 	template <typename T>
-	static void RegisterHandler(Common::PacketType type, std::function<void(SessionPtr, const T&)> logic_func)
+	static void RegisterHandler(
+		Common::PacketType type,
+		std::function<void(SessionPtr, const T&)> logic_func)
 	{
 		_handlerMap.emplace(
 			type,

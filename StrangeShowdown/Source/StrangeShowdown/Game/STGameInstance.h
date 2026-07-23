@@ -81,6 +81,8 @@ public:
 public:
 	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
 	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
+	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
+	void HandleDespawnObject(const Common::SCDespawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
@@ -112,13 +114,15 @@ public:
 
 	void Chat(const FText& Message);
 
-	void Ready(bool Value);
+	void Ready(const bool Value);
 
 	void StartGame();
 	
-	void UseItem(uint64 TargetID, Common::ItemType ItemID);
+	void UseItem(const uint64 TargetID, const Common::ItemType ItemID);
 
-	void PickUpItem(Common::ItemType ItemID);
+	void PickUpItem(const Common::ItemType ItemID);
+
+	void MovePlayer(const FVector Location, const FRotator Rotator, const uint8 Flag);
 
 
 

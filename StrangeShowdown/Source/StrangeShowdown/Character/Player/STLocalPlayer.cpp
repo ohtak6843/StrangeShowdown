@@ -35,6 +35,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Controller/STGhostController.h"
 #include "Character/Ghost/STLocalGhost.h"
+#include "Network/STSerializer.h"
 
 
 ASTLocalPlayer::ASTLocalPlayer()
@@ -158,7 +159,7 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 
 	// Send Move Packet to Server
 #if NETWORK_ENABLED
-	SendMovePacket(DeltaTime);
+	SendMovePacket(DeltaTime, PlayerStateFlag);
 #endif
 }
 
@@ -995,34 +996,4 @@ void ASTLocalPlayer::Init()
 {
 	StatComp->InitPlayerStats();
 	UE_LOG(LogTemp, Log, TEXT("Player Stats Initialized"));
-}
-
-void ASTLocalPlayer::SendMovePacket(const float DeltaTime)
-{
-	SendMoveDeltaTime += DeltaTime;
-
-	if (SendMoveDeltaTime >= Common::SendMoveTime)
-	{
-		SendMoveDeltaTime -= Common::SendMoveTime;
-
-		TArray<uint8> SendBuffer;
-		auto rotation{ GetActorRotation() };
-		Common::CSMovePlayer move_packet{
-			Vec3f{
-				static_cast<float>(GetActorLocation().X),
-				static_cast<float>(GetActorLocation().Y),
-				static_cast<float>(GetActorLocation().Z)
-			},
-			Vec3f{
-				static_cast<float>(rotation.Pitch),
-				static_cast<float>(rotation.Yaw),
-				static_cast<float>(rotation.Roll)
-			},
-			PlayerStateFlag
-		};
-
-		SendBuffer.AddUninitialized(move_packet.size);
-		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
-		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
-	}
 }

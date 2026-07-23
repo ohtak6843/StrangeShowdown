@@ -79,10 +79,4 @@ protected:
 
 	TObjectPtr<class USTLobbyHUD> LobbyHUDWidget;
 
-// Network Section
-protected:
-	void SendMovePacket(const float DeltaTime);
-
-	float SendMoveDeltaTime{};
-
 };

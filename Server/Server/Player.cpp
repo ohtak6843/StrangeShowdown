@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "Room.h"
 
-void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
+void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session, const uint32 id)
 {
 	// 초기화
 	Clear();
@@ -15,6 +15,7 @@ void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
 	{
 		// todo: 예외 처리
 		std::println("Error: Player::Init called with nullptr room");
+
 	}
 
 	if (nullptr != session)
@@ -25,7 +26,10 @@ void Player::Init(const std::shared_ptr<Room>& room, const SessionPtr session)
 	{
 		// todo: 예외 처리
 		std::println("Error: Player::Init called with nullptr session");
+
 	}
+
+	SetObjectId(id);
 	
 	// 캐릭터 배치
 	ChangePlayerType(Common::PlayerType::LobbyPlayer);
@@ -116,23 +120,24 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 	}
 
 	// 아이템 사용 패킷을 본인 및 다른 플레이어에게 전달.
+	auto my_id{ GetObjectId() };
 
 	// 다른 플레이어에게 전달하는 아이템 사용 패킷
-	// 사용자의 보유 아이템 개수를 공개하지 않음
 	Common::SCUseItem use_item_packet_other{
-		_ownerSession->GetSessionID(),
+		my_id,
 		packet.targetID,
 		packet.itemType,
 	};
-	room->Broadcast(use_item_packet_other, _ownerSession->GetSessionID());
+	room->Broadcast(use_item_packet_other, my_id);
 
 	// 사용자 플레이어에게 전달하는 아이템 사용 패킷
-	// 사용자의 보유 아이템 개수를 공개함
 	Common::SCUseItem use_item_packet_self{
-		_ownerSession->GetSessionID(),
+		my_id,
 		packet.targetID,
 		packet.itemType,
 	};
+
+	// todo: weakptr
 	_ownerSession->DoSend(use_item_packet_self);
 
 	// 아이템 효과 적용 및 사용 효과 패킷 전달
@@ -146,8 +151,9 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 			}
 
 			const auto& target_status{ target->GetStatus() };
+			auto target_id{ target->GetObjectId() };
 			Common::SCStatusUpdate status_update_packet{
-				target->GetOwnerSession()->GetSessionID(),
+				target_id,
 				target_status.hp,
 				target_status.stamina,
 				target_status.bullet,
@@ -211,7 +217,7 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 
 	// 스탯 업데이트 패킷 전달
 	Common::SCStatusUpdate status_update_packet{
-		_ownerSession->GetSessionID(),
+		my_id,
 		_status.hp,
 		_status.stamina,
 		_status.bullet,
@@ -225,6 +231,7 @@ void Player::ApplyItemEffect(const Common::CSUseItem packet, const PlayerPtr tar
 void Player::TakeDamage(const float damage)
 {
 	_status.hp -= damage;
+	auto my_id{ GetObjectId() };
 
 	// 체력이 0이 되었을떄 유령 플레이어 생성
 	if (_status.hp <= std::numeric_limits<float>::epsilon())
@@ -232,7 +239,7 @@ void Player::TakeDamage(const float damage)
 		ChangePlayerType(Common::PlayerType::Ghost, false);
 		
 		// 기존 플레이어 제거 패킷 전송
-		Common::SCDespawnPlayer despawn_packet{ _ownerSession->GetSessionID() };
+		Common::SCDespawnPlayer despawn_packet{ my_id };
 		auto room{ _room.lock() };
 		if (nullptr != room)
 		{
@@ -241,14 +248,18 @@ void Player::TakeDamage(const float damage)
 
 		// 새로이 유령 플레이어 생성 패킷 전송
 		Common::SCSpawnPlayer spawn_packet{
-			_ownerSession->GetSessionID(),
+			my_id,
 			_position,
 			_direction,
 			_type
 		};
 
-		std::println("Player {} has become a ghost", _ownerSession->GetSessionID());
+#ifdef DEBUG
+		std::println("Player {} has become a ghost", my_id);
 		std::println("Player Type: {}", static_cast<int>(_type));
+
+#endif // DEBUG
+
 		if (nullptr != room)
 		{
 			room->Broadcast(spawn_packet);
@@ -261,13 +272,28 @@ void Player::HandleMove(const Common::CSMovePlayer& packet)
 	_position = packet.pos;
 	_direction = packet.dir;
 	_animationState = packet.state;
+	
+	auto my_id{ GetObjectId() };
+
+	Common::SCMovePlayer move_object_packet{
+		my_id,
+		_position,
+		_direction,
+		_animationState
+	};
+
+	if (auto room{ _room.lock() }; nullptr != room)
+	{
+		room->Broadcast(move_object_packet, my_id);
+	}
 }
 
 void Player::HandlePickItem(const Common::CSPickItem& packet)
 {
 	// todo: 검증
 	++_inventory[static_cast<size_t>(packet.itemType)];
-	std::println("Player {} picked up item {}, new count: {}", _ownerSession->GetSessionID(), static_cast<int>(packet.itemType), _inventory[static_cast<size_t>(packet.itemType)]);
+
+	// std::println("Player {} picked up item {}, new count: {}", _ownerSession->GetSessionID(), static_cast<int>(packet.itemType), _inventory[static_cast<size_t>(packet.itemType)]);
 }
 
 int Player::GetItemCount(const Common::ItemType item_type) const

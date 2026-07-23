@@ -11,6 +11,8 @@
 #include "Character/Player/STLobbyLocalPlayer.h"
 #include "Character/Ghost/STFieldGhost.h"
 #include "Character/Ghost/STLocalGhost.h"
+#include "Character/Sheriff/STFieldSheriff.h"
+#include "Character/Sheriff/STLocalSheriff.h"
 
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
@@ -52,10 +54,35 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+	// 본인 플레이어 처리
+	// todo: 일단 냅둠
+	if (Packet.id == MyPlayerInfo.ID)
+	{
+		//// 본인 플레이어 객체를 제거한다.
+		//if (auto PlayerPtr{ MyPlayerInfo.Player.Get() }; PlayerPtr != nullptr)
+		//{
+		//	PlayerPtr->Destroy();
+		//}
+		//MyPlayerInfo.Player.Reset();
+		//// 새로운 객체를 생성한다.
+		//auto* Player{ SpawnFieldPlayer(Transform, SpawnParams, MyPlayerInfo, Packet.type) };
+		//MyPlayerInfo.Player = Player;
+		//// 기존 정보를 업데이트한다.
+		//MyPlayerInfo.Type = Packet.type;
 
+
+		
+		UE_LOG(LogTemp, Log, TEXT("My Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+		
+		return;
+	}
+
+	
+
+	// 다른 플레이어 스폰 처리
 	auto PlayerInfoPtr{ PlayerInfoMap.Find(Packet.id) };
 	
-	// 플레이어가 존재하지 않음.
+	// 기존 플레이어 정보가 존재하지 않음.
 	if (nullptr == PlayerInfoPtr)
 	{
 		// playerinfo 생성
@@ -111,7 +138,6 @@ void USTDataManager::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 	PlayerPtr->Destroy();
 	PlayerInfoPtr->Player.Reset();
 
-
 		// 유령 클라이언트의 딜레이를 고려한다? -> PC에 따라서 다 다를거니까
 		// 1. 플레이어가 죽는 동시에 유령을 스폰한다.
 		// 2, 플레이어가 죽어도 일정시간동안 기다렸다가 스폰한다.
@@ -120,6 +146,70 @@ void USTDataManager::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 	
 
 }
+
+void USTDataManager::HandleSpawnObject(const Common::SCSpawnObject& Packet)
+{
+	// transform
+	FTransform Transform{ FTransform::Identity };
+
+	Transform.SetLocation(FVector(Packet.pos.x, Packet.pos.y, Packet.pos.z));
+	Transform.SetRotation(FQuat::Identity);
+
+	// spawn param
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+
+	auto ObjectInfoPtr{ ObjectInfoMap.Find(Packet.id) };
+
+	if (nullptr != ObjectInfoPtr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Object %llu already exists, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+		return;
+	}
+
+	switch (Packet.type)
+	{
+	case Common::ObjectType::Sheriff:
+	{
+		auto* SheriffPtr{ GetWorld()->SpawnActor<ASTFieldSheriff>(
+			LobbyFieldPlayerClass,
+			Transform,
+			SpawnParams
+		) };
+		FObjectInfo ObjectInfo{
+			.Object = SheriffPtr,
+			.ID = Packet.id,
+			.Type = Packet.type,
+		};
+		ObjectInfoMap.Add(Packet.id, ObjectInfo);
+		UE_LOG(LogTemp, Log, TEXT("New Object %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+		return;
+	}
+	break;
+	default:
+		break;
+	}
+
+}
+
+void USTDataManager::HandleDespawnObject(const Common::SCDespawnObject& Packet)
+{
+	auto PlayerInfoPtr{ GetPlayerInfo(Packet.id) };
+	if (nullptr == PlayerInfoPtr)
+	{
+		return;
+	}
+	auto PlayerPtr{ PlayerInfoPtr->Player.Get() };
+	if (nullptr == PlayerPtr)
+	{
+		return;
+	}
+
+	PlayerPtr->Destroy();
+	PlayerInfoPtr->Player.Reset();
+}
+
 
 void USTDataManager::HandleMove(const Common::SCMovePlayer& Packet)
 {
@@ -257,7 +347,7 @@ void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 
 void USTDataManager::OnLevelChanged()
 {
-	RefreshPlayers();
+	// RefreshPlayers();
 	InitController();
 	GetMyPlayer();
 }
@@ -311,6 +401,8 @@ void USTDataManager::RefreshPlayers()
 
 void USTDataManager::InitController()
 {
+	// 로비 상태일 때만 설정한다.
+	// todo: 중간 난입도 생각해야 함.
 	if (false == bIsInGame)
 	{
 		APlayerController* PlayerController{ UGameplayStatics::GetPlayerController(GetWorld(), 0) };
@@ -338,6 +430,7 @@ void USTDataManager::GetMyPlayer()
 	// 플레이어 객체가 게임 중인지 로비 중인지에 따라 캐스팅을 다르게 함.
 	if (true == bIsInGame)
 	{
+		// todo: hard codding
 		auto* Player{ Cast<ASTLocalPlayer>(Pawn) };
 		if (nullptr == Player)
 		{
@@ -349,6 +442,7 @@ void USTDataManager::GetMyPlayer()
 	}
 	else
 	{
+		// todo: hard codding
 		auto* Player{ Cast<ASTLobbyLocalPlayer>(Pawn) };
 		if (nullptr == Player)
 		{

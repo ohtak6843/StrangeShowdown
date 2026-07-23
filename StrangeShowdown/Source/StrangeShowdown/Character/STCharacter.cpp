@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/STAnimInstance.h"
 #include "CommonDefine.h"
+#include "Game/STGameInstance.h"
 
 
 // Sets default values
@@ -83,3 +84,18 @@ void ASTCharacter::TickMove(float DeltaTime)
 	SetActorRotation(NewRotation);
 }
 
+
+void ASTCharacter::SendMovePacket(const float DeltaTime, const uint8 PlayerStateFlag)
+{
+	SendMoveDeltaTime += DeltaTime;
+
+	if (SendMoveDeltaTime >= Common::SendMoveTime)
+	{
+		SendMoveDeltaTime -= Common::SendMoveTime;
+
+		auto Rotation{ GetActorRotation() };
+		auto Location{ GetActorLocation() };
+
+		Cast<USTGameInstance>(GWorld->GetGameInstance())->MovePlayer(Location, Rotation, PlayerStateFlag);
+	}
+}

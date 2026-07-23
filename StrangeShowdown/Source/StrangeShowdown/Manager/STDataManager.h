@@ -38,6 +38,16 @@ struct FPlayerInfo
 	Common::PlayerType Type{ Common::PlayerType::None };
 };
 
+USTRUCT(BlueprintType)
+struct FObjectInfo
+{
+	GENERATED_BODY()
+
+	CharacterWeakPtr Object;
+	uint32 ID{ 0 };
+	Common::ObjectType Type{ Common::ObjectType::None };
+};
+
 /**
 * @brief:  
 *  서버와 연동되는 클라이언트의 정보관리
@@ -55,6 +65,8 @@ class STRANGESHOWDOWN_API USTDataManager : public UObject
 public:
 	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
 	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
+	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
+	void HandleDespawnObject(const Common::SCDespawnObject& Packet);
 	void HandleMove(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);
@@ -140,6 +152,10 @@ private:
 	// 다른 플레이어가 저장되어 있는 맵
 	UPROPERTY()
 	TMap<uint64, FPlayerInfo> PlayerInfoMap{};
+
+	// 다른 오브젝트가 저장되어 있는 맵
+	// todo cham: object를 나중에 player와 통합
+	TMap<uint32, FObjectInfo> ObjectInfoMap{};
 
 	// 본인 플레이어 정보
 	UPROPERTY()

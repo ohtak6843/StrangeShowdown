@@ -109,6 +109,16 @@ void USTGameInstance::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 	DataManager->HandleDespawnPlayer(Packet);
 }
 
+void USTGameInstance::HandleSpawnObject(const Common::SCSpawnObject& Packet)
+{
+	DataManager->HandleSpawnObject(Packet);
+}
+
+void USTGameInstance::HandleDespawnObject(const Common::SCDespawnObject& Packet)
+{
+	DataManager->HandleDespawnObject(Packet);
+}
+
 void USTGameInstance::HandleMove(const Common::SCMovePlayer& Packet)
 {
 	DataManager->HandleMove(Packet);
@@ -275,6 +285,8 @@ void USTGameInstance::ChangeWorld(const FText& Level)
 {
 	//DataManager->SetLoadingLevel(true);
 
+	NetworkManager->Pause();
+
 	FName LevelName(*Level.ToString());
 	UGameplayStatics::OpenLevel(this, LevelName);
 
@@ -296,7 +308,7 @@ void USTGameInstance::Chat(const FText& Message)
 	UE_LOG(LogTemp, Log, TEXT("Chat called: Message=%s"), *Message.ToString());
 }
 
-void USTGameInstance::Ready(bool Value)
+void USTGameInstance::Ready(const bool Value)
 {
 	Common::CSReady ReadyPacket{ Value };
 	auto Packet{ STSerializer::Serialize(ReadyPacket) };
@@ -312,7 +324,7 @@ void USTGameInstance::StartGame()
 	UE_LOG(LogTemp, Log, TEXT("StartGame called"));
 }
 
-void USTGameInstance::UseItem(uint64 TargetID, Common::ItemType ItemType)
+void USTGameInstance::UseItem(const uint64 TargetID, const Common::ItemType ItemType)
 {
 	Common::CSUseItem UseItemPacket{ TargetID, ItemType };
 	auto Packet{ STSerializer::Serialize(UseItemPacket) };
@@ -320,12 +332,30 @@ void USTGameInstance::UseItem(uint64 TargetID, Common::ItemType ItemType)
 	UE_LOG(LogTemp, Log, TEXT("UseItem called: ItemType=%d"), static_cast<uint32>(ItemType));
 }
 
-void USTGameInstance::PickUpItem(Common::ItemType ItemID)
+void USTGameInstance::PickUpItem(const Common::ItemType ItemID)
 {
 	Common::CSPickItem PickUpItemPacket{ ItemID };
 	auto Packet{ STSerializer::Serialize(PickUpItemPacket) };
 	SendPacket(Packet);
 	UE_LOG(LogTemp, Log, TEXT("PickUpItem called: ItemID=%d"), static_cast<uint32>(ItemID));
+}
+
+void USTGameInstance::MovePlayer(const FVector Location, const FRotator Rotator, const uint8 Flag)
+{
+	Vec3f LocationVec{
+		static_cast<float>(Location.X), 
+		static_cast<float>(Location.Y), 
+		static_cast<float>(Location.Z)
+	};
+
+	Vec3f RotatorVec{
+		static_cast<float>(Rotator.Pitch),
+		static_cast<float>(Rotator.Yaw),
+		static_cast<float>(Rotator.Roll)
+	};
+	Common::CSMovePlayer MovePacket{ LocationVec, RotatorVec, Flag };
+	auto Packet{ STSerializer::Serialize(MovePacket) };
+	SendPacket(Packet);
 }
 
 void USTGameInstance::DevGetRoomList()
@@ -379,16 +409,19 @@ void USTGameInstance::SendPacket(const TArray<uint8>& Packet)
 
 void USTGameInstance::OnLevelLoaded(UWorld* LoadedWorld)
 {
-	while (false == IsValid(LoadedWorld))
+	if (false == IsValid(LoadedWorld) ||
+		false == LoadedWorld->IsGameWorld() ||
+		LoadedWorld != GetWorld())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Waiting for level to load..."));
-		FPlatformProcess::Sleep(0.05f);
-		LoadedWorld = GetWorld();
+		UE_LOG(LogTemp, Warning, TEXT("OnLevelLoaded: LoadedWorld is invalid"));
+		return;
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Level loaded: %s"), *LoadedWorld->GetName());
-	//DataManager->SetLoadingLevel(false);
 
 	// 플레이어 객체 갱신
 	DataManager->OnLevelChanged();
+
+	// NetworkManager 재개
+	NetworkManager->Resume();
 }

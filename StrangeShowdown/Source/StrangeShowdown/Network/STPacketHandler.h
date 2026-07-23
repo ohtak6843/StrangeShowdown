@@ -23,6 +23,8 @@ private:
 	// 고정 크기 핸들러
 	void HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet);
 	void HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet);
+	void HandleSpawnObject(const Common::SCSpawnObject& Packet);
+	void HandleDespawnObject(const Common::SCDespawnObject& Packet);
 	void HandleMoveObject(const Common::SCMovePlayer& Packet);
 	void HandleCreateRoom(const Common::SCCreateRoom& Packet);
 	void HandleJoinRoom(const Common::SCJoinRoom& Packet);

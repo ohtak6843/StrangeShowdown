@@ -29,6 +29,8 @@
 #define UMETA(type)
 #define ENUM_CLASS_FLAGS(type)
 
+#define DEBUG
+
 #include "struct.h"
 #include "type.h"
 #include "define.h"

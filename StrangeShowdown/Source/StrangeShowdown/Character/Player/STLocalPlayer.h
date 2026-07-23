@@ -240,9 +240,4 @@ public:
 public:
 	void Init();
 
-
-private:
-	void SendMovePacket(const float DeltaTime);
-
-	float SendMoveDeltaTime{};
 };

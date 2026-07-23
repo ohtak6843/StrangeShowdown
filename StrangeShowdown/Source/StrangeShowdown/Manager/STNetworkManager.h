@@ -26,7 +26,6 @@ public:
 	void Start();
 	virtual void BeginDestroy() override;
 
-
 	// --
 	// network method
 	// --
@@ -38,8 +37,9 @@ private:
 
 public:
 	void SendPacket(const TArray<uint8>& Packet);
-
-
+	
+	void Pause() { IsLoadingLevel = true; };
+	void Resume() { IsLoadingLevel = false; };
 
 
 private:

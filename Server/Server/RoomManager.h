@@ -14,16 +14,21 @@ public:
 
 	// todo: thread unsafe
 	void HandleCreateRoom(SessionPtr session, const Common::CSCreateRoom& packet);
-
-	// todo: thread unsafe
 	void HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& packet);
+	void HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet);
 
+	
 	// todo: 현재 thread unsafe!!!!
+private:
 	std::vector<Common::RoomInfo> GetRoomList();
 
+
+
+	// --
+	// Member variables
+	// --
 private:
 	// lock 필요할듯..
-	
 	// room id 부여
 	std::atomic<uint32> _roomCounter{ 0 };
 	

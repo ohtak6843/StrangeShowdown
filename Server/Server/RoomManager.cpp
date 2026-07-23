@@ -47,6 +47,18 @@ void RoomManager::HandleJoinRoom(SessionPtr session, const Common::CSJoinRoom& p
 	room->HandleJoinRoom(session, packet);
 }
 
+void RoomManager::HandleGetRoomList(SessionPtr session, const Common::CSGetRoomList& packet)
+{
+	auto room_list{ GetRoomList() };
+	Common::SCGiveRoomList room_list_packet{
+		static_cast<uint16>(room_list.size())
+	};
+	room_list_packet.size += static_cast<uint16>(sizeof(Common::RoomInfo) * room_list.size());
+	// sendbuffer에 패킷과 방 리스트를 직접 직렬화해서 보냄.
+	auto buffer{ Serializer::Serialize(room_list_packet, room_list) };
+	session->DoSend(buffer);
+}
+
 std::vector<Common::RoomInfo> RoomManager::GetRoomList()
 {
 	std::vector<Common::RoomInfo> room_list;

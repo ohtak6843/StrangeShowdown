@@ -126,7 +126,7 @@ void ASTLobbyLocalPlayer::Tick(float DeltaTime)
 
 	// Send Move Packet to Server
 #if NETWORK_ENABLED
-	SendMovePacket(DeltaTime);
+	SendMovePacket(DeltaTime, PlayerStateFlag);
 #endif
 }
 
@@ -210,36 +210,6 @@ void ASTLobbyLocalPlayer::ChangeToLookingUp()
 	bUseControllerRotationYaw = true;
 
 	SetCameraPose(ECameraPose::LookingUp);
-}
-
-void ASTLobbyLocalPlayer::SendMovePacket(const float DeltaTime)
-{
-	SendMoveDeltaTime += DeltaTime;
-
-	if (SendMoveDeltaTime >= Common::SendMoveTime)
-	{
-		SendMoveDeltaTime -= Common::SendMoveTime;
-
-		TArray<uint8> SendBuffer;
-		auto rotation{ GetActorRotation() };
-		Common::CSMovePlayer move_packet{
-			Vec3f{
-				static_cast<float>(GetActorLocation().X),
-				static_cast<float>(GetActorLocation().Y),
-				static_cast<float>(GetActorLocation().Z)
-			},
-			Vec3f{
-				static_cast<float>(rotation.Pitch),
-				static_cast<float>(rotation.Yaw),
-				static_cast<float>(rotation.Roll)
-			},
-			PlayerStateFlag
-		};
-
-		SendBuffer.AddUninitialized(move_packet.size);
-		FMemory::Memcpy(SendBuffer.GetData(), &move_packet, move_packet.size);
-		Cast<USTGameInstance>(GWorld->GetGameInstance())->SendPacket(SendBuffer);
-	}
 }
 
 void ASTLobbyLocalPlayer::AddPlayerInWidget(uint64 PlayerID, const FString& NickName, bool bReady)

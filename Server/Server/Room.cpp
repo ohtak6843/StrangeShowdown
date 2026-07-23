@@ -15,7 +15,7 @@ void Room::HandleCreateRoom(const uint32 roomID, const SessionPtr session, const
 	_name = packet.name;
 	_hasPassword = packet.hasPassword;
 	_password = packet.password;
-	_hostID = session->GetSessionID();
+	_hostID = 0;
 	_state = RoomState::LOBBY;
 }
 
@@ -36,38 +36,45 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 
 
 	// 플레이어 생성
-	auto id{ session->GetSessionID() };
-	auto player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
+	auto my_id{ _currentId++ };
+	auto my_player{ GET_SINGLE(ObjectManager)->Pop<Player>() };
+
+
+	// 방장이 없는 경우 새로 들어온 플레이어를 방장으로 설정
+	if (0 == _hostID)
+	{
+		_hostID = my_id;
+	}
 	
 	// 플레이어 초기화 todo: 실패시 처리
-	player->Init(shared_from_this(), session);
-	session->SetPlayer(player);
-	_players[id] = player;
+	my_player->Init(shared_from_this(), session, my_id);
+	session->SetPlayer(my_player);
+	_players[my_id] = my_player;
 
 	// 플레이어 입장 성공을 클라이언트에 알림
-	Common::SCJoinRoom join_packet{ true, _hostID, id };
+	Common::SCJoinRoom join_packet{ true, _hostID, my_id };
 	session->DoSend(join_packet);
 
 	// 다른 플레이어에게 스폰 패킷 전달
 	Common::SCSpawnPlayer spawn_packet{
-		id,
-		player->GetPosition(),
-		player->GetDirection(),
-		player->GetType()
+		my_id,
+		my_player->GetPosition(),
+		my_player->GetDirection(),
+		my_player->GetType()
 	};
-
-	std::println("Player Type: {}", static_cast<int>(player->GetType()));
 
 	for (const auto& [other_id, other_player] : _players)
 	{
-		if (other_id == id)
+
+		// 모든 플레이어에게 새로 들어온 플레이어의 스폰 패킷 전달
+
+		other_player->GetOwnerSession()->DoSend(spawn_packet);
+		if (other_id ==	my_id)
 		{
 			continue;
 		}
 
-		// 다른 플레이어에게 스폰 패킷 전달
-		other_player->GetOwnerSession()->DoSend(spawn_packet);
-
+		// 현재 클라이언트에 기존 플레이어 정보 전달
 		Common::SCSpawnPlayer other_spawn_packet{
 			other_id,
 			other_player->GetPosition(),
@@ -75,8 +82,7 @@ void Room::HandleJoinRoom(const SessionPtr session, const Common::CSJoinRoom& pa
 			other_player->GetType()
 		};
 
-		std::println("Other Player Type: {}", static_cast<int>(other_player->GetType()));
-		// 현재 클라이언트에 기존 플레이어 정보 전달
+
 		session->DoSend(other_spawn_packet);
 	}
 }
@@ -91,29 +97,34 @@ void Room::HandleReady(const SessionPtr session, const Common::CSReady& packet)
 		return;
 	}
 	
-	auto player{ session->GetPlayer() };
-	if (player == nullptr)
+	auto my_player{ session->GetPlayer() };
+	if (my_player == nullptr)
 	{
 		return;
 	}
 
 	// 플레이어의 준비 상태 업데이트
-	player->SetReady(packet.ready);
+	my_player->SetReady(packet.ready);
 
 	// 모든 플레이어에게 해당 플레이어의 준비 상태 전달
-	// todo: 나중에 session id대신 player id로 변경할 필요 있음
-	auto id{ session->GetSessionID() };
+	auto my_id{ my_player->GetObjectId() };
 	Common::SCReady ready_packet{
-		id,
+		my_id,
 		packet.ready
 	};
 
-	Broadcast(ready_packet, id);
+	Broadcast(ready_packet, my_id);
 }
 
 void Room::HandleStart(const SessionPtr session)
 {
 	// 예외 처리
+	auto my_player{ session->GetPlayer() };
+	if (my_player == nullptr)
+	{
+		return;
+	}
+	auto my_id{ my_player->GetObjectId() };
 
 	// 방이 로비 상태인지 검사.
 	if (RoomState::LOBBY != _state)
@@ -122,7 +133,7 @@ void Room::HandleStart(const SessionPtr session)
 	}
 
 	// 플레이어가 방장인지 검사.
-	if (session->GetSessionID() != _hostID)
+	if (my_id != _hostID)
 	{
 		return;
 	}
@@ -152,20 +163,47 @@ void Room::HandleStart(const SessionPtr session)
 	// todo: 게임 시작 하기 전 클라이언트 로딩을 기다려야 함.
 	_state = RoomState::INGAME;
 
+	for (const auto& [id, player] : _players)
+	{
+		player->ChangePlayerType(Common::PlayerType::Player);
+	}
+
 
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
 	for (const auto& [id, player] : _players)
 	{
-		player->ChangePlayerType(Common::PlayerType::Player);
-		player->GetOwnerSession()->DoSend(Common::SCStartGame{ true });
+		// todo: weak ptr화
+		auto session{ player->GetOwnerSession() };
+		if (nullptr != session)
+		{
+			session->DoSend(Common::SCStartGame{ true });
+		}
+
+		// 현재 세션에 모든 방의 플레이어 소환 패킷을 보냄
+		for (const auto& [other_id, other_player] : _players)
+		{
+			Common::SCSpawnPlayer spawn_packet{
+				other_id,
+				other_player->GetPosition(),
+				other_player->GetDirection(),
+				other_player->GetType()
+			};
+
+			session->DoSend(spawn_packet);
+		}
+		
 	}
 
 }
 
 void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size)
 {
-
-	auto id{ session->GetSessionID() };
+	auto my_player{ session->GetPlayer() };
+	if (my_player == nullptr)
+	{
+		return;
+	}
+	auto my_id{ my_player->GetObjectId() };
 	
 	// message
 	std::vector<uint8> additional_data(payload, payload + payload_size);
@@ -173,7 +211,7 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 
 	// packet
 	Common::SCChat chat_packet{
-		id,
+		my_id,
 		static_cast<uint16>(payload_size + 1)
 	};
 
@@ -181,7 +219,7 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 	auto buffer{ Serializer::Serialize(chat_packet, additional_data) };
 
 	// 모든 다른 플레이어에게 직렬화된 데이터 전송
-	Broadcast(buffer, id);
+	Broadcast(buffer, my_id);
 }
 
 void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet)
@@ -192,13 +230,15 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 		return;
 	}
 
-	// 아이템 사용 가능 여부 검사 및 사용 처리
-	auto player{ session->GetPlayer() };
-	if (nullptr == player)
+	auto my_player{ session->GetPlayer() };
+	if (nullptr == my_player)
 	{
 		return;
 	}
-	if (false == player->TryConsumeItem(packet.itemType))
+	auto my_id{ my_player->GetObjectId() };
+
+	// 아이템 사용 가능 여부 검사 및 사용 처리
+	if (false == my_player->TryConsumeItem(packet.itemType))
 	{
 		return;
 	}
@@ -216,10 +256,11 @@ void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& pack
 	}
 
 	// 효과 적용 및 패킷 전송
-	player->ApplyItemEffect(packet, target);
+	my_player->ApplyItemEffect(packet, target);
 
-	// debug: 아이템 패킷 종류 출력
-	std::println("Player {} used item {} on target {}", session->GetSessionID(), static_cast<int>(packet.itemType), packet.targetID);
+#ifdef DEBUG
+	std::println("Player {} used item {} on target {}", my_id, static_cast<int>(packet.itemType), packet.targetID);
+#endif
 }
 
 

@@ -25,6 +25,22 @@ STPacketHandler::STPacketHandler()
 		}
 	);
 
+	RegisterHandler<Common::SCSpawnObject>(
+		Common::PacketType::SC_SPAWN_OBJECT,
+		[this](const auto& Packet)
+		{
+			HandleSpawnObject(Packet);
+		}
+	);
+
+	RegisterHandler<Common::SCDespawnObject>(
+		Common::PacketType::SC_DESPAWN_OBJECT,
+		[this](const auto& Packet)
+		{
+			HandleDespawnObject(Packet);
+		}
+	);
+
 	RegisterHandler<Common::SCMovePlayer>(
 		Common::PacketType::SC_MOVE_PLAYER,
 		[this](const auto& Packet)
@@ -130,6 +146,16 @@ void STPacketHandler::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 void STPacketHandler::HandleDespawnPlayer(const Common::SCDespawnPlayer& Packet)
 {
 	GameInstance->HandleDespawnPlayer(Packet);
+}
+
+void STPacketHandler::HandleSpawnObject(const Common::SCSpawnObject& Packet)
+{
+	GameInstance->HandleSpawnObject(Packet);
+}
+
+void STPacketHandler::HandleDespawnObject(const Common::SCDespawnObject& Packet)
+{
+	GameInstance->HandleDespawnObject(Packet);
 }
 
 void STPacketHandler::HandleMoveObject(const Common::SCMovePlayer& Packet)

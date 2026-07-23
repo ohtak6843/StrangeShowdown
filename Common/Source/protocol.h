@@ -51,6 +51,9 @@ enum class PacketType : uint16
 	SC_SPAWN_PLAYER,
 	SC_DESPAWN_PLAYER,
 
+	SC_SPAWN_OBJECT,
+	SC_DESPAWN_OBJECT,
+
 	SC_MOVE_OBJECT,
 
 	SC_MOVE_PLAYER,
@@ -327,7 +330,7 @@ struct CSChat : Header
 //  uint64 objectID
 //  Vec3f pos
 //  Vec3f dir
-//  PlayerState state
+//  PlayerType type
 //	
 // Brief:
 //  클라이언트 로그인 요청
@@ -360,6 +363,34 @@ struct SCDespawnPlayer : Header
 	}
 };
 
+// SCSpawnObject
+struct SCSpawnObject : Header
+{
+	uint32 id{};
+	Vec3f pos{};
+	Vec3f dir{};
+	ObjectType type{ ObjectType::None };
+	SCSpawnObject() = default;
+	SCSpawnObject(const uint32 in_id, const Vec3f& in_pos, const Vec3f& in_dir, const ObjectType in_type = ObjectType::None) :
+		Header{ sizeof(SCSpawnObject), PacketType::SC_SPAWN_OBJECT },
+		id{ in_id },
+		pos{ in_pos },
+		dir{ in_dir },
+		type{ in_type }
+	{
+	}
+};
+
+struct SCDespawnObject : Header
+{
+	uint32 id{};
+	SCDespawnObject() = default;
+	SCDespawnObject(const uint32 in_id) :
+		Header{ sizeof(SCDespawnObject), PacketType::SC_DESPAWN_OBJECT },
+		id{ in_id }
+	{
+	}
+};
 
 // Param:
 //  uint64 id

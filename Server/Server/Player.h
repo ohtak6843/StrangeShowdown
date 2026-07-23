@@ -54,7 +54,7 @@ class Player : public Object
 	// method
 	// --
 public:
-	void Init(const std::shared_ptr<Room>& room, const SessionPtr session);
+	void Init(const std::shared_ptr<Room>& room, const SessionPtr session, const uint32 id);
 	void Clear();
 
 	// player type 변경. clear가 true면 type 변경과 함께 Clear()도 실행

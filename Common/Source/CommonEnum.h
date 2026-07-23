@@ -67,8 +67,8 @@ enum class ObjectType : uint8
 {
 	None = 0,
 	Player,
-	Ghost,
-	PickUpUItem,
+	Sheriff,
+	PickUpUItem
 };
 
 

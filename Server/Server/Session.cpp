@@ -155,6 +155,7 @@ void Session::ReassemblePacket()
 		if (packet_size < sizeof(Common::Header) || packet_size > MAX_PACKET_SIZE)
 		{
 			std::println("Invalid packet size: {}. Disconnecting session {}.", packet_size, _sessionID);
+
 			Disconnect();
 			break;
 		}
@@ -217,6 +218,7 @@ void Session::ReleaseRef()
 			_room->RemovePlayer(_sessionID);
 		}
 		std::println("Session {} ended.", _sessionID);
+
 	}
 }
 
