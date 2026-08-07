@@ -192,13 +192,6 @@ void ASTLocalPlayer::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 
-	// Set Local Player Mesh
-	if(PlayerMeshes[static_cast<int>(PlayerMeshType)].IsValid())
-	{
-		USkeletalMesh* PlayerMesh = PlayerMeshes[static_cast<int>(PlayerMeshType)].LoadSynchronous();
-		GetMesh()->SetSkeletalMesh(PlayerMesh);
-	}
-
 	// Sheriff Chase Line
 	LineBatcher = NewObject<ULineBatchComponent>(this, TEXT("LineBatcher"));
 	LineBatcher->RegisterComponent();
@@ -828,6 +821,11 @@ void ASTLocalPlayer::DropItem(const FInputActionValue& Value)
 	QuickSlotComp->OnQuickSlotUpdated.Broadcast();
 
 	HoldItem();
+}
+
+void ASTLocalPlayer::SetDead()
+{
+	Super::SetDead();
 }
 
 void ASTLocalPlayer::ApplyStateSettings(ECameraPose NewState)

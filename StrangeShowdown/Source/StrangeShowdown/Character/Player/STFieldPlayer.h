@@ -26,7 +26,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-// Damage Section
+// Dead Section
 public:
 	virtual ASTCharacter* ChangeToGhost() override;
 

@@ -45,10 +45,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	TObjectPtr<USTStatComponent> StatComp;
 
-	// Player Mesh Type
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	EPlayerMeshType PlayerMeshType;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", meta = (Bitmask, BitmaskEnum = "EPlayerState"))
 	uint8 PlayerStateFlag;
 
@@ -63,6 +59,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> RightHandSkeletalMesh;
 
+// Player Meshes Section
+public:
+	EPlayerMeshType GetPlayerMeshType() const { return PlayerMeshType; }
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	EPlayerMeshType PlayerMeshType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<EPlayerMeshType, TObjectPtr<USkeletalMesh>> PlayerMeshes;
+
 // Damage Section
 public:
 
@@ -71,15 +78,34 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+// Dead Section
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void SetDead();
+	void PlayDeadAnimation();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayDissolveEffect();
+	virtual void PlayDissolveEffect_Implementation() {}
+
 	UFUNCTION(BlueprintCallable)
 	virtual ASTCharacter* ChangeToGhost() { return nullptr; }
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UMaterialInstanceDynamic> DynamicMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dead)
+	TObjectPtr<class UAnimMontage> DeadMontage;
+
+	float DeadEventDelayTime = 3.0f;
+	float DissolveEffectDelayTime = 2.5f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<class ASTGhostController> GhostControllerClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<class ASTLocalGhost> GhostClass;
+	TSubclassOf<class ASTGhostBase> GhostClass;
 
 // Effect Section
 public:

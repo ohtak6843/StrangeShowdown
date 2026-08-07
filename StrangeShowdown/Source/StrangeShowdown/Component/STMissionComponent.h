@@ -11,6 +11,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FMissionUpdate,
+	USTMissionRowData*, Data
+);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FMissionClear,
 	USTMissionRowData*, Data
 );
@@ -24,13 +29,19 @@ public:
 	USTMissionComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void SetMission(const FText& Title, const FText& Desc);
+	void AddMission();
 
 	UFUNCTION(BlueprintCallable)
 	void ClearMission(int32 Index);
 
 	UFUNCTION(BlueprintCallable)
-	void SetTestMission(int32 Index);
+	void UpdateMissionProgress(int32 Index, int32 ProgressToAdd);
+
+	UFUNCTION(BlueprintCallable)
+	void AddProgress(USTMissionRowData* Mission);
+
+	UFUNCTION(BlueprintCallable)
+	void TestMissionProgressUp();
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -39,7 +50,29 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FMissionClear OnMissionClear;
 
+	UPROPERTY(BlueprintAssignable)
+	FMissionUpdate OnMissionUpdate;
+
 private:
 	UPROPERTY()
 	TArray<USTMissionRowData*> Missions;
+
+public:
+	USTMissionRowData* SetAttack();
+	USTMissionRowData* SetGainGold();
+	USTMissionRowData* SetDestroyDoor();
+	USTMissionRowData* SetDamageSheriff();
+	USTMissionRowData* SetSurviveWithoutAttack();
+	USTMissionRowData* SetBuyItem();
+	USTMissionRowData* SetTest();
+
+	// 실제 미션 진행 함수
+public:
+	void OnAttack();
+	void OnGainGold();
+	void OnDestroyDoor();
+	void OnDamageSheriff();
+	void OnSurviveWithoutAttack();
+	void OnBuyItem();
+	void OnTest();
 };
