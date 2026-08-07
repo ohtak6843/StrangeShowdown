@@ -65,7 +65,6 @@
 - Delayed Job Queue based on Priority Queue (mutex 기반)
 - Object Pool based on Type Traits
 - Reference Counting
-- Circular Buffer
 - Serialize
 - Fixed & Dynamic Size Packet
 
