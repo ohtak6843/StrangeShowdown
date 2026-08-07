@@ -33,6 +33,8 @@ private:
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
+	void HandleSetTurn(const Common::SCSetTurn& Packet);
+
 
 	// 가변 크기 핸들러
 	void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);

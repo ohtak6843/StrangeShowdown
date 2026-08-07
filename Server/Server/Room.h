@@ -22,7 +22,9 @@ public:
 
 	// jobQueue에 LF로 job을 push
 	void PushJob(Job& job);
-
+	
+	// 지연된 job을 push
+	void PushDelayedJob(Job& job, const float delayTime);
 
 	// --
 	// handler
@@ -41,18 +43,12 @@ public:
 	void HandleChat(const SessionPtr session, const Common::CSChat& packet, const uint8* payload, const uint16 payload_size);
 
 
-
-	// --
-	// item method
-	// --
-public:
-	bool UseGun(const PlayerPtr target);
-
-
 	// --
 	// content method
 	// --
 public:
+	void ChangeRoomState(const RoomState state);
+	void OnTurnEnded();
 
 
 	// --
@@ -100,6 +96,9 @@ private:
 	std::atomic<bool> _busy{ false };
 	concurrency::concurrent_queue<Job> _jobQueue;
 
+	std::priority_queue<DelayedJob> _delayedJobQueue;
+	std::mutex _delayedJobMutex;
+
 
 	// --
 	// Content
@@ -107,19 +106,21 @@ private:
 private:
 	// 현재 방에 있는 플레이어 수
 	std::unordered_map<uint64, std::shared_ptr<Player>> _players{};
-
 	std::unordered_map<uint32, std::shared_ptr<Object>> _objects{};
 
 	// room info
-
 	uint32 _roomID{};
 	std::string _name{};
 	bool _hasPassword{ false };
 	std::string _password{};
 	uint32 _hostID{ 0 };
-
 	uint32 _currentId{ 1 };
+	uint8 _currentTurn{ 0 };
 	
+
+	// constants
+	constexpr static float _turnTime{ Common::GameConstants::TurnTime };
+
 	// 임시. 이후 enum으로 변경
 	RoomState _state{ RoomState::WAITING };
 };

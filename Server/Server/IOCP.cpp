@@ -158,6 +158,7 @@ void IOCP::WorkerThread()
 			session->OnRecvCompleted(io_size);
 
 			// 세션에 소속한 방 잡큐에 작업이 있을 경우 실행
+			// todo: thread unsafe
 			auto room{ session->GetRoom() };
 			if (nullptr != room)
 			{

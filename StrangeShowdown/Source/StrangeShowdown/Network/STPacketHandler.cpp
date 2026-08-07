@@ -122,6 +122,14 @@ STPacketHandler::STPacketHandler()
 			HandleStatusUpdate(Packet);
 		}
 	);
+
+	RegisterHandler<Common::SCSetTurn>(
+		Common::PacketType::SC_SET_TURN,
+		[this](const auto& Packet)
+		{
+			HandleSetTurn(Packet);
+		}
+	);
 }
 
 STPacketHandler::~STPacketHandler()
@@ -206,4 +214,12 @@ void STPacketHandler::HandleUseItem(const Common::SCUseItem& Packet)
 void STPacketHandler::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 {
 	GameInstance->HandleStatusUpdate(Packet);
+}
+
+void STPacketHandler::HandleSetTurn(const Common::SCSetTurn& Packet)
+{
+	if (nullptr != GameInstance)
+	{
+		GameInstance->HandleSetTurn(Packet);
+	}
 }

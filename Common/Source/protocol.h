@@ -70,10 +70,10 @@ enum class PacketType : uint16
 	SC_USE_ITEM,
 	CS_USE_ITEM,
 
-
 	SC_DAMAGE,
 	SC_STATUS_UPDATE,
 	
+	SC_SET_TURN,
 
 };
 
@@ -524,6 +524,24 @@ struct SCStatusUpdate : Header
 		bullet{ in_bullet },
 		gold{ in_gold },
 		armor{ in_armor }
+	{
+	}
+};
+
+// SCSetTurn
+// Param:
+//  uint8 turn
+//  float time
+struct SCSetTurn : Header
+{
+	uint8 turn{};
+	float time{};
+
+	SCSetTurn() = default;
+	SCSetTurn(const uint8 in_turn, const float in_time) :
+		Header{ sizeof(SCSetTurn), PacketType::SC_SET_TURN },
+		turn{ in_turn },
+		time{ in_time }
 	{
 	}
 };

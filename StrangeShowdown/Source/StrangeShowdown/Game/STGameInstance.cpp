@@ -232,6 +232,12 @@ void USTGameInstance::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 	
 }
 
+void USTGameInstance::HandleSetTurn(const Common::SCSetTurn& Packet)
+{
+	DataManager->HandleSetTurn(Packet);
+	UE_LOG(LogTemp, Log, TEXT("Set Turn: Turn=%d"), Packet.turn);
+}
+
 
 void USTGameInstance::HandleUseItem(const Common::SCUseItem& Packet)
 {

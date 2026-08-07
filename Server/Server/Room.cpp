@@ -159,24 +159,24 @@ void Room::HandleStart(const SessionPtr session)
 	// 게임 시작.
 	
 	// 플레이어를 인게임 플레이어로 변경
-
 	// todo: 게임 시작 하기 전 클라이언트 로딩을 기다려야 함.
 	_state = RoomState::INGAME;
+	_currentTurn = 0;
 
 	for (const auto& [id, player] : _players)
 	{
 		player->ChangePlayerType(Common::PlayerType::Player);
 	}
 
-
 	// 모든 플레이어에게 게임 시작 신호를 보냄.
+	Common::SCStartGame start_packet{ true };
 	for (const auto& [id, player] : _players)
 	{
 		// todo: weak ptr화
 		auto session{ player->GetOwnerSession() };
 		if (nullptr != session)
 		{
-			session->DoSend(Common::SCStartGame{ true });
+			session->DoSend(start_packet);
 		}
 
 		// 현재 세션에 모든 방의 플레이어 소환 패킷을 보냄
@@ -193,6 +193,8 @@ void Room::HandleStart(const SessionPtr session)
 		}
 		
 	}
+
+	OnTurnEnded();
 
 }
 
@@ -220,6 +222,40 @@ void Room::HandleChat(const SessionPtr session, const Common::CSChat& packet, co
 
 	// 모든 다른 플레이어에게 직렬화된 데이터 전송
 	Broadcast(buffer, my_id);
+}
+
+void Room::ChangeRoomState(const RoomState state)
+{
+
+}
+
+void Room::OnTurnEnded()
+{
+	// 턴 종료시 처리
+	++_currentTurn;
+
+	// 지연 작업 추가
+	Job timer_job{ [this]() {
+		OnTurnEnded();
+	} };
+	PushDelayedJob(timer_job, _turnTime);
+
+	// 모든 플레이어에게 턴 종료 패킷 전송
+	Common::SCSetTurn start_packet{ _currentTurn, _turnTime };
+	for (const auto& [id, player] : _players)
+	{
+		// todo: weak ptr화
+		auto session{ player->GetOwnerSession() };
+		if (nullptr != session)
+		{
+			session->DoSend(start_packet);
+		}
+	}
+
+#ifdef DEBUG
+	std::println("Turn {} ended. Next turn will start in {} seconds.", _currentTurn, _turnTime);
+#endif // DEBUG
+
 }
 
 void Room::HandleUseItem(const SessionPtr session, const Common::CSUseItem& packet)
@@ -271,7 +307,29 @@ void Room::Update()
 	// job 처리는 하나의 스레드만 들어가도록 보장
 	if (_busy.compare_exchange_strong(expected, true))
 	{
-		// 모든 큐 비우기
+		auto now = std::chrono::steady_clock::now();
+
+		// 1. _delayedJobQueue에서 처리 시간이 된 작업들 옮기기
+		{
+			std::lock_guard<std::mutex> lock{ _delayedJobMutex };
+			while (!_delayedJobQueue.empty())
+			{
+				const DelayedJob& topJob{ _delayedJobQueue.top() };
+				if (topJob.executeTime <= now)
+				{
+					// 실행 시간이 지났으면 _jobQueue로 옮기고 우선순위 큐에서 제거
+					_jobQueue.push(topJob.job);
+					_delayedJobQueue.pop();
+				}
+				else
+				{
+					// 가장 앞에 있는 작업의 시간이 아직 안 되었다면, 뒤의 작업들도 아직 안 된 것이 보장됨
+					break;
+				}
+			}
+		} // _delayedJobMutex lock 해제
+
+		// 2. 모든 큐 비우기 (일반 큐에 들어있던 작업 + 방금 넘어온 지연 작업)
 		Job job;
 		while (true == _jobQueue.try_pop(job))
 		{
@@ -279,5 +337,22 @@ void Room::Update()
 		}
 
 		_busy = false;
+	}
+}
+
+// 외부(멀티스레드)에서 지연된 작업을 넣을 때 사용하는 함수
+void Room::PushDelayedJob(Job& job, const float delayTime)
+{
+	auto delayDuration{ std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+		std::chrono::duration<float>(delayTime)
+	) };
+
+	auto executeTime{ std::chrono::steady_clock::now() + delayDuration };
+	DelayedJob delayedJob{ executeTime, job };
+
+	// Multi-thread push 상황에 대한 락
+	{
+		std::lock_guard<std::mutex> lock{ _delayedJobMutex };
+		_delayedJobQueue.push(delayedJob);
 	}
 }

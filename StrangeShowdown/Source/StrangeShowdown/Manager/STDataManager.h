@@ -76,6 +76,7 @@ public:
 	void HandleStartGame(const Common::SCStartGame& Packet);
 	void HandleUseItem(const Common::SCUseItem& Packet);
 	void HandleStatusUpdate(const Common::SCStatusUpdate& Packet);
+	void HandleSetTurn(const Common::SCSetTurn& Packet);
 
 	// µ¿Àû
 	//void HandleGiveRoomList(const Common::SCGiveRoomList& Packet, const uint8* PayloadPtr, const uint16 PayloadSize);

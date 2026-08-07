@@ -348,6 +348,10 @@ void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 		return;
 	}
 	PlayerBasePtr->HandleStatusUpdate(Packet);
+}
+
+void USTDataManager::HandleSetTurn(const Common::SCSetTurn& Packet)
+{
 	
 }
 

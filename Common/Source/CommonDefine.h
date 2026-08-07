@@ -74,7 +74,7 @@ namespace MapConstants
 
 namespace GameConstants
 {
-	constexpr float TurnTime{ 20.f }; // seconds
+	constexpr float TurnTime{ 20.f }; // s
 }
 
 // --
