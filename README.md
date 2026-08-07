@@ -57,11 +57,17 @@
 
 **서버**
 
-- C++
+- C++20
 - Winsock2
-- IOCP (I/O Completion Port)
+- IOCP (I/O Completion Port, AcceptEx 기반 비동기 Accept)
 - std::thread
-- concurrency::concurrent_queue
+- Lock-free Job Queue
+- Delayed Job Queue based on Priority Queue (mutex 기반)
+- Object Pool based on Type Traits
+- Reference Counting
+- Circular Buffer
+- Serialize
+- Fixed & Dynamic Size Packet
 
 **공통**
 
