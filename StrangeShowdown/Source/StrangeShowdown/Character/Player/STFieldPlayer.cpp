@@ -56,7 +56,7 @@ void ASTFieldPlayer::BeginPlay()
 	}
 }
 
-void ASTFieldPlayer::ChangeToGhost()
+ASTCharacter* ASTFieldPlayer::ChangeToGhost()
 {
 	FTransform SpawnTransform = this->GetActorTransform();
 
@@ -68,6 +68,8 @@ void ASTFieldPlayer::ChangeToGhost()
 	{
 		this->Destroy();
 	}
+
+	return NewGhost;
 }
 
 void ASTFieldPlayer::Init(const FPlayerInfo& PlayerInfo)

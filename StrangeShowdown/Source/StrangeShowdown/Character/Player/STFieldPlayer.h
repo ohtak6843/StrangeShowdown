@@ -28,7 +28,7 @@ protected:
 
 // Damage Section
 public:
-	virtual void ChangeToGhost() override;
+	virtual ASTCharacter* ChangeToGhost() override;
 
 // Effect Section
 public:

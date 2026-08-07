@@ -34,7 +34,10 @@ void ASTGhostController::SetupInputComponent()
 void ASTGhostController::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void ASTGhostController::Init()
+{
 	HUDWidget = CreateWidget<USTHUDWidget>(this, HUDWidgetClass);
 
 	if (HUDWidget)

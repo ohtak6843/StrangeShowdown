@@ -26,6 +26,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void Init() override;
+
+public:
 	virtual class USTMiniMapWidget* GetMiniMapWidget() override;
 	virtual class USTMiniMapWidget* GetBigMapWidget() override;
 

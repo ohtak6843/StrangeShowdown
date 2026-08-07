@@ -99,3 +99,15 @@ void ASTCharacter::SendMovePacket(const float DeltaTime, const uint8 PlayerState
 		Cast<USTGameInstance>(GWorld->GetGameInstance())->MovePlayer(Location, Rotation, PlayerStateFlag);
 	}
 }
+
+void ASTCharacter::Teleport(const FTransform& SpawnTransform)
+{
+	// 위치와 회전값을 적용하여 순간이동 처리 (물리 상태 및 속도 초기화 포함)
+	SetActorLocationAndRotation(
+		SpawnTransform.GetLocation(),
+		SpawnTransform.Rotator(),
+		false,
+		nullptr,
+		ETeleportType::TeleportPhysics
+	);
+}

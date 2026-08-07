@@ -60,6 +60,15 @@ void Player::ChangePlayerType(const Common::PlayerType type, const bool clear)
 	{
 		_inventory[static_cast<size_t>(Common::ItemType::Pistol)] = 1;
 		_inventory[static_cast<size_t>(Common::ItemType::Hammer)] = 1;
+
+		// temp
+		_position.x = (rand() % 201) - 100;
+		_position.y = (rand() % 201) - 100;
+	}
+	// 로비 상태로 변경 시 위치 초기화
+	else if (Common::PlayerType::LobbyPlayer == type)
+	{
+		_position = Common::PlayerConstants::LobbyPos;
 	}
 }
 

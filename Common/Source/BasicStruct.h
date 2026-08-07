@@ -9,9 +9,9 @@ struct Vec3f
 	float y{ 0.f };
 	float z{ 0.f };
 
-	Vec3f() = default;
-	Vec3f(const Vec3f&) = default;
-	Vec3f(const float x, const float y, const float z) :
+	constexpr Vec3f() = default;
+	constexpr Vec3f(const Vec3f&) = default;
+	constexpr Vec3f(const float x, const float y, const float z) :
 		x{ x },
 		y{ y },
 		z{ z }

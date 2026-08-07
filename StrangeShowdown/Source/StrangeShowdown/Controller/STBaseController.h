@@ -30,6 +30,10 @@ protected:
 
 	virtual void Interact();
 
+
+public:
+	virtual void Init() {};
+
 private:
 	void AddInputAction();
 

@@ -11,6 +11,8 @@
 
 
 class ASTCharacter;
+class ASTBaseController;
+
 
 using CharacterWeakPtr = TWeakObjectPtr<ASTCharacter>;
 
@@ -128,6 +130,16 @@ private:
 		const Common::PlayerType PlayerType
 	);
 
+	ASTCharacter* SpawnLocalPlayer(
+		const FTransform& Transform,
+		const FActorSpawnParameters& SpawnParams,
+		const FPlayerInfo& PlayerInfo,
+		const Common::PlayerType PlayerType
+	);
+
+	// 본인 플레이어 생성 시 컨트롤러 교체
+	void ChangeType(const Common::PlayerType NewType);
+
 
 	// todo cham: 나중에 private화.
 
@@ -167,18 +179,50 @@ private:
 	// --
 
 public:
-	UPROPERTY(EditAnywhere, Category = "SpawnData")
+
+	// field player spawn class
+
+	UPROPERTY(EditAnywhere, Category = "FieldPlayerSpawnClass")
 	TSubclassOf<ASTCharacter> FieldPlayerClass;
 
-	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	UPROPERTY(EditAnywhere, Category = "FieldPlayerSpawnClass")
 	TSubclassOf<ASTCharacter> LobbyFieldPlayerClass;
 
-	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	UPROPERTY(EditAnywhere, Category = "FieldPlayerSpawnClass")
 	TSubclassOf<ASTCharacter> FieldGhostClass;
 
-	UPROPERTY(EditAnywhere, Category = "SpawnData")
+	UPROPERTY(EditAnywhere, Category = "FieldPlayerSpawnClass")
+	TSubclassOf<ASTCharacter> FieldSheriffClass;
+
+	// local player spawn class
+
+	UPROPERTY(EditAnywhere, Category = "LocalPlayerSpawnClass")
 	TSubclassOf<ASTCharacter> LocalGhostClass;
 
+	UPROPERTY(EditAnywhere, Category = "LocalPlayerSpawnClass")
+	TSubclassOf<ASTCharacter> LocalPlayerClass;
+
+	UPROPERTY(EditAnywhere, Category = "LocalPlayerSpawnClass")
+	TSubclassOf<ASTCharacter> LocalLobbyPlayerClass;
+
+	UPROPERTY(EditAnywhere, Category = "LocalPlayerSpawnClass")
+	TSubclassOf<ASTCharacter> LocalSheriffClass;
+
+
+
+	// player controller class
+
+	UPROPERTY(EditAnywhere, Category = "PlayerControllerClass")
+	TSubclassOf<ASTBaseController> GhostControllerClass;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerControllerClass")
+	TSubclassOf<ASTBaseController> PlayerControllerClass;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerControllerClass")
+	TSubclassOf<ASTBaseController> SheriffControllerClass;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerControllerClass")
+	TSubclassOf<ASTBaseController> LobbyPlayerControllerClass;
 
 
 };

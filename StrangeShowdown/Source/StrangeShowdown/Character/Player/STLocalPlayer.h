@@ -47,7 +47,7 @@ public:
 
 // Damage Section
 public:
-	virtual void ChangeToGhost() override;
+	virtual ASTCharacter* ChangeToGhost() override;
 
 // HUD Section
 public:

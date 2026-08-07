@@ -160,6 +160,7 @@ void ASTLocalPlayer::Tick(float DeltaTime)
 	// Send Move Packet to Server
 #if NETWORK_ENABLED
 	SendMovePacket(DeltaTime, PlayerStateFlag);
+	
 #endif
 }
 
@@ -205,13 +206,13 @@ void ASTLocalPlayer::BeginPlay()
 	HoldItem();
 }
 
-void ASTLocalPlayer::ChangeToGhost()
+ASTCharacter* ASTLocalPlayer::ChangeToGhost()
 {
 	APlayerController* OldPC = Cast<APlayerController>(GetController());
 	if (!OldPC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Controller is not valid"));
-		return;
+		return nullptr;
 	}
 
 	FTransform SpawnTransform = this->GetActorTransform();
@@ -219,19 +220,46 @@ void ASTLocalPlayer::ChangeToGhost()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	ASTLocalGhost* NewGhost = GetWorld()->SpawnActor<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams);
-	if (NewGhost)
+	// 1. Ghost를 지연 스폰 (BeginPlay 실행이 대기됩니다)
+	ASTLocalGhost* NewGhost{ GetWorld()->SpawnActorDeferred<ASTLocalGhost>(GhostClass, SpawnTransform, SpawnParams.Owner, SpawnParams.Instigator, SpawnParams.SpawnCollisionHandlingOverride) };
+
+	if (nullptr != NewGhost)
 	{
-		ASTGhostController* NewPC = GetWorld()->SpawnActor<ASTGhostController>(GhostControllerClass, SpawnTransform);
-		if (NewPC)
+		// 2. 컨트롤러 스폰 (표준 스폰)
+		ASTGhostController* NewPC{ GetWorld()->SpawnActor<ASTGhostController>(GhostControllerClass, SpawnTransform) };
+		
+		if (nullptr != NewPC)
 		{
+			// 3. 기존 컨트롤러 해제 및 새 컨트롤러로 교체
 			OldPC->UnPossess();
 			UGameplayStatics::GetGameMode(GetWorld())->SwapPlayerControllers(OldPC, NewPC);
 			OldPC->Destroy();
+			
+			// 4. 새 컨트롤러가 준비 중인 고스트 폰에 빙의
 			NewPC->Possess(NewGhost);
+			
+			// 5. 빙의 및 컨트롤러 설정이 완료된 이 시점에서 최종 스폰 완료 (BeginPlay 호출)
+			UGameplayStatics::FinishSpawningActor(NewGhost, SpawnTransform);
+
+			// 6. 이전 캐릭터 파괴
 			this->Destroy();
+
+			NewPC->Init();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn NewPC"));
+			
+			// 컨트롤러 스폰 실패 시 메모리에 떠있는 보류 폰을 제거합니다.
+			NewGhost->Destroy();
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn NewGhost"));
+	}
+
+	return NewGhost;
 }
 
 void ASTLocalPlayer::SetupHUDWidget(USTHUDWidget* InHUDWidget)

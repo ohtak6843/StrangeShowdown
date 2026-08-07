@@ -72,7 +72,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void ChangeToGhost() {}
+	virtual ASTCharacter* ChangeToGhost() { return nullptr; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

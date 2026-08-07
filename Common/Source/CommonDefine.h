@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BasicStruct.h"
 #include "CommonNamespace.h"
 #include "CommonEnum.h"
 #include <string_view>
@@ -34,6 +35,8 @@ namespace PlayerConstants
 	constexpr float 		Speed{ 500.f }; // cmps
 	constexpr float 		Gold{ 0.f };
 	constexpr float 		Armor{ 0.f };
+
+	constexpr Vec3f			LobbyPos{ -574.66f, 50.63f, 130.41f };
 
 }
 

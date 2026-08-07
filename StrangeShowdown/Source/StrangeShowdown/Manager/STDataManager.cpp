@@ -58,19 +58,25 @@ void USTDataManager::HandleSpawnPlayer(const Common::SCSpawnPlayer& Packet)
 	// todo: 일단 냅둠
 	if (Packet.id == MyPlayerInfo.ID)
 	{
-		//// 본인 플레이어 객체를 제거한다.
-		//if (auto PlayerPtr{ MyPlayerInfo.Player.Get() }; PlayerPtr != nullptr)
-		//{
-		//	PlayerPtr->Destroy();
-		//}
-		//MyPlayerInfo.Player.Reset();
-		//// 새로운 객체를 생성한다.
-		//auto* Player{ SpawnFieldPlayer(Transform, SpawnParams, MyPlayerInfo, Packet.type) };
-		//MyPlayerInfo.Player = Player;
-		//// 기존 정보를 업데이트한다.
-		//MyPlayerInfo.Type = Packet.type;
+		if (auto* PlayerPtr{ Cast<ASTCharacter>(MyPlayerInfo.Player.Get()) })
+		{
+			// 받아온 Transform 위치로 캐릭터를 순간이동
+			PlayerPtr->Teleport(Transform);
 
+			UE_LOG(LogTemp, Log, TEXT("My Player %llu teleported to new location, type : %d"), Packet.id, static_cast<int32>(Packet.type));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("My Player %llu exists but is not completely valid or not an ASTCharacter."), Packet.id);
+		}
 
+		if (MyPlayerInfo.Type != Packet.type)
+		{
+			// 타입이 다르면 캐릭터를 교체
+			ChangeType(Packet.type);
+
+			MyPlayerInfo.Type = Packet.type;
+		}
 		
 		UE_LOG(LogTemp, Log, TEXT("My Player %llu spawned, type : %d"), Packet.id, static_cast<int32>(Packet.type));
 		
@@ -548,6 +554,30 @@ ASTCharacter* USTDataManager::SpawnFieldPlayer(const FTransform& Transform, cons
 	}
 
 	return player;
+}
+
+void USTDataManager::ChangeType(const Common::PlayerType NewType)
+{
+    // 현재 타입이 Player이고, 변경하려는 타입이 Ghost인지 확인
+    if (Common::PlayerType::Player == MyPlayerInfo.Type && Common::PlayerType::Ghost == NewType)
+    {
+        // 본인 플레이어를 ASTLocalPlayer로 안전하게 캐스팅
+        if (ASTLocalPlayer* LocalPlayer{ Cast<ASTLocalPlayer>(MyPlayerInfo.Player.Get()) })
+        {
+            // ChangeToGhost()를 실행하고 반환값을 다시 MyPlayerInfo.Player에 저장
+            MyPlayerInfo.Player = LocalPlayer->ChangeToGhost();
+            
+            // 타입 정보 업데이트
+            MyPlayerInfo.Type = NewType;
+            
+            UE_LOG(LogTemp, Log, TEXT("Player successfully changed to Ghost."));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Failed to cast MyPlayerInfo.Player to ASTLocalPlayer."));
+        }
+    }
+    
 }
 
 

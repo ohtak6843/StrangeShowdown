@@ -39,6 +39,7 @@ public:
 	void Move(const FVector& Location, const FRotator& Rotator);
 	void TickMove(float DeltaTime);
 	void SendMovePacket(const float DeltaTime, const uint8 PlayerStateFlag = 0u);
+	void Teleport(const FTransform& SpawnTransform);
 
 private:
 	float SendMoveDeltaTime{};

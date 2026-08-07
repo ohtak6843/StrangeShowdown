@@ -22,6 +22,7 @@ public:
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 // HUD Section
 protected:

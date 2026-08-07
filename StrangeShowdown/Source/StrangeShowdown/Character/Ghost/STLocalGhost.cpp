@@ -95,6 +95,15 @@ void ASTLocalGhost::BeginPlay()
 	}
 }
 
+void ASTLocalGhost::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+#if NETWORK_ENABLED
+	SendMovePacket(DeltaTime);
+#endif
+}
+
 void ASTLocalGhost::SetupHUDWidget(USTHUDWidget* InHUDWidget)
 {
 	ISTCharacterHUDInterface::SetupHUDWidget(InHUDWidget);
