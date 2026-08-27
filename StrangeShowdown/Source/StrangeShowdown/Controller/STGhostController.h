@@ -59,4 +59,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsBountyPosterOpen : 1;
+
+// network session
+	
 };

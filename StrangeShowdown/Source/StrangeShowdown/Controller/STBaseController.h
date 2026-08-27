@@ -33,6 +33,7 @@ protected:
 
 public:
 	virtual void Init() {};
+	virtual void SetTimer(const int turn, const float time) {};
 
 private:
 	void AddInputAction();

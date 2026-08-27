@@ -8,6 +8,7 @@
 #include "UI/STHUDWidget.h"
 #include "Actor/STInteractableActor.h"
 #include "DrawDebugHelpers.h"
+#include "UI/Timer/STTimerWidget.h"
 
 ASTPlayerController::ASTPlayerController()
 {
@@ -150,5 +151,14 @@ void ASTPlayerController::OpenBountyPoster(const FInputActionValue& Value)
 			bool result = HUDWidget->OpenBountyPoster();
 			bIsBountyPosterOpen = result;
 		}
+	}
+}
+
+void ASTPlayerController::SetTimer(const int turn, const float time)
+{
+	if (HUDWidget)
+	{
+		auto TimerWidget{ HUDWidget->GetTimerWidget() };
+		TimerWidget->SetTimer(time);
 	}
 }

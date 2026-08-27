@@ -70,4 +70,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsBountyPosterOpen : 1;
+
+	// network section
+public:
+	virtual void SetTimer(const int turn, const float time) override;
 };

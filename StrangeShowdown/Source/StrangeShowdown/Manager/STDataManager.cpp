@@ -17,6 +17,7 @@
 #include "Game/STGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Controller/STLobbyController.h"
+#include "Controller/STPlayerController.h"
 #include "UI/Lobby/STLobbyHUD.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -352,9 +353,17 @@ void USTDataManager::HandleStatusUpdate(const Common::SCStatusUpdate& Packet)
 
 void USTDataManager::HandleSetTurn(const Common::SCSetTurn& Packet)
 {
-	
+	// 현재 월드를 가져옵니다.
+	if (UWorld* World{ GetWorld() }; IsValid(World))
+	{
+		// 첫 번째 로컬 플레이어의 컨트롤러를 가져와 ASTPlayerController로 캐스팅합니다.
+		if (ASTPlayerController* PC{ Cast<ASTPlayerController>(World->GetFirstPlayerController()) }; IsValid(PC))
+		{
+			// 패킷 데이터 혹은 필요한 인자를 넘겨주어 SetTurn을 호출합니다.
+			PC->SetTimer(Packet.turn, Packet.time);
+		}
+	}
 }
-
 void USTDataManager::OnLevelChanged()
 {
 	// RefreshPlayers();
